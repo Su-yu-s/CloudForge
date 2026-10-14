@@ -1,0 +1,17 @@
+{
+  "name": "cloudforge-tools",
+  "version": "0.2.0",
+  "type": "module",
+  "license": "Apache-2.0",
+  "description": "云铸（CloudForge）点云几何与当前模型核验工具集，经 AGH ToolContext 执行 C++ 核心与 CAD 检查",
+  "exports": "./index.mjs",
+  "agnes": {
+    "plugins": [
+      {
+        "export": "cloudforgeTools",
+        "id": "ext:cloudforge/cloudforge-tools",
+        "inject": ["extension"]
+      }
+    ]
+  }
+}

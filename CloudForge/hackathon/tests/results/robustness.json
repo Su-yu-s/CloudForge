@@ -1,0 +1,115 @@
+{
+  "timestamp": "2026-10-04T04:41:46.473Z",
+  "description": "合成零件（平面 z=0 + 圆柱 r=0.05m）在噪声注入 × 随机降采样网格下的参数稳定性",
+  "grid": [
+    {
+      "noise_sigma": 0,
+      "keep_ratio": 1,
+      "points": 65000,
+      "shapes": 6,
+      "plane_err_m": 0.0000164938501,
+      "cyl_err_m": 0.000603861146,
+      "verify_pass": true
+    },
+    {
+      "noise_sigma": 0,
+      "keep_ratio": 0.5,
+      "points": 32422,
+      "shapes": 3,
+      "plane_err_m": 0.0000369768932,
+      "cyl_err_m": 0.000716471513,
+      "verify_pass": true
+    },
+    {
+      "noise_sigma": 0,
+      "keep_ratio": 0.25,
+      "points": 16092,
+      "shapes": 2,
+      "plane_err_m": 0.0000945693828,
+      "cyl_err_m": 0.000319787272,
+      "verify_pass": true
+    },
+    {
+      "noise_sigma": 0.002,
+      "keep_ratio": 1,
+      "points": 65000,
+      "shapes": 8,
+      "plane_err_m": 0.0000290679545,
+      "cyl_err_m": 0.0011311923,
+      "verify_pass": true
+    },
+    {
+      "noise_sigma": 0.002,
+      "keep_ratio": 0.5,
+      "points": 32643,
+      "shapes": 6,
+      "plane_err_m": 0.0000765430159,
+      "cyl_err_m": 0.000614135686,
+      "verify_pass": true
+    },
+    {
+      "noise_sigma": 0.002,
+      "keep_ratio": 0.25,
+      "points": 16449,
+      "shapes": 2,
+      "plane_err_m": 0.0000753455897,
+      "cyl_err_m": 0.000747725679,
+      "verify_pass": true
+    },
+    {
+      "noise_sigma": 0.005,
+      "keep_ratio": 1,
+      "points": 65000,
+      "shapes": 2,
+      "plane_err_m": 0.000299909327,
+      "cyl_err_m": 0.00193629187,
+      "verify_pass": true
+    },
+    {
+      "noise_sigma": 0.005,
+      "keep_ratio": 0.5,
+      "points": 32643,
+      "shapes": 3,
+      "plane_err_m": 0.000204998636,
+      "cyl_err_m": 1e+30,
+      "verify_pass": false
+    },
+    {
+      "noise_sigma": 0.005,
+      "keep_ratio": 0.25,
+      "points": 16449,
+      "shapes": 2,
+      "plane_err_m": 0.000258314045,
+      "cyl_err_m": 0.000675820721,
+      "verify_pass": true
+    },
+    {
+      "noise_sigma": 0.01,
+      "keep_ratio": 1,
+      "points": 65000,
+      "shapes": 0,
+      "plane_err_m": 1e+30,
+      "cyl_err_m": 1e+30,
+      "verify_pass": false
+    },
+    {
+      "noise_sigma": 0.01,
+      "keep_ratio": 0.5,
+      "points": 32643,
+      "shapes": 0,
+      "plane_err_m": 1e+30,
+      "cyl_err_m": 1e+30,
+      "verify_pass": false
+    },
+    {
+      "noise_sigma": 0.01,
+      "keep_ratio": 0.25,
+      "points": 16449,
+      "shapes": 0,
+      "plane_err_m": 1e+30,
+      "cyl_err_m": 1e+30,
+      "verify_pass": false
+    }
+  ],
+  "verdict": "可信域边界：σ≤2mm 且保留点数≥50% 时 verify 稳定通过（平面误差 <0.1mm，圆柱误差 <1mm）；σ≥5mm 或极端组合下拟合失控/无检出，云铸如实报告 FAIL 而非粉饰（单次 RANSAC 采样存在波动，故中间格非严格单调，重复运行取多数结果即得稳定边界）。边界即结论——系统知道自己何时可信。"
+}

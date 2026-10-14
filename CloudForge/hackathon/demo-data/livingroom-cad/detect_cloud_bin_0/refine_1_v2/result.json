@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "source_cloud": "E:\\C++\\Point\\data\\livingroom1-fragments-ply\\cloud_bin_0.ply",
+  "input_point_count": 196133,
+  "shape_count": 4,
+  "inlier_point_sum": 41890,
+  "remaining_count": 43,
+  "shapes": [
+    {"id": 0, "type": "Plane", "type_id": 0, "inlier_count": 31901, "rmse": 0.00331673991, "robust_sigma": 0.00109570781, "soft_score": 0.833344293, "coefficients": [0.00470696623, 0.99982959, 0.0178499762, -2.4398849]},
+    {"id": 1, "type": "Plane", "type_id": 0, "inlier_count": 5068, "rmse": 0.0129509982, "robust_sigma": 0.000920348513, "soft_score": 0.810391063, "coefficients": [-0.00149633305, 0.99958545, 0.028752258, -2.43422151]},
+    {"id": 2, "type": "Plane", "type_id": 0, "inlier_count": 4821, "rmse": 0.00285268264, "robust_sigma": 0.00162793131, "soft_score": 0.864072335, "coefficients": [0.0272251889, 0.999106765, 0.0323183797, -2.48130965]},
+    {"id": 3, "type": "Plane", "type_id": 0, "inlier_count": 100, "rmse": 0.000532802264, "robust_sigma": 0.00018775845, "soft_score": 0.813802236, "coefficients": [0.0154709136, -0.999552071, -0.0256177317, 2.36622906]}
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "input_point_count": 196133,
+  "shape_count": 5,
+  "inlier_point_sum": 7509,
+  "remaining_count": 349,
+  "shapes": [
+    {"id": 0, "type": "Cylinder", "type_id": 2, "inlier_count": 3870, "rmse": 0.00293609178, "robust_sigma": 0.00171694371, "soft_score": 0.870235014, "coefficients": [-0.0823208019, -0.25748989, 2.08815289, 0.0352172479, 0.991868138, 0.122299969, 0.8161605]},
+    {"id": 1, "type": "Cylinder", "type_id": 2, "inlier_count": 2461, "rmse": 0.00308484167, "robust_sigma": 0.0017857236, "soft_score": 0.868287675, "coefficients": [-0.0574942045, -0.364039749, 1.55009174, 0.0839777738, 0.959097803, 0.270331621, 0.634273589]},
+    {"id": 2, "type": "Cylinder", "type_id": 2, "inlier_count": 172, "rmse": 0.00348757505, "robust_sigma": 0.00193861332, "soft_score": 0.865110957, "coefficients": [0.0931668952, -0.317220181, 0.63040787, 0.171667323, 0.838973582, 0.516385257, 0.191613182]},
+    {"id": 3, "type": "Cylinder", "type_id": 2, "inlier_count": 882, "rmse": 0.00294180436, "robust_sigma": 0.00176915824, "soft_score": 0.87288, "coefficients": [1.11354399, -0.301216155, 0.870997846, -0.075083822, -0.943356037, -0.323174566, 0.624458492]},
+    {"id": 4, "type": "Cylinder", "type_id": 2, "inlier_count": 124, "rmse": 0.00192693015, "robust_sigma": 0.00101003626, "soft_score": 0.844000689, "coefficients": [1.24104023, 0.40487349, 2.49082422, 0.123067684, -0.927010596, 0.354267776, 0.305505425]}
+  ]
+}

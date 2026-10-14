@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "source_cloud": "E:\\C++\\Point\\CloudForge\\hackathon\\demo-data\\demo-part\\demo.pcd",
+  "input_point_count": 65000,
+  "shape_count": 6,
+  "inlier_point_sum": 60154,
+  "remaining_count": 4846,
+  "shapes": [
+    {"id": 0, "type": "Plane", "type_id": 0, "inlier_count": 40168, "rmse": 0.0019365479, "robust_sigma": 0.00114869859, "soft_score": 0.871204767, "coefficients": [0.000100961304, -1.93781616e-05, 1, -1.64938501e-05]},
+    {"id": 1, "type": "Torus", "type_id": 4, "inlier_count": 5000, "rmse": 0.00214878841, "robust_sigma": 0.00126368855, "soft_score": 0.870543927, "coefficients": [0.0500679351, 0.450821728, 0.00736888405, 0.64225632, 0.0522046797, -0.649883389, -0.76001811, -0.00490907487]},
+    {"id": 2, "type": "Cone", "type_id": 3, "inlier_count": 4404, "rmse": 0.00196169277, "robust_sigma": 0.00120502945, "soft_score": 0.878445041, "coefficients": [0.325865209, 0.33533299, -6.99463367, 0.00337093649, 0.00203710538, 0.999992251, 0.0070017199]},
+    {"id": 3, "type": "Plane", "type_id": 0, "inlier_count": 7357, "rmse": 0.002172915, "robust_sigma": 0.00127494496, "soft_score": 0.87030542, "coefficients": [6.1878236e-05, 0.000137618321, 1, -0.000101733174]},
+    {"id": 4, "type": "Plane", "type_id": 0, "inlier_count": 166, "rmse": 0.00213597173, "robust_sigma": 0.00137629141, "soft_score": 0.888534081, "coefficients": [0.0271876659, -0.00504206168, 0.999617636, -0.000647601206]},
+    {"id": 5, "type": "Cone", "type_id": 3, "inlier_count": 3059, "rmse": 0.00200758402, "robust_sigma": 0.00119457154, "soft_score": 0.873697259, "coefficients": [0.358094633, 0.354378253, 8.26378632, -0.000999144162, -0.000541491434, -0.999999344, 0.00612857472]}
+  ]
+}

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>CloudForge 面板预览台</title>
+<link rel="stylesheet" href="/panel/client/index.css">
+<style>
+  /* 复刻宿主 AGH 的右栏卡片：position:fixed + 上下 inset + min(26rem, 100vw-2rem)
+     （packages/web/public/style.css:1288-1298），这样面板的高度链与真实环境一致 */
+  body { margin:0; font:13px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+         background:#fff; color:#18181b; }
+  .shell { display:flex; height:100vh; }
+  .main { flex:1; padding:28px 32px; overflow:auto; }
+  .main h1 { font-size:18px; margin:0 0 6px; }
+  .main p { color:#52525b; max-width:64ch; }
+  .main code { background:#f4f4f5; border:1px solid #ededed; border-radius:4px; padding:0 4px;
+               font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11.5px; }
+  .diag { margin-top:16px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11px;
+          color:#52525b; background:#fafafa; border:1px solid #e5e5e5; border-radius:8px; padding:10px 12px;
+          white-space:pre-wrap; max-height:34vh; overflow:auto; }
+  .diag b { color:#18181b; }
+  [data-agnes-region="rightbar"] { position:fixed; z-index:5; inset:4.75rem 1rem 1rem auto;
+    width:min(26rem, calc(100vw - 2rem)); overflow:auto; border:1px solid #e5e5e5; border-radius:1rem;
+    background:#fff; box-shadow:0 10px 40px rgba(0,0,0,.08); padding:1rem; display:flex; flex-direction:column; }
+</style>
+<script type="importmap">
+{ "imports": { "react": "/react.mjs" } }
+</script>
+</head>
+<body>
+<div class="shell">
+  <div class="main">
+    <h1>CloudForge 控制台 · 独立预览台</h1>
+    <p>这里加载的是<b>真实</b>的 <code>extensions/main/client/index.js</code> 与 <code>extensions/main/index.mjs</code> 后端 handler，
+       只有 <code>react</code> 换成 shim、<code>services.call</code> 换成同源 fetch。AGH 的 import map / BFF / 配额在真机上生效。</p>
+    <p>用途：不依赖「活动会话 + 已信任工作区」就能验证渲染、几何叠加、分页与四页签数据。</p>
+    <div class="diag" id="diag">正在加载…</div>
+  </div>
+  <aside data-agnes-region="rightbar"><div id="rightbar-content"></div></aside>
+</div>
+
+<script type="module">
+const diag = document.getElementById('diag')
+const log = []
+function say(k, v) { log.push(`<b>${k}</b> ${v}`); diag.innerHTML = log.join('\n') }
+
+// —— 复刻 AGH 注入的 ctx 形状（packages/web-client/src/client-module.ts:28-41）
+const calls = []
+const ctx = {
+  agnes: {
+    services: {
+      call: async (name, input) => {
+        calls.push(name)
+        const res = await fetch(`/svc/${name}`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(input ?? {}),
+        })
+        if (!res.ok) throw new Error(`${name} → HTTP ${res.status} ${await res.text()}`)
+        return res.json()
+      },
+    },
+    sessions: new Map([['preview-session', { prompt: async (t) => { say('prompt', String(t).slice(0, 80)) } }]]),
+  },
+  session: {
+    sessionId: 'preview-session',
+    projection: { read: async () => ({ sessionId: 'preview-session', upto: 1, generation: 1, opState: null, nodes: [], turns: [] }), subscribe: () => () => {} },
+  },
+  commands: {
+    registerEffect: (c) => { say('registerEffect', c.id + ' → ' + c.service); return () => {} },
+    execute: async (id, input) => { say('execute', id + ' ' + JSON.stringify(input)); return { ok: true } },
+    register: () => () => {},
+  },
+  slots: { register: (opts, comp) => { say('slot.register', `${opts.name} priority=${opts.priority}`); mount(comp); return () => {} } },
+  effect: (fn) => { ctx.__effects.push(fn); return () => {} },
+  __effects: [],
+}
+
+// —— 复刻宿主插槽渲染器：组件是 React 组件，返回值交给 createElement（web-client/src/outlet.tsx:269）
+function mount(Comp) {
+  const host = document.getElementById('rightbar-content')
+  host.replaceChildren(Comp({ owner: {}, sessionId: 'preview-session' }))
+}
+
+const mod = await import('/panel/client/index.js')
+try {
+  mod.apply(ctx, {})
+  say('apply', 'OK')
+} catch (e) {
+  say('apply', 'FAILED ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : e))
+}
+
+const panel = document.getElementById('cf-console')
+say('panel', panel ? `已挂载 ${Math.round(panel.getBoundingClientRect().width)}×${Math.round(panel.getBoundingClientRect().height)}` : '未挂载')
+say('tabs', panel ? [...panel.querySelectorAll('.cf-tab')].map((t) => t.textContent.trim()).join(' / ') : '-')
+
+// 每秒刷新一次诊断，便于观察服务调用与状态变化
+setInterval(() => {
+  const st = window.__CF_DEBUG?.state
+  say('phase', st ? `${st.phase} · ${st.workflow?.name ?? '无工作流'} · ${st.workflow?.points ?? 0} 点 / ${st.workflow?.shapes ?? 0} 基元` : '-')
+  say('calls', calls.length ? [...new Set(calls)].join(', ') : '-')
+}, 1000)
+</script>
+</body>
+</html>

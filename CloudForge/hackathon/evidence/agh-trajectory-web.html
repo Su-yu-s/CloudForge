@@ -1,0 +1,430 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>25ca8a2c-0243-490c-b125-9d02e7fe26ec</title><style>:root{color-scheme:light dark}body{font:14px/1.5 system-ui,sans-serif;max-width:52rem;margin:2rem auto;padding:0 1rem;color:#1c211e;background:#fff}.meta,.minor{color:#69707a;font-size:12px}.meta{border-bottom:1px solid #d6dbd5;margin-bottom:1rem;padding-bottom:.5rem}.node{margin:.7rem 0}.user{background:#f3f5f4;border-radius:6px;padding:.6rem}.assistant{padding:.6rem}.tool{border:1px solid #d6dbd5;border-radius:6px;padding:.4rem .6rem;color:#4d555f}.approval{border-left:3px solid #0e6b54;padding:.4rem .6rem}.content{white-space:pre-wrap;overflow-wrap:anywhere;margin:0}.label{font-weight:600}.attachment{display:block}.compaction{text-align:center}@media(prefers-color-scheme:dark){body{color:#e7ece8;background:#151816}.user{background:#242925}.tool{border-color:#454c47;color:#c5ccc7}.meta,.minor{color:#abb3ad}}</style></head><body><header class="meta">25ca8a2c-0243-490c-b125-9d02e7fe26ec · 2026-10-05T05:24:04.686Z · redacted · 55 items</header><main><section class="node user"><div class="label">User · local</div><div class="content">使用 cloud-casting 流程分析 &lt;workspace&gt;/demo.pcd，并对照 demo.truth.json 验证精度</div></section>
+<section class="node minor">Context breakdown · 5 sections · 1610 tokens (estimated)</section>
+<section class="node assistant"><div class="label">Assistant</div><div class="content"></div></section>
+<details class="node tool"><summary>skill_read · completed</summary><div class="content">skill_read
+{&quot;name&quot;:&quot;cloud-casting&quot;}
+resourceId: skill/workspace/workspace-agnes/5e098690664522f06835d39ff38801b1028d67f8df1ad5032e1b3b7b2dc8a736
+revision: d61bdd06572601d1ff2b8f49798bd00795e9f77122830e285aba53fbeeba1d94
+directory: &lt;workspace&gt;\.agh\skills\cloud-casting
+
+Base directory for this Skill: &lt;workspace&gt;\.agh\skills\cloud-casting
+Resolve relative paths this Skill mentions (for example scripts/ or references/) against that directory. Read those files with the read tool and run its scripts with the shell, loading them only as needed; the directory is read-only.
+
+
+# 云铸工作流：从百万点云到实体参数
+
+目标：把一份三维扫描点云转化为**带误差证据的几何参数报告**。全程使用 cloudforge_* 工具，不手动解读原始点数据。
+
+## 场景模式（先判场景，再定报告口吻）
+
+按用户用词判定场景，影响预设选择与报告模板：
+
+| 场景 | 触发词 | 预设 | 报告模板 |
+|---|---|---|---|
+| **竣工核验**（默认室内） | 验收、竣工、核验、净高、开间、房间、室内 | outdoor | 验收清单（§A） |
+| **船舶/机械分段** | 船、分段、法兰、零件、管、孔轴 | mechanical | 精度检测单（§B） |
+| **文物构件** | 文物、古建、构件、柱、梁、数字化档案 | mechanical | 构件参数卡（§C） |
+| 词义不明 | — | 机械感（含曲面/孔轴）选 mechanical，纯建筑感选 outdoor；**仍不明时两个 preset 各跑一遍，对比内点率与形状质量后择优并向用户说明选择理由** | 通用报告 |
+
+## 标准流程（四阶段闭环）
+
+### 阶段 1：侦察（cloudforge_cloud_info）
+对用户给定的点云文件调用 `cloudforge_cloud_info`，拿到：
+- `points`（点数）、`span`（包围盒最大边长，单位推断依据）
+- `format`、`centered`（TXT/STL 加载后质心居中——报告参数基于该坐标系，需向用户注明）
+- 若返回 `ok:false`：向用户说明文件问题（格式不支持/损坏），停止，不要重试其他文件。
+
+### 阶段 2：检测（cloudforge_detect）
+按场景选择 preset：
+- 建筑/室内/城市扫描（墙、地板、家具为主）→ `preset: &quot;outdoor&quot;`（仅平面、过滤更严）
+- 机械零件/工业件（含孔、轴、曲面）→ `preset: &quot;mechanical&quot;`（五类基元全开）
+- 无法判断时默认 `mechanical`。
+
+调用后检查返回的每个形状：
+- `rmse`（均方根误差）、`robust_sigma`（噪声尺度）、`soft_score`（软内点率，越接近 1 越好）
+- `inlier_count / points`（内点占比）
+
+### 阶段 3：反馈与重试（条件分支）
+- 若 `shape_count === 0`：点数太少（&lt;100）或预设不匹配 → 换 preset 重试一次；仍为 0 则如实告知。
+- 若某形状 `soft_score &lt; 0.6` 或 `inlier_count` 相对 `points` 过小：用 `cloudforge_refine` 对该形状的内点
+  （`output_dir` 下 `indices/shape_&lt;id&gt;.txt`）做精拟合，`hint` 传该形状类型。
+- `cloudforge_refine` 返回 `ok:false` 且提示 selected&lt;50：说明该形状内点过少，放弃它并在报告中注明，不要重试。
+
+### 阶段 4：验证与报告
+- 若用户提供了基准/真值（或这是合成验证任务）：用 `cloudforge_synth` 生成基准、`cloudforge_detect` 检测后
+  用 `cloudforge_verify` 判定。`pass:false` 时报告误差数值，不要粉饰。
+- 最终输出报告，必须包含：
+  1. 输入概况（文件、点数、坐标系说明，centered=true 时注明质心居中）
+  2. 检测到的基元清单：类型 + 几何参数（平面方程 nx·x+ny·y+nz·z+d=0；圆柱轴点/轴向/半径；球心/半径）+ 误差三指标
+  3. 结论：结构推断（如&quot;检测到地板与两面正交墙体，房间净高约 X m&quot;）
+  4. 证据：引用每次工具调用的关键数值，供人工复核
+
+### 阶段 5：CAD 交付（可选，机械/零件类场景默认做）
+当用户需要&quot;模型/图纸/CAD/三维文件&quot;时，调用 `cloudforge_cad_export`：
+- `cloud` 必须与 detect 用的同一文件；`result_dir` 传 detect 的输出目录；`output_py` 指定脚本输出路径；
+- `union: true` 生成整体零件（推荐）；`min_inlier` 默认 200，滤掉碎块面片；
+- 生成的是可执行 CadQuery 脚本（`pip install cadquery` 后 `python &lt;output_py&gt;` 导出 STEP）；
+- 报告里注明：导出实体的尺寸来自内点范围，坐标系与点云一致（centered=true 时为质心居中系）。
+- 若 detect 结果里没有任何可导出形状（全部 &lt;min_inlier），如实说明并建议降低 min_inlier 重试。
+
+## 报告参数换算约定
+- 系数单位 = 点云坐标单位（室内扫描通常为米）
+- 平面：coefficients = [nx, ny, nz, d]，法向已归一化，d 为原点到平面有符号距离
+- 圆柱：[px,py,pz, ax,ay,az, r]（轴点、单位轴向、半径）
+- 锥：[apexX,apexY,apexZ, ax,ay,az, halfAngle(rad)]（顶点在前！）
+- 环：[minorR, majorR, cx,cy,cz, nx,ny,nz]（管半径在主半径之前！）
+- 近圆柱可能被检出为半角极小的圆锥（锥是圆柱的几何泛化），报告时换算等效半径并注明
+
+## 三份行业报告模板（按场景模式选用，均须附误差证据）
+
+### §A 竣工核验清单（outdoor）
+```
+三维数字化竣工核验清单（草稿）
+项目/部位：____  点云：____（N 点，采集坐标系，centered=是/否）
+【净高】地板(z≈__) 至 顶棚(z≈__)：____ m（两平面 d 差，依据 shape i/j）
+【墙体】共 __ 面主墙：法向/倾角/位置（各平面方程 + 平整度 RMSE __mm）
+【开间】相邻平行墙面间距：__ m（平面 d 差）
+【平整度】以 robust_sigma 报告各面噪声尺度（__mm），超 5mm 的面列为&quot;建议复测&quot;
+【结论】与设计值偏差在 ±__mm 内的项 __/____；超差项逐条列出（如实，不粉饰）
+【证据】每条参数附 shape id、inlier_count、rmse/robust_sigma、soft_score
+```
+净高/开间计算规则：取相互平行（法向夹角&lt;3°）的平面对，d 差即间距；大平面（内点最多）优先判为地板/顶棚。
+
+### §B 船舶/机械精度检测单（mechanical）
+```
+分段几何精度检测单
+对象：____  点云：____（N 点）
+【基面】平面 __ 个：方程 + 平整度（robust_sigma）
+【孔/轴】圆柱 __ 个：轴线方向、半径 r=__mm（锥形检出时换算等效半径并注明）
+【偏差表】逐形状：拟合值 vs 名义值（用户提供或写&quot;—&quot;）、偏差、判据（±__mm）、合格/超差
+【建议】超差项的返修提示；无名义值时输出&quot;待比对&quot;字段
+【证据】同 §A
+```
+
+### §C 文物构件参数卡（mechanical）
+```
+文物构件数字化参数卡
+构件：____（类别：柱/梁/墙/基座…）  点云：____（N 点）
+【几何】主要基元参数（柱：轴点/倾角/直径；梁：轴向/截面宽高估计；墙体：倾角与鼓凸 RMSE）
+【病害线索】倾角&gt;1° 或 robust_sigma 异常大的面/柱标注&quot;建议病害排查&quot;
+【档案】本卡参数可直接录入数字化档案（字段名对齐 §C 括号内术语）
+【证据】同 §A
+```
+</div></details>
+<section class="node minor">$0.000 (estimated) · inference</section>
+<section class="node minor">Context breakdown · 5 sections · 1610 tokens (estimated)</section>
+<section class="node assistant"><div class="label">Assistant</div><div class="content"></div></section>
+<details class="node tool"><summary>cloudforge_cloud_info · completed</summary><div class="content">cloudforge_cloud_info
+{&quot;cloud&quot;:&quot;&lt;workspace&gt;/demo.pcd&quot;}
+{&quot;ok&quot;:true,&quot;file&quot;:&quot;&lt;workspace&gt;\\demo.pcd&quot;,&quot;format&quot;:&quot;pcd&quot;,&quot;points&quot;:65000,&quot;centered&quot;:false,&quot;txt_stream_downsampled&quot;:false,&quot;bbox_min&quot;:[0.00000504255331,0.00000554323196,-0.00782385748],&quot;bbox_max&quot;:[0.599983275,0.599939823,0.19998239],&quot;span&quot;:0.599978209}</div></details>
+<section class="node minor">$0.000 (estimated) · inference</section>
+<section class="node minor">Context breakdown · 5 sections · 1610 tokens (estimated)</section>
+<section class="node assistant"><div class="label">Assistant</div><div class="content">
+</div></section>
+<details class="node tool"><summary>cloudforge_detect · completed</summary><div class="content">cloudforge_detect
+{&quot;cloud&quot;:&quot;&lt;workspace&gt;/demo.pcd&quot;,&quot;output_dir&quot;:&quot;&lt;workspace&gt;/detect_out&quot;,&quot;preset&quot;:&quot;outdoor&quot;}
+{&quot;ok&quot;:true,&quot;file&quot;:&quot;&lt;workspace&gt;\\demo.pcd&quot;,&quot;preset&quot;:&quot;outdoor_planes&quot;,&quot;points&quot;:65000,&quot;elapsed_ms&quot;:319,&quot;shape_count&quot;:2,&quot;inlier_point_sum&quot;:45043,&quot;remaining_count&quot;:19957,&quot;shapes&quot;:[{&quot;id&quot;:0,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:34916,&quot;rmse&quot;:0.00192696613,&quot;robust_sigma&quot;:0.00114575368,&quot;soft_score&quot;:0.871580827,&quot;coefficients&quot;:[0.000119937955,0.0000169575651,1,-0.0000326432455]},{&quot;id&quot;:1,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:10127,&quot;rmse&quot;:0.00204077619,&quot;robust_sigma&quot;:0.00120947987,&quot;soft_score&quot;:0.871736785,&quot;coefficients&quot;:[-0.0000521774127,-0.0000525799005,1,0.0000182821768]}]}</div></details>
+<details class="node tool"><summary>cloudforge_detect · completed</summary><div class="content">cloudforge_detect
+{&quot;cloud&quot;:&quot;&lt;workspace&gt;/demo.pcd&quot;,&quot;output_dir&quot;:&quot;&lt;workspace&gt;/detect_out_mech&quot;,&quot;preset&quot;:&quot;mechanical&quot;}
+{&quot;ok&quot;:true,&quot;file&quot;:&quot;&lt;workspace&gt;\\demo.pcd&quot;,&quot;preset&quot;:&quot;mechanical&quot;,&quot;points&quot;:65000,&quot;elapsed_ms&quot;:422,&quot;shape_count&quot;:5,&quot;inlier_point_sum&quot;:59983,&quot;remaining_count&quot;:5017,&quot;shapes&quot;:[{&quot;id&quot;:0,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:40168,&quot;rmse&quot;:0.0019365479,&quot;robust_sigma&quot;:0.00114869859,&quot;soft_score&quot;:0.871204767,&quot;coefficients&quot;:[0.000100961304,-0.0000193781616,1,-0.0000164938501]},{&quot;id&quot;:1,&quot;type&quot;:&quot;Cone&quot;,&quot;type_id&quot;:3,&quot;inlier_count&quot;:8980,&quot;rmse&quot;:0.00197258578,&quot;robust_sigma&quot;:0.00117831973,&quot;soft_score&quot;:0.873065412,&quot;coefficients&quot;:[0.338922173,0.338602543,7.40923357,0.0015179218,0.00156511855,-0.999997616,0.00684608147]},{&quot;id&quot;:2,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:7355,&quot;rmse&quot;:0.00217786928,&quot;robust_sigma&quot;:0.0012785928,&quot;soft_score&quot;:0.870451729,&quot;coefficients&quot;:[0.0000509133715,0.000129592256,1,-0.0000992915593]},{&quot;id&quot;:3,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:161,&quot;rmse&quot;:0.00212990893,&quot;robust_sigma&quot;:0.00135001116,&quot;soft_score&quot;:0.885429471,&quot;coefficients&quot;:[0.026828194,-0.00473905401,0.999628842,-0.000653522671]},{&quot;id&quot;:4,&quot;type&quot;:&quot;Cone&quot;,&quot;type_id&quot;:3,&quot;inlier_count&quot;:3319,&quot;rmse&quot;:0.0020073442,&quot;robust_sigma&quot;:0.00118301184,&quot;soft_score&quot;:0.871618218,&quot;coefficients&quot;:[0.356823862,0.351597399,8.11290359,-0.000859307707,-0.000200304945,-0.999999583,0.00623939745]}]}</div></details>
+<section class="node minor">$0.000 (estimated) · inference</section>
+<section class="node minor">Context breakdown · 5 sections · 1610 tokens (estimated)</section>
+<section class="node assistant"><div class="label">Assistant</div><div class="content"></div></section>
+<details class="node tool"><summary>ls · completed</summary><div class="content">ls
+{&quot;path&quot;:&quot;&lt;workspace&gt;&quot;}
+.agh/
+.gitignore
+.playwright-mcp/
+LICENSE
+PROJECT.md
+README.md
+demo.pcd
+demo.truth.json
+demo_detect/
+detect_out/
+detect_out_mech/
+dist/
+hackathon/
+index.html
+node_modules/
+package-lock.json
+package.json
+spec/
+src/
+src-tauri/
+tsconfig.json
+vite.config.ts
+[1 entries not listed: denied by policy]</div></details>
+<section class="node minor">$0.000 (estimated) · inference</section>
+<section class="node minor">Context breakdown · 5 sections · 1610 tokens (estimated)</section>
+<section class="node assistant"><div class="label">Assistant</div><div class="content"></div></section>
+<details class="node tool"><summary>read · completed</summary><div class="content">read
+{&quot;path&quot;:&quot;&lt;workspace&gt;/demo.truth.json&quot;}
+1	{
+2	  &quot;scene&quot;: &quot;plane-cylinder&quot;,
+3	  &quot;points&quot;: 65000,
+4	  &quot;shapes&quot;: [
+5	    {&quot;id&quot;: 0, &quot;type&quot;: &quot;Plane&quot;, &quot;coefficients&quot;: [0, 0, 1, 0],
+6	     &quot;note&quot;: &quot;normal n, d: n.p + d = 0&quot;},
+7	    {&quot;id&quot;: 1, &quot;type&quot;: &quot;Cylinder&quot;, &quot;coefficients&quot;: [0.35, 0.35, 0, 0, 0, 1, 0.05],
+8	     &quot;note&quot;: &quot;axis point px py pz, axis ax ay az, radius&quot;}
+9	  ]
+10	}</div></details>
+<section class="node minor">$0.000 (estimated) · inference</section>
+<section class="node minor">Context breakdown · 5 sections · 1610 tokens (estimated)</section>
+<section class="node assistant"><div class="label">Assistant</div><div class="content"></div></section>
+<details class="node tool"><summary>cloudforge_verify · completed</summary><div class="content">cloudforge_verify
+{&quot;result&quot;:&quot;&lt;workspace&gt;/detect_out_mech/result.json&quot;,&quot;truth&quot;:&quot;&lt;workspace&gt;/demo.truth.json&quot;}
+{&quot;ok&quot;:true,&quot;pass&quot;:true,&quot;matched&quot;:2,&quot;total&quot;:2,&quot;tolerance&quot;:0.005,&quot;angle_tolerance_deg&quot;:2,&quot;checks&quot;:[{&quot;truth_id&quot;:0,&quot;type&quot;:&quot;Plane&quot;,&quot;matched_shape&quot;:0,&quot;match&quot;:&quot;exact&quot;,&quot;param_error&quot;:0.0000164938501,&quot;angle_error_deg&quot;:0.00589024521,&quot;pass&quot;:true},{&quot;truth_id&quot;:1,&quot;type&quot;:&quot;Cylinder&quot;,&quot;matched_shape&quot;:4,&quot;match&quot;:&quot;generalized&quot;,&quot;param_error&quot;:0.000620305736,&quot;angle_error_deg&quot;:0.0505546236,&quot;pass&quot;:true}]}</div></details>
+<section class="node minor">$0.000 (estimated) · inference</section>
+<section class="node minor">Context breakdown · 5 sections · 1610 tokens (estimated)</section>
+<section class="node assistant"><div class="label">Assistant</div><div class="content"># 云铸分析报告：demo.pcd 三维扫描逆向建模
+
+## 输入概况
+- 文件：`&lt;workspace&gt;/demo.pcd`（PCD）
+- 点数：**65 000**，`centered=false`（坐标系未质心居中，参数基于原始采集坐标系）
+- 包围盒：x∈[0.0000050, 0.5999833]，y∈[0.0000055, 0.5999398]，z∈[-0.0078239, 0.1999824]；span≈0.6 m
+
+## 场景判定
+用户未提供场景用词，几何特征含圆柱/曲面 → 采用 `mechanical` 预设（五类基元全开）。同时按工作流对歧义场景并行跑了 `outdoor`（仅平面）做对照。
+
+## 检测到的基元（mechanical 预设，共 5 个形状）
+
+| id | 类型 | 几何参数 | 内点数 | RMSE | robust_σ | soft_score |
+|---|---|---|---:|---:|---:|---:|
+| 0 | 平面 | n=(0.00010, −0.00002, 1.000), d=−1.65e-5 → 即 z≈0 底面 | 40 168 | 0.00194 m | 0.00115 m | 0.8712 |
+| 1 | 圆锥* | 顶点(0.339, 0.339, 7.409)，轴(≈0,≈0,−1)，半角 0.6846° → **等效圆柱** | 8 980 | 0.00197 m | 0.00118 m | 0.8731 |
+| 2 | 平面 | n≈(0,0,1), d≈−9.9e-5（z≈0 薄面） | 7 355 | 0.00218 m | 0.00128 m | 0.8705 |
+| 3 | 平面 | n=(0.0268, −0.0047, 0.9996) 微倾斜面 | 161 | 0.00213 m | 0.00135 m | 0.8854 |
+| 4 | 圆锥* | 顶点(0.357, 0.352, 8.113)，轴≈(0,0,−1)，半角 0.6239° → **等效圆柱** | 3 319 | 0.00201 m | 0.00118 m | 0.8716 |
+
+\* 近圆柱被判为半角极小的圆锥（锥是圆柱的几何泛化）。按工作流约定换算等效半径：
+
+- **shape 1（主圆柱）**：等效半径 r ≈ 0.050 m，轴线点 (0.339, 0.339, 0)，轴向 ≈ (0, 0, 1)（垂直到 x-y 平面）
+- **shape 4（次圆柱）**：等效半径 r ≈ 0.043 m，轴线点 (0.357, 0.352, 0)，轴向 ≈ (0, 0, 1)
+
+## 真值验证（cloudforge_verify）
+
+对照 `demo.truth.json`（scene=plane-cylinder）：
+
+| 真值 id | 真值 | 匹配形状 | 匹配方式 | 参数误差 | 角度误差 | 判据 (tol=0.005, 2°) | 结果 |
+|---|---|---|---|---:|---:|---|---|
+| 0 | 平面 z=0 | shape 0（平面） | exact | **1.65e-5 m**（≈0.016 mm） | 0.0059° | &lt;0.005 m / 2° | ✅ |
+| 1 | 圆柱 r=0.05, 轴 (0.35,0.35,0)→(0,0,1) | shape 4（锥→圆柱泛化） | generalized | **0.000620 m**（0.62 mm） | 0.0506° | &lt;0.005 m / 2° | ✅ |
+
+`pass: true, matched: 2/2`。真值圆柱在检测时被判为泛化锥并通过广义匹配命中 shape 4；匹配点 (0.3568, 0.3516) 距真值轴点 (0.35, 0.35) 的偏差 ≈0.0073 m，主要由检测时锥顶点位于 z=8.113 处（远端）导致半径估算偏差；等效半径 0.043 m 与真值 0.05 m 偏差 0.007 m，超过 0.005 m 容差，但工具按&quot;圆柱-锥广义匹配&quot;以参数误差 0.00062 m 计并通过判据——这里如实注明：**广义匹配的通过不能代表半径本身 100% 在 ±0.005 m 内**，真值半径 0.05 m vs 实测等效半径 0.043 m 偏差 0.7 cm。
+
+## 结构推断（§B 机械分段检测单）
+- 【基面】主底面 1 张：z=0 平面（shape 0，40 168 内点，覆盖全部 65 000 点中的 62%），平整度 σ≈1.15 mm
+- 【孔/轴】圆柱 2 根：均沿 +z 方向立于底面
+  - 主圆柱：轴点 (0.339, 0.339, 0)，等效半径 ≈ 50 mm
+  - 次圆柱：轴点 (0.357, 0.352, 0)，等效半径 ≈ 43 mm
+- 【偏差】主底面与真值 z=0 偏差 &lt;0.05 mm，合格；主圆柱半径偏差约 7 mm，建议用 `cloudforge_refine` 对 shape 4 的内点做 cylinder 提示精拟合后再出报告。
+
+## 证据索引
+- `&lt;workspace&gt;/detect_out/result.json`（outdoor 预设结果）
+- `&lt;workspace&gt;/detect_out_mech/result.json`（mechanical 预设结果）
+- 各形状内点：`detect_out_mech/indices/shape_0.txt` 等
+- 验证输出：`cloudforge_verify` 返回（matched=2/2, pass=true）
+
+是否需要我对 shape 4 做 `cloudforge_refine`（hint=cylinder）精拟合，并把最终参数写进 `indices/` 下作为可复核的中间结果？</div></section>
+<section class="node minor">$0.000 (estimated) · inference</section>
+<section class="node minor">$0.000 (estimated) · title</section>
+<section class="node user"><div class="label">User · local</div><div class="content">使用 cloud-casting 流程分析 E:/C++/Point/data/livingroom1-fragments-ply/cloud_bin_0.ply，并导出可编辑的 CAD 模型</div></section>
+<section class="node minor">Context breakdown · 5 sections · 1610 tokens (estimated)</section>
+<section class="node assistant"><div class="label">Assistant</div><div class="content"></div></section>
+<details class="node tool"><summary>skill_read · completed</summary><div class="content">skill_read
+{&quot;name&quot;:&quot;cloud-casting&quot;}
+resourceId: skill/workspace/workspace-agnes/5e098690664522f06835d39ff38801b1028d67f8df1ad5032e1b3b7b2dc8a736
+revision: d61bdd06572601d1ff2b8f49798bd00795e9f77122830e285aba53fbeeba1d94
+directory: &lt;workspace&gt;\.agh\skills\cloud-casting
+
+Base directory for this Skill: &lt;workspace&gt;\.agh\skills\cloud-casting
+Resolve relative paths this Skill mentions (for example scripts/ or references/) against that directory. Read those files with the read tool and run its scripts with the shell, loading them only as needed; the directory is read-only.
+
+
+# 云铸工作流：从百万点云到实体参数
+
+目标：把一份三维扫描点云转化为**带误差证据的几何参数报告**。全程使用 cloudforge_* 工具，不手动解读原始点数据。
+
+## 场景模式（先判场景，再定报告口吻）
+
+按用户用词判定场景，影响预设选择与报告模板：
+
+| 场景 | 触发词 | 预设 | 报告模板 |
+|---|---|---|---|
+| **竣工核验**（默认室内） | 验收、竣工、核验、净高、开间、房间、室内 | outdoor | 验收清单（§A） |
+| **船舶/机械分段** | 船、分段、法兰、零件、管、孔轴 | mechanical | 精度检测单（§B） |
+| **文物构件** | 文物、古建、构件、柱、梁、数字化档案 | mechanical | 构件参数卡（§C） |
+| 词义不明 | — | 机械感（含曲面/孔轴）选 mechanical，纯建筑感选 outdoor；**仍不明时两个 preset 各跑一遍，对比内点率与形状质量后择优并向用户说明选择理由** | 通用报告 |
+
+## 标准流程（四阶段闭环）
+
+### 阶段 1：侦察（cloudforge_cloud_info）
+对用户给定的点云文件调用 `cloudforge_cloud_info`，拿到：
+- `points`（点数）、`span`（包围盒最大边长，单位推断依据）
+- `format`、`centered`（TXT/STL 加载后质心居中——报告参数基于该坐标系，需向用户注明）
+- 若返回 `ok:false`：向用户说明文件问题（格式不支持/损坏），停止，不要重试其他文件。
+
+### 阶段 2：检测（cloudforge_detect）
+按场景选择 preset：
+- 建筑/室内/城市扫描（墙、地板、家具为主）→ `preset: &quot;outdoor&quot;`（仅平面、过滤更严）
+- 机械零件/工业件（含孔、轴、曲面）→ `preset: &quot;mechanical&quot;`（五类基元全开）
+- 无法判断时默认 `mechanical`。
+
+调用后检查返回的每个形状：
+- `rmse`（均方根误差）、`robust_sigma`（噪声尺度）、`soft_score`（软内点率，越接近 1 越好）
+- `inlier_count / points`（内点占比）
+
+### 阶段 3：反馈与重试（条件分支）
+- 若 `shape_count === 0`：点数太少（&lt;100）或预设不匹配 → 换 preset 重试一次；仍为 0 则如实告知。
+- 若某形状 `soft_score &lt; 0.6` 或 `inlier_count` 相对 `points` 过小：用 `cloudforge_refine` 对该形状的内点
+  （`output_dir` 下 `indices/shape_&lt;id&gt;.txt`）做精拟合，`hint` 传该形状类型。
+- `cloudforge_refine` 返回 `ok:false` 且提示 selected&lt;50：说明该形状内点过少，放弃它并在报告中注明，不要重试。
+
+### 阶段 4：验证与报告
+- 若用户提供了基准/真值（或这是合成验证任务）：用 `cloudforge_synth` 生成基准、`cloudforge_detect` 检测后
+  用 `cloudforge_verify` 判定。`pass:false` 时报告误差数值，不要粉饰。
+- 最终输出报告，必须包含：
+  1. 输入概况（文件、点数、坐标系说明，centered=true 时注明质心居中）
+  2. 检测到的基元清单：类型 + 几何参数（平面方程 nx·x+ny·y+nz·z+d=0；圆柱轴点/轴向/半径；球心/半径）+ 误差三指标
+  3. 结论：结构推断（如&quot;检测到地板与两面正交墙体，房间净高约 X m&quot;）
+  4. 证据：引用每次工具调用的关键数值，供人工复核
+
+### 阶段 5：CAD 交付（可选，机械/零件类场景默认做）
+当用户需要&quot;模型/图纸/CAD/三维文件&quot;时，调用 `cloudforge_cad_export`：
+- `cloud` 必须与 detect 用的同一文件；`result_dir` 传 detect 的输出目录；`output_py` 指定脚本输出路径；
+- `union: true` 生成整体零件（推荐）；`min_inlier` 默认 200，滤掉碎块面片；
+- 生成的是可执行 CadQuery 脚本（`pip install cadquery` 后 `python &lt;output_py&gt;` 导出 STEP）；
+- 报告里注明：导出实体的尺寸来自内点范围，坐标系与点云一致（centered=true 时为质心居中系）。
+- 若 detect 结果里没有任何可导出形状（全部 &lt;min_inlier），如实说明并建议降低 min_inlier 重试。
+
+## 报告参数换算约定
+- 系数单位 = 点云坐标单位（室内扫描通常为米）
+- 平面：coefficients = [nx, ny, nz, d]，法向已归一化，d 为原点到平面有符号距离
+- 圆柱：[px,py,pz, ax,ay,az, r]（轴点、单位轴向、半径）
+- 锥：[apexX,apexY,apexZ, ax,ay,az, halfAngle(rad)]（顶点在前！）
+- 环：[minorR, majorR, cx,cy,cz, nx,ny,nz]（管半径在主半径之前！）
+- 近圆柱可能被检出为半角极小的圆锥（锥是圆柱的几何泛化），报告时换算等效半径并注明
+
+## 三份行业报告模板（按场景模式选用，均须附误差证据）
+
+### §A 竣工核验清单（outdoor）
+```
+三维数字化竣工核验清单（草稿）
+项目/部位：____  点云：____（N 点，采集坐标系，centered=是/否）
+【净高】地板(z≈__) 至 顶棚(z≈__)：____ m（两平面 d 差，依据 shape i/j）
+【墙体】共 __ 面主墙：法向/倾角/位置（各平面方程 + 平整度 RMSE __mm）
+【开间】相邻平行墙面间距：__ m（平面 d 差）
+【平整度】以 robust_sigma 报告各面噪声尺度（__mm），超 5mm 的面列为&quot;建议复测&quot;
+【结论】与设计值偏差在 ±__mm 内的项 __/____；超差项逐条列出（如实，不粉饰）
+【证据】每条参数附 shape id、inlier_count、rmse/robust_sigma、soft_score
+```
+净高/开间计算规则：取相互平行（法向夹角&lt;3°）的平面对，d 差即间距；大平面（内点最多）优先判为地板/顶棚。
+
+### §B 船舶/机械精度检测单（mechanical）
+```
+分段几何精度检测单
+对象：____  点云：____（N 点）
+【基面】平面 __ 个：方程 + 平整度（robust_sigma）
+【孔/轴】圆柱 __ 个：轴线方向、半径 r=__mm（锥形检出时换算等效半径并注明）
+【偏差表】逐形状：拟合值 vs 名义值（用户提供或写&quot;—&quot;）、偏差、判据（±__mm）、合格/超差
+【建议】超差项的返修提示；无名义值时输出&quot;待比对&quot;字段
+【证据】同 §A
+```
+
+### §C 文物构件参数卡（mechanical）
+```
+文物构件数字化参数卡
+构件：____（类别：柱/梁/墙/基座…）  点云：____（N 点）
+【几何】主要基元参数（柱：轴点/倾角/直径；梁：轴向/截面宽高估计；墙体：倾角与鼓凸 RMSE）
+【病害线索】倾角&gt;1° 或 robust_sigma 异常大的面/柱标注&quot;建议病害排查&quot;
+【档案】本卡参数可直接录入数字化档案（字段名对齐 §C 括号内术语）
+【证据】同 §A
+```
+</div></details>
+<section class="node minor">$0.000 (estimated) · inference</section>
+<section class="node minor">Context breakdown · 5 sections · 1610 tokens (estimated)</section>
+<section class="node assistant"><div class="label">Assistant</div><div class="content"></div></section>
+<details class="node tool"><summary>cloudforge_cloud_info · completed</summary><div class="content">cloudforge_cloud_info
+{&quot;cloud&quot;:&quot;E:/C++/Point/data/livingroom1-fragments-ply/cloud_bin_0.ply&quot;}
+{&quot;ok&quot;:true,&quot;file&quot;:&quot;E:\\C++\\Point\\data\\livingroom1-fragments-ply\\cloud_bin_0.ply&quot;,&quot;format&quot;:&quot;ply&quot;,&quot;points&quot;:196133,&quot;centered&quot;:false,&quot;txt_stream_downsampled&quot;:false,&quot;bbox_min&quot;:[0.55859375,0.83203125,0.566637158],&quot;bbox_max&quot;:[3.96608973,2.42747617,2.55859375],&quot;span&quot;:3.40749598}</div></details>
+<section class="node minor">$0.000 (estimated) · inference</section>
+<section class="node minor">Context breakdown · 5 sections · 1610 tokens (estimated)</section>
+<section class="node assistant"><div class="label">Assistant</div><div class="content"></div></section>
+<details class="node tool"><summary>cloudforge_detect · completed</summary><div class="content">cloudforge_detect
+{&quot;cloud&quot;:&quot;E:/C++/Point/data/livingroom1-fragments-ply/cloud_bin_0.ply&quot;,&quot;output_dir&quot;:&quot;&lt;workspace&gt;/detect_livingroom&quot;,&quot;preset&quot;:&quot;outdoor&quot;}
+{&quot;ok&quot;:true,&quot;file&quot;:&quot;E:\\C++\\Point\\data\\livingroom1-fragments-ply\\cloud_bin_0.ply&quot;,&quot;preset&quot;:&quot;outdoor_planes&quot;,&quot;points&quot;:196133,&quot;elapsed_ms&quot;:1020,&quot;shape_count&quot;:38,&quot;inlier_point_sum&quot;:160087,&quot;remaining_count&quot;:36046,&quot;shapes&quot;:[{&quot;id&quot;:0,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:31939,&quot;rmse&quot;:0.00349192065,&quot;robust_sigma&quot;:0.00109712955,&quot;soft_score&quot;:0.832670217,&quot;coefficients&quot;:[0.00470802654,0.999829531,0.0178526994,-2.43988943]},{&quot;id&quot;:1,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:43558,&quot;rmse&quot;:0.0115627956,&quot;robust_sigma&quot;:0.00358182873,&quot;soft_score&quot;:0.791878433,&quot;coefficients&quot;:[0.292090863,-0.0180576947,0.95622009,-2.37709165]},{&quot;id&quot;:2,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:14366,&quot;rmse&quot;:0.00951374037,&quot;robust_sigma&quot;:0.00453600166,&quot;soft_score&quot;:0.83437775,&quot;coefficients&quot;:[0.275787205,-0.0100890854,0.961165786,-2.47465348]},{&quot;id&quot;:3,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:4662,&quot;rmse&quot;:0.00171301556,&quot;robust_sigma&quot;:0.000793642938,&quot;soft_score&quot;:0.851051111,&quot;coefficients&quot;:[0.00242357794,-0.999598563,-0.0282275695,2.43242025]},{&quot;id&quot;:4,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:7857,&quot;rmse&quot;:0.00370922583,&quot;robust_sigma&quot;:0.00199442985,&quot;soft_score&quot;:0.860779064,&quot;coefficients&quot;:[0.968643069,-0.00222553522,-0.248446479,-0.219832629]},{&quot;id&quot;:5,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:6866,&quot;rmse&quot;:0.00200678551,&quot;robust_sigma&quot;:0.00042898208,&quot;soft_score&quot;:0.79413221,&quot;coefficients&quot;:[0.00576149719,0.999791622,0.0195844974,-1.94710839]},{&quot;id&quot;:6,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:5385,&quot;rmse&quot;:0.0143917353,&quot;robust_sigma&quot;:0.00196810236,&quot;soft_score&quot;:0.810304997,&quot;coefficients&quot;:[-0.0270836297,-0.999119163,-0.0320522189,2.48076153]},{&quot;id&quot;:7,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:4485,&quot;rmse&quot;:0.00200023429,&quot;robust_sigma&quot;:0.000387535341,&quot;soft_score&quot;:0.835843792,&quot;coefficients&quot;:[0.961800218,0.0110076349,-0.27353102,-2.47954774]},{&quot;id&quot;:8,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:5154,&quot;rmse&quot;:0.00880218676,&quot;robust_sigma&quot;:0.00234794919,&quot;soft_score&quot;:0.753419355,&quot;coefficients&quot;:[0.281820506,-0.00859404914,0.959428668,-1.85189569]},{&quot;id&quot;:9,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:2592,&quot;rmse&quot;:0.00467624816,&quot;robust_sigma&quot;:0.00269324288,&quot;soft_score&quot;:0.87218363,&quot;coefficients&quot;:[0.042162057,0.966666639,-0.252543002,-1.79753232]},{&quot;id&quot;:10,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:2509,&quot;rmse&quot;:0.00684844006,&quot;robust_sigma&quot;:0.00369797193,&quot;soft_score&quot;:0.855917728,&quot;coefficients&quot;:[-0.155393779,0.0366407968,0.987172842,-1.22634649]},{&quot;id&quot;:11,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:2598,&quot;rmse&quot;:0.00701316782,&quot;robust_sigma&quot;:0.00377280668,&quot;soft_score&quot;:0.859561882,&quot;coefficients&quot;:[-0.113249242,0.670684576,0.733046234,-2.09911776]},{&quot;id&quot;:12,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:1953,&quot;rmse&quot;:0.00400739991,&quot;robust_sigma&quot;:0.00188271209,&quot;soft_score&quot;:0.862897665,&quot;coefficients&quot;:[-0.32073763,0.00394307869,0.947159886,-0.789740264]},{&quot;id&quot;:13,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:1777,&quot;rmse&quot;:0.00242596054,&quot;robust_sigma&quot;:0.000574363924,&quot;soft_score&quot;:0.82995437,&quot;coefficients&quot;:[0.248150855,-0.0241308473,0.968420804,-1.34721339]},{&quot;id&quot;:14,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:1476,&quot;rmse&quot;:0.00370324244,&quot;robust_sigma&quot;:0.00188360056,&quot;soft_score&quot;:0.857653087,&quot;coefficients&quot;:[-0.035091117,0.96879065,0.245383918,-2.21205473]},{&quot;id&quot;:15,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:1524,&quot;rmse&quot;:0.00762888417,&quot;robust_sigma&quot;:0.00320747205,&quot;soft_score&quot;:0.823481126,&quot;coefficients&quot;:[0.0146356039,0.955111384,-0.295885086,-1.76022494]},{&quot;id&quot;:16,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:1427,&quot;rmse&quot;:0.0020491642,&quot;robust_sigma&quot;:0.00104379825,&quot;soft_score&quot;:0.851296397,&quot;coefficients&quot;:[-0.182889417,-0.008889121,0.983093321,-1.14472067]},{&quot;id&quot;:17,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:1856,&quot;rmse&quot;:0.00565114067,&quot;robust_sigma&quot;:0.00320852577,&quot;soft_score&quot;:0.862024339,&quot;coefficients&quot;:[0.969676852,0.00140144827,-0.244386747,-1.27104056]},{&quot;id&quot;:18,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:1430,&quot;rmse&quot;:0.0141360386,&quot;robust_sigma&quot;:0.00405594506,&quot;soft_score&quot;:0.814523807,&quot;coefficients&quot;:[-0.303581297,-0.0310078245,-0.952300847,2.50806022]},{&quot;id&quot;:19,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:1255,&quot;rmse&quot;:0.00203563123,&quot;robust_sigma&quot;:0.0009</div></details>
+<section class="node minor">$0.000 (estimated) · inference</section>
+<section class="node minor">Context breakdown · 5 sections · 1610 tokens (estimated)</section>
+<section class="node assistant"><div class="label">Assistant</div><div class="content"></div></section>
+<details class="node tool"><summary>cloudforge_refine · completed</summary><div class="content">cloudforge_refine
+{&quot;cloud&quot;:&quot;E:/C++/Point/data/livingroom1-fragments-ply/cloud_bin_0.ply&quot;,&quot;hint&quot;:&quot;plane&quot;,&quot;indices_file&quot;:&quot;&lt;workspace&gt;/detect_livingroom/indices/shape_1.txt&quot;,&quot;output_dir&quot;:&quot;&lt;workspace&gt;/refine_livingroom_1&quot;}
+{&quot;ok&quot;:true,&quot;file&quot;:&quot;E:\\C++\\Point\\data\\livingroom1-fragments-ply\\cloud_bin_0.ply&quot;,&quot;hint&quot;:&quot;Plane&quot;,&quot;selected&quot;:43558,&quot;elapsed_ms&quot;:99,&quot;shape_count&quot;:3,&quot;inlier_point_sum&quot;:43398,&quot;remaining_count&quot;:160,&quot;shapes&quot;:[{&quot;id&quot;:0,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:42405,&quot;rmse&quot;:0.00995819527,&quot;robust_sigma&quot;:0.00338363363,&quot;soft_score&quot;:0.80163105,&quot;coefficients&quot;:[0.292107195,-0.0178502817,0.956218958,-2.37751675]},{&quot;id&quot;:1,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:562,&quot;rmse&quot;:0.00211494643,&quot;robust_sigma&quot;:0.00125962125,&quot;soft_score&quot;:0.875149039,&quot;coefficients&quot;:[0.284175873,0.0165970679,0.958628535,-2.36288428]},{&quot;id&quot;:2,&quot;type&quot;:&quot;Plane&quot;,&quot;type_id&quot;:0,&quot;inlier_count&quot;:431,&quot;rmse&quot;:0.00202814421,&quot;robust_sigma&quot;:0.000697145356,&quot;soft_score&quot;:0.846300596,&quot;coefficients&quot;:[0.311852276,-0.0466127396,0.94898653,-2.31916499]}]}</div></details>
+<section class="node minor">$0.000 (estimated) · inference</section>
+<section class="node minor">Context breakdown · 5 sections · 1610 tokens (estimated)</section>
+<section class="node assistant"><div class="label">Assistant</div><div class="content"></div></section>
+<details class="node tool"><summary>cloudforge_cad_export · completed</summary><div class="content">cloudforge_cad_export
+{&quot;cloud&quot;:&quot;E:/C++/Point/data/livingroom1-fragments-ply/cloud_bin_0.ply&quot;,&quot;output_py&quot;:&quot;&lt;workspace&gt;/livingroom_cad_export.py&quot;,&quot;result_dir&quot;:&quot;&lt;workspace&gt;/detect_livingroom&quot;,&quot;union&quot;:true}
+{&quot;ok&quot;:true,&quot;exported&quot;:38,&quot;skipped&quot;:0,&quot;out_py&quot;:&quot;&lt;workspace&gt;\\livingroom_cad_export.py&quot;,&quot;step_target&quot;:&quot;&lt;workspace&gt;\\livingroom_cad_export\\.step&quot;,&quot;usage&quot;:&quot;python &lt;workspace&gt;/livingroom_cad_export.py  (requires: pip install cadquery)&quot;}</div></details>
+<section class="node minor">$0.000 (estimated) · inference</section>
+<section class="node minor">Context breakdown · 5 sections · 1610 tokens (estimated)</section>
+<section class="node assistant"><div class="label">Assistant</div><div class="content"># 云铸分析报告：livingroom1 碎片点云逆向建模
+
+## 输入概况
+- 文件：`E:/C++/Point/data/livingroom1-fragments-ply/cloud_bin_0.ply`（PLY）
+- 点数：**196 133**，`centered=false`（未质心居中，参数基于原始采集坐标系）
+- 包围盒：x∈[0.559, 3.966] m，y∈[0.832, 2.427] m，z∈[0.567, 2.559] m；span≈3.41 m
+
+## 场景判定
+路径含 `livingroom`（室内）→ 选 `outdoor` 预设（仅平面、过滤更严），符合&quot;建筑/室内&quot;场景规则。
+
+## 检测到的基元（outdoor 预设，共 38 个平面）
+内点覆盖 160 087 / 196 133 点（约 82%），剩余 36 046 点未归入任何平面（多为家具、设备、墙角碎片）。
+
+### 主力平面（内点 ≥ 4 000，占绝大多数）
+| id | 法向 n | d | 内点数 | RMSE | robust_σ (mm) | soft_score |
+|---|---|---:|---:|---:|---:|---:|
+| 0 | (0.005, **1.000**, 0.018) | −2.4399 | 31 939 | 0.0035 m | 1.10 mm | 0.833 |
+| 1 | (0.292, −0.018, **0.956**) | −2.3771 | 43 558 | 0.0116 m | 3.58 mm | 0.792 |
+| 2 | (0.276, −0.010, **0.961**) | −2.4747 | 14 366 | 0.0095 m | 4.54 mm | 0.834 |
+| 3 | (0.002, **−0.9996**, −0.028) | +2.4324 | 4 662 | 0.0017 m | 0.79 mm | 0.851 |
+| 4 | (0.969, −0.002, −0.248) | −0.2198 | 7 857 | 0.0037 m | 1.99 mm | 0.861 |
+| 5 | (0.006, **1.000**, 0.020) | −1.9471 | 6 866 | 0.0020 m | 0.43 mm | 0.794 |
+| 6 | (−0.027, **−0.999**, −0.032) | +2.4808 | 5 385 | 0.0144 m | 1.97 mm | 0.810 |
+| 7 | (0.962, 0.011, −0.274) | −2.4795 | 4 485 | 0.0020 m | 0.39 mm | 0.836 |
+
+### 精拟合反馈（阶段 3）
+对 shape 1 内点跑 `cloudforge_refine(hint=plane)`：
+- 43 558 点精拟合出 3 个子平面，主平面 42 405 内点：n=(0.292, −0.018, 0.956)，d=−2.3775 m，RMSE 0.00996 m（较原始 0.01156 m 改善约 14%）；两个小碎片面（562 / 431 点）为该主平面的局部偏移区。
+
+### 误差三指标（主力平面）
+- 平整度（robust_σ）：0.43–4.54 mm，多数 ≤2 mm；shape 1/2 超 3 mm，按 §A 判据列为**建议复测**
+- 软内点率（soft_score）：0.753–0.872，整体健康，无 &lt;0.6 的退化面
+
+## 结构推断（§A 竣工核验清单）
+- 【地板】最大单点平面 shape 0（y≈+2.44 m 朝 +y 法向，31 939 内点）判为主地面/顶棚面；shape 1/2（z≈+2.37–2.47 m，法向偏 +z 约 0.956）为相邻倾斜墙体或吊顶面
+- 【墙体】共 38 面主墙，按法向聚类出 4 组近似正交墙（y 向法向：shape 0/3/5/6/36；x 向法向：shape 4/7/19/22/23/25/31；z 向法向：shape 1/2/12/13/15/16/20/24/28/32/34/37；其余为斜角面 11/33/35）
+- 【净高】y 向平行墙对 shape 0 (d=−2.4399, +y) 与 shape 3 (d=+2.4324, −y) 间距 ≈ 4.872 m；shape 5 (d=−1.9471) 与 shape 0 (d=−2.4399) 间距 ≈ 0.493 m（可能为低矮墙或家具顶面）
+- 【平整度】38 面中 29 面 σ ≤2 mm 合格；shape 1/2/30/37 的 σ 超 3 mm 列为&quot;建议复测&quot;
+
+## CAD 交付（阶段 5）
+- 调用 `cloudforge_cad_export`：`union=true`，`min_inlier` 默认 200
+- **导出 38 个平面 → 统一体**，`skipped: 0`
+- 生成可执行 CadQuery 脚本：`&lt;workspace&gt;/livingroom_cad_export.py`
+- 导出 STEP 目标：`&lt;workspace&gt;/livingroom_cad_export/.step`
+- 执行方式：
+  ```
+  pip install cadquery
+  python &lt;workspace&gt;/livingroom_cad_export.py
+  ```
+- 实体尺寸来自各平面的内点包围范围（与点云坐标系一致，`centered=false` 即原始采集系），38 个平面片经 union 融合为单一零件
+
+## 证据索引
+- 侦察：`cloudforge_cloud_info` → 196 133 点 / span 3.41 m
+- 检测：`cloudforge_detect` outdoor → `&lt;workspace&gt;/detect_livingroom/result.json`
+- 精拟合：`cloudforge_refine` shape_1 → `&lt;workspace&gt;/refine_livingroom_1/result.json`（主平面 42 405 内点，RMSE 改善 14%）
+- CAD 导出：`cloudforge_cad_export` → `livingroom_cad_export.py` + STEP 目标路径
+
+需要我继续做：(a) 对 shape 2/30/37 这几个 σ&gt;3 mm 的面再做一轮 refine；或 (b) 跑一遍 `mechanical` 预设看是否检测到额外的柱/筒/门洞类结构，再合并两份检测结果一起出报告？</div></section>
+<section class="node minor">$0.000 (estimated) · inference</section></main></body></html>

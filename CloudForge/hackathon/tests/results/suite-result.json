@@ -1,0 +1,75 @@
+{
+  "timestamp": "2026-10-04T06:20:47.594Z",
+  "cli": "E:/C++/Point/CloudForge/hackathon/cli/build/Release/cloudforge-cli.exe",
+  "total": 11,
+  "passed": 11,
+  "failed": 0,
+  "results": [
+    {
+      "group": "normal",
+      "name": "N1 合成基准全链路",
+      "pass": true,
+      "detail": "shapes=6, verify=2/2, 平面误差=1.65e-5m, 圆柱误差=0.0006m"
+    },
+    {
+      "group": "normal",
+      "name": "N2 真实室内扫描平面反演",
+      "pass": true,
+      "detail": "196133 pts → 41 平面, 内点覆盖 81.8%, 耗时 986ms"
+    },
+    {
+      "group": "normal",
+      "name": "N3 大子集精拟合",
+      "pass": true,
+      "detail": "31939 pts → rmse=0.00326"
+    },
+    {
+      "group": "boundary",
+      "name": "B1 精拟合 50 点下限两侧",
+      "pass": true,
+      "detail": "49 点 → ok:false(ransac_refine_instance returned -1), 50 点 → ok:true(0 shape)"
+    },
+    {
+      "group": "boundary",
+      "name": "B2 空选择拒绝",
+      "pass": true,
+      "detail": "empty selection"
+    },
+    {
+      "group": "boundary",
+      "name": "B3 点云元信息完整",
+      "pass": true,
+      "detail": "span=3.407, downsampled=false"
+    },
+    {
+      "group": "failure",
+      "name": "F1 文件不存在",
+      "pass": true,
+      "detail": "file not found: E:\\definitely\\not-exist.ply"
+    },
+    {
+      "group": "failure",
+      "name": "F2 损坏 PLY",
+      "pass": true,
+      "detail": "failed to load point cloud (0 points): E:\\C++\\Point\\CloudFor"
+    },
+    {
+      "group": "failure",
+      "name": "F3 空文件",
+      "pass": true,
+      "detail": "failed to load point cloud (0 points): E:\\C++\\Point\\CloudFor"
+    },
+    {
+      "group": "failure",
+      "name": "F4 错误 BIN 格式",
+      "pass": true,
+      "detail": "failed to load point cloud (0 points): E:\\C++\\Point\\CloudFor"
+    },
+    {
+      "group": "failure",
+      "name": "F5 verify schema 不符",
+      "pass": true,
+      "detail": "missing shapes array in truth or result"
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>云铸 · CAD 模型查看器（离线）</title>
+<style>
+  body { margin: 0; overflow: hidden; font-family: "Segoe UI", "Microsoft YaHei", sans-serif; background: #1b1e24; }
+  #drop { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #aab2c0; gap: 10px; pointer-events: none; transition: opacity .3s; }
+  #drop h1 { font-size: 22px; color: #e8ecf3; font-weight: 600; margin: 0; }
+  #drop p { font-size: 14px; margin: 0; }
+  #hud { position: fixed; top: 12px; left: 14px; color: #e8ecf3; font-size: 13px; line-height: 1.7; background: rgba(15,17,22,.72); padding: 10px 14px; border-radius: 10px; border: 1px solid #333a46; display: none; }
+  #hud b { color: #7fd1a8; }
+  #pick { position: fixed; top: 14px; right: 14px; }
+  #pick button { background: #2b6cb0; border: none; color: #fff; padding: 9px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+  #pick button:hover { background: #2f7cc9; }
+  body.dragging::after { content: "松开以加载模型"; position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 26px; color: #7fd1a8; background: rgba(20,24,30,.55); border: 3px dashed #7fd1a8; box-sizing: border-box; }
+</style>
+<script type="importmap">
+{ "imports": {
+    "three": "./three/three.module.js",
+    "three/addons/": "./three/addons/"
+} }
+</script>
+</head>
+<body>
+<div id="drop">
+  <h1>云铸 · CAD 模型查看器</h1>
+  <p>把 <b>.stl</b> 模型文件拖进本页面即可加载（也支持 .ply 网格）</p>
+  <p>鼠标左键旋转 · 滚轮缩放 · 右键平移</p>
+</div>
+<div id="hud"></div>
+<div id="pick"><button>选择 STL 文件</button><input id="file" type="file" accept=".stl,.ply" hidden></div>
+<script type="module">
+import * as THREE from 'three';
+import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1b1e24);
+const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.01, 5000);
+camera.position.set(1.2, 1.0, 1.6);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(devicePixelRatio);
+document.body.appendChild(renderer.domElement);
+addEventListener('resize', () => { camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+
+scene.add(new THREE.HemisphereLight(0xdfe8ff, 0x30343d, 2.2));
+const key = new THREE.DirectionalLight(0xffffff, 2.0); key.position.set(3, 6, 4); scene.add(key);
+const fill = new THREE.DirectionalLight(0xbcd4ff, 0.8); fill.position.set(-4, 2, -3); scene.add(fill);
+const grid = new THREE.GridHelper(10, 40, 0x3a4150, 0x272c36);
+grid.name = 'grid'; scene.add(grid);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+
+function fit(obj) {
+  const box = new THREE.Box3().setFromObject(obj);
+  const size = box.getSize(new THREE.Vector3()), center = box.getCenter(new THREE.Vector3());
+  const r = size.length() || 1;
+  obj.position.sub(center);                       // 居中到原点
+  controls.target.set(0, 0, 0);
+  const d = r * 1.6;
+  camera.position.set(d * 0.62, d * 0.5, d * 0.75);
+  camera.near = r / 1000; camera.far = r * 100; camera.updateProjectionMatrix();
+  const g = scene.getObjectByName('grid');
+  g.scale.setScalar(r); g.position.y = box.min.y - obj.position.y;
+  const hud = document.getElementById('hud');
+  hud.style.display = 'block';
+  hud.innerHTML = `<b>${obj.name}</b><br>包围盒 ${size.x.toFixed(3)} × ${size.y.toFixed(3)} × ${size.z.toFixed(3)}（模型单位，通常为米）<br>三角面 ${(obj.geometry.index ? obj.geometry.index.count : obj.geometry.attributes.position.count) / 3 | 0}`;
+}
+function loadSTL(buffer, name) {
+  const geo = new STLLoader().parse(buffer);
+  geo.computeVertexNormals();
+  const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x8fb7d9, metalness: 0.15, roughness: 0.55 }));
+  mesh.name = name;
+  const old = scene.getObjectByName('model'); if (old) { scene.remove(old); old.geometry.dispose(); }
+  mesh.name = 'model'; scene.add(mesh); fit(mesh);
+  const drop = document.getElementById('drop');
+  drop.style.opacity = '0'; setTimeout(() => drop.style.display = 'none', 400);
+}
+function handle(f) {
+  const r = new FileReader();
+  r.onload = () => loadSTL(r.result, f.name);
+  r.readAsArrayBuffer(f);
+}
+document.querySelector('#pick button').onclick = () => document.getElementById('file').click();
+document.getElementById('file').onchange = e => e.target.files[0] && handle(e.target.files[0]);
+addEventListener('dragover', e => { e.preventDefault(); document.body.classList.add('dragging'); });
+addEventListener('dragleave', e => { if (!e.relatedTarget) document.body.classList.remove('dragging'); });
+addEventListener('drop', e => { e.preventDefault(); document.body.classList.remove('dragging'); const f = e.dataTransfer.files[0]; if (f) handle(f); });
+
+(function loop(){ requestAnimationFrame(loop); controls.update(); renderer.render(scene, camera); })();
+
+// 支持 ?model=<路径> 直接加载（相对本服务根），如 ?model=/livingroom_model.stl
+const q = new URLSearchParams(location.search).get('model');
+if (q) fetch(q).then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+  .then(b => loadSTL(b, q.split('/').pop()))
+  .catch(e => { document.getElementById('hud').style.display='block'; document.getElementById('hud').textContent = '加载失败: ' + q + ' (' + e.message + ')'; });
+</script>
+</body>
+</html>

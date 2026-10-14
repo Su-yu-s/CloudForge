@@ -1,0 +1,10 @@
+{
+  "scene": "plane-cylinder",
+  "points": 65000,
+  "shapes": [
+    {"id": 0, "type": "Plane", "coefficients": [0, 0, 1, 0],
+     "note": "normal n, d: n.p + d = 0"},
+    {"id": 1, "type": "Cylinder", "coefficients": [0.35, 0.35, 0, 0, 0, 1, 0.05],
+     "note": "axis point px py pz, axis ax ay az, radius"}
+  ]
+}

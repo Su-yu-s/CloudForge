@@ -1,0 +1,580 @@
+{
+  "ok": true,
+  "input_point_count": 196133,
+  "shape_count": 38,
+  "inlier_point_sum": 159812,
+  "remaining_count": 36321,
+  "shapes": [
+    {
+      "id": 0,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 31939,
+      "rmse": 0.00349192065,
+      "robust_sigma": 0.00109712955,
+      "soft_score": 0.832670217,
+      "coefficients": [
+        0.00470802654,
+        0.999829531,
+        0.0178526994,
+        -2.43988943
+      ]
+    },
+    {
+      "id": 1,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 43507,
+      "rmse": 0.0114681994,
+      "robust_sigma": 0.00357124784,
+      "soft_score": 0.792321833,
+      "coefficients": [
+        0.292091697,
+        -0.0180480778,
+        0.956220031,
+        -2.37711167
+      ]
+    },
+    {
+      "id": 2,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 14113,
+      "rmse": 0.0088372744,
+      "robust_sigma": 0.00458629425,
+      "soft_score": 0.84658208,
+      "coefficients": [
+        0.283056259,
+        -0.00985458959,
+        0.959052682,
+        -2.47821593
+      ]
+    },
+    {
+      "id": 3,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 5452,
+      "rmse": 0.0150097054,
+      "robust_sigma": 0.00200327417,
+      "soft_score": 0.805224198,
+      "coefficients": [
+        0.0270692892,
+        0.999120295,
+        0.0320290513,
+        -2.48071265
+      ]
+    },
+    {
+      "id": 4,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 7857,
+      "rmse": 0.00370500685,
+      "robust_sigma": 0.00199546112,
+      "soft_score": 0.861025711,
+      "coefficients": [
+        0.968637049,
+        -0.00221681199,
+        -0.248470053,
+        -0.219795182
+      ]
+    },
+    {
+      "id": 5,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 6866,
+      "rmse": 0.00200678551,
+      "robust_sigma": 0.00042898208,
+      "soft_score": 0.79413221,
+      "coefficients": [
+        0.00576149719,
+        0.999791622,
+        0.0195844974,
+        -1.94710839
+      ]
+    },
+    {
+      "id": 6,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 4665,
+      "rmse": 0.00159226941,
+      "robust_sigma": 0.000796364901,
+      "soft_score": 0.851373518,
+      "coefficients": [
+        -0.00246031233,
+        0.99959904,
+        0.0282093342,
+        -2.43235636
+      ]
+    },
+    {
+      "id": 7,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 4485,
+      "rmse": 0.00200023429,
+      "robust_sigma": 0.000387535341,
+      "soft_score": 0.835843792,
+      "coefficients": [
+        0.961800218,
+        0.0110076349,
+        -0.27353102,
+        -2.47954774
+      ]
+    },
+    {
+      "id": 8,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 5154,
+      "rmse": 0.00880218676,
+      "robust_sigma": 0.00234794919,
+      "soft_score": 0.753419355,
+      "coefficients": [
+        0.281820506,
+        -0.00859404914,
+        0.959428668,
+        -1.85189569
+      ]
+    },
+    {
+      "id": 9,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 2643,
+      "rmse": 0.00696725335,
+      "robust_sigma": 0.00389423572,
+      "soft_score": 0.860904702,
+      "coefficients": [
+        -0.109568715,
+        0.698703229,
+        0.706971347,
+        -2.1240921
+      ]
+    },
+    {
+      "id": 10,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 2592,
+      "rmse": 0.00467624816,
+      "robust_sigma": 0.00269324288,
+      "soft_score": 0.87218363,
+      "coefficients": [
+        0.042162057,
+        0.966666639,
+        -0.252543002,
+        -1.79753232
+      ]
+    },
+    {
+      "id": 11,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 1954,
+      "rmse": 0.00400685445,
+      "robust_sigma": 0.00189430053,
+      "soft_score": 0.864188242,
+      "coefficients": [
+        -0.320601016,
+        0.00396988261,
+        0.94720602,
+        -0.790076613
+      ]
+    },
+    {
+      "id": 12,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 1770,
+      "rmse": 0.00234596341,
+      "robust_sigma": 0.000573068131,
+      "soft_score": 0.830664915,
+      "coefficients": [
+        0.248207405,
+        -0.0241291393,
+        0.968406379,
+        -1.34728098
+      ]
+    },
+    {
+      "id": 13,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 2489,
+      "rmse": 0.00685990051,
+      "robust_sigma": 0.0036755273,
+      "soft_score": 0.855429374,
+      "coefficients": [
+        -0.155640453,
+        0.0342982747,
+        0.987218142,
+        -1.22196436
+      ]
+    },
+    {
+      "id": 14,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 1560,
+      "rmse": 0.00728121674,
+      "robust_sigma": 0.00318731321,
+      "soft_score": 0.825431039,
+      "coefficients": [
+        -0.0142371925,
+        -0.954203606,
+        0.298818946,
+        1.75420046
+      ]
+    },
+    {
+      "id": 15,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 1454,
+      "rmse": 0.00504221066,
+      "robust_sigma": 0.00221822601,
+      "soft_score": 0.844010994,
+      "coefficients": [
+        0.956463933,
+        0.00469941739,
+        -0.291812807,
+        -1.17628407
+      ]
+    },
+    {
+      "id": 16,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 1334,
+      "rmse": 0.00272806528,
+      "robust_sigma": 0.00164264069,
+      "soft_score": 0.874551073,
+      "coefficients": [
+        -0.0330006965,
+        0.97140801,
+        0.235111535,
+        -2.20937896
+      ]
+    },
+    {
+      "id": 17,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 1425,
+      "rmse": 0.00205171488,
+      "robust_sigma": 0.00101578192,
+      "soft_score": 0.846144563,
+      "coefficients": [
+        -0.190876737,
+        -0.00904058944,
+        0.98157239,
+        -1.12893403
+      ]
+    },
+    {
+      "id": 18,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 2318,
+      "rmse": 0.00576873289,
+      "robust_sigma": 0.00282556172,
+      "soft_score": 0.835132233,
+      "coefficients": [
+        0.972014368,
+        0.00614472665,
+        -0.234840989,
+        -1.29887211
+      ]
+    },
+    {
+      "id": 19,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 1132,
+      "rmse": 0.00204241116,
+      "robust_sigma": 0.000412985161,
+      "soft_score": 0.811907862,
+      "coefficients": [
+        0.963173151,
+        0.00736519741,
+        -0.268780977,
+        -1.11881602
+      ]
+    },
+    {
+      "id": 20,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 1433,
+      "rmse": 0.0122206933,
+      "robust_sigma": 0.0039908376,
+      "soft_score": 0.824261606,
+      "coefficients": [
+        0.309857875,
+        0.0315409824,
+        0.950259566,
+        -2.50836921
+      ]
+    },
+    {
+      "id": 21,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 958,
+      "rmse": 0.00407348513,
+      "robust_sigma": 0.0018829088,
+      "soft_score": 0.86290135,
+      "coefficients": [
+        -0.106839851,
+        0.0577808507,
+        -0.992595911,
+        1.93738317
+      ]
+    },
+    {
+      "id": 22,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 1053,
+      "rmse": 0.0032292763,
+      "robust_sigma": 0.00205140977,
+      "soft_score": 0.887736017,
+      "coefficients": [
+        -0.960672319,
+        -0.00997207686,
+        -0.277505398,
+        1.88172364
+      ]
+    },
+    {
+      "id": 23,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 1246,
+      "rmse": 0.00192079102,
+      "robust_sigma": 0.00110393637,
+      "soft_score": 0.867012963,
+      "coefficients": [
+        0.980115652,
+        0.0079722181,
+        0.198266834,
+        -1.8998946
+      ]
+    },
+    {
+      "id": 24,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 915,
+      "rmse": 0.00422405092,
+      "robust_sigma": 0.00171996133,
+      "soft_score": 0.843681999,
+      "coefficients": [
+        -0.088499032,
+        -0.955852449,
+        -0.280203462,
+        2.86339855
+      ]
+    },
+    {
+      "id": 25,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 862,
+      "rmse": 0.00119052323,
+      "robust_sigma": 0.000600054189,
+      "soft_score": 0.828951064,
+      "coefficients": [
+        0.958332717,
+        -0.00752242934,
+        0.285555303,
+        -1.69772625
+      ]
+    },
+    {
+      "id": 26,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 842,
+      "rmse": 0.00427694531,
+      "robust_sigma": 0.00151821784,
+      "soft_score": 0.861607908,
+      "coefficients": [
+        -0.709144711,
+        0.00494448561,
+        -0.70504564,
+        2.48085904
+      ]
+    },
+    {
+      "id": 27,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 932,
+      "rmse": 0.00416016103,
+      "robust_sigma": 0.00189595008,
+      "soft_score": 0.846539034,
+      "coefficients": [
+        -0.335551769,
+        -0.0364406332,
+        0.941316664,
+        -0.990317523
+      ]
+    },
+    {
+      "id": 28,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 816,
+      "rmse": 0.00369764292,
+      "robust_sigma": 0.00179324908,
+      "soft_score": 0.86259558,
+      "coefficients": [
+        0.620126426,
+        0.0194387287,
+        -0.784260988,
+        0.17371951
+      ]
+    },
+    {
+      "id": 29,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 644,
+      "rmse": 0.00387785982,
+      "robust_sigma": 0.00214840781,
+      "soft_score": 0.847853709,
+      "coefficients": [
+        0.144619942,
+        -0.0245599411,
+        0.989182413,
+        -1.80046177
+      ]
+    },
+    {
+      "id": 30,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 763,
+      "rmse": 0.00121142281,
+      "robust_sigma": 0.00068361317,
+      "soft_score": 0.853760521,
+      "coefficients": [
+        0.87537688,
+        -0.0103846565,
+        0.483329594,
+        -1.69403291
+      ]
+    },
+    {
+      "id": 31,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 629,
+      "rmse": 0.00273738682,
+      "robust_sigma": 0.000903217816,
+      "soft_score": 0.841001927,
+      "coefficients": [
+        0.988696516,
+        -0.0233892538,
+        0.148095086,
+        -2.02170539
+      ]
+    },
+    {
+      "id": 32,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 610,
+      "rmse": 0.000952788813,
+      "robust_sigma": 0.000486781975,
+      "soft_score": 0.845574018,
+      "coefficients": [
+        0.14959465,
+        -0.355237424,
+        -0.922728479,
+        1.20629513
+      ]
+    },
+    {
+      "id": 33,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 882,
+      "rmse": 0.0169904833,
+      "robust_sigma": 0.00179890246,
+      "soft_score": 0.716800435,
+      "coefficients": [
+        -0.987389982,
+        -0.000785145385,
+        -0.158304632,
+        2.33641744
+      ]
+    },
+    {
+      "id": 34,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 564,
+      "rmse": 0.00517974827,
+      "robust_sigma": 0.00154865996,
+      "soft_score": 0.789317025,
+      "coefficients": [
+        -0.495878041,
+        -0.0442486331,
+        0.867264092,
+        -0.655976653
+      ]
+    },
+    {
+      "id": 35,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 563,
+      "rmse": 0.00140098744,
+      "robust_sigma": 0.000552870627,
+      "soft_score": 0.830403789,
+      "coefficients": [
+        -0.167522535,
+        0.808827281,
+        -0.563679516,
+        -0.806031585
+      ]
+    },
+    {
+      "id": 36,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 536,
+      "rmse": 0.00316666977,
+      "robust_sigma": 0.000824576098,
+      "soft_score": 0.749371882,
+      "coefficients": [
+        -0.0618222468,
+        0.97842437,
+        -0.197139084,
+        -1.03071272
+      ]
+    },
+    {
+      "id": 37,
+      "type": "Plane",
+      "type_id": 0,
+      "inlier_count": 855,
+      "rmse": 0.0080825356,
+      "robust_sigma": 0.00350212341,
+      "soft_score": 0.823529412,
+      "coefficients": [
+        0.201897874,
+        0.0398649834,
+        0.978594899,
+        -2.48135114
+      ]
+    }
+  ],
+  "source_cloud": "E:\\yuntao\\data\\livingroom1-fragments-ply\\cloud_bin_0.ply"
+}

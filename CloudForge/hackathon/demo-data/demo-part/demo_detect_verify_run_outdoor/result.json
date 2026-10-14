@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "input_point_count": 65000,
+  "shape_count": 2,
+  "inlier_point_sum": 45042,
+  "remaining_count": 19958,
+  "shapes": [
+    {"id": 0, "type": "Plane", "type_id": 0, "inlier_count": 34917, "rmse": 0.00192696078, "robust_sigma": 0.00114580052, "soft_score": 0.871589687, "coefficients": [0.000120619741, 1.65820475e-05, 1, -3.26467089e-05]},
+    {"id": 1, "type": "Plane", "type_id": 0, "inlier_count": 10125, "rmse": 0.00204089435, "robust_sigma": 0.00121010255, "soft_score": 0.871830824, "coefficients": [-5.42497801e-05, -5.15228749e-05, 1, 1.83660813e-05]}
+  ]
+}

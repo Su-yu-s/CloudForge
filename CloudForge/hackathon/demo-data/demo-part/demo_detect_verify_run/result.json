@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "input_point_count": 65000,
+  "shape_count": 5,
+  "inlier_point_sum": 59957,
+  "remaining_count": 5043,
+  "shapes": [
+    {"id": 0, "type": "Plane", "type_id": 0, "inlier_count": 40168, "rmse": 0.0019365479, "robust_sigma": 0.00114869859, "soft_score": 0.871204767, "coefficients": [0.000100961304, -1.93781616e-05, 1, -1.64938501e-05]},
+    {"id": 1, "type": "Cone", "type_id": 3, "inlier_count": 8964, "rmse": 0.00198432886, "robust_sigma": 0.0012008449, "soft_score": 0.875171929, "coefficients": [0.361346036, 0.354617119, -7.40893507, -0.00150746154, -0.000613859156, 0.999998689, 0.00666347099]},
+    {"id": 2, "type": "Plane", "type_id": 0, "inlier_count": 7359, "rmse": 0.00217716715, "robust_sigma": 0.00128003875, "soft_score": 0.870773836, "coefficients": [5.09309211e-05, 0.000129882974, 1, -9.97498209e-05]},
+    {"id": 3, "type": "Plane", "type_id": 0, "inlier_count": 161, "rmse": 0.00215389668, "robust_sigma": 0.0013883423, "soft_score": 0.888456965, "coefficients": [0.0274280049, -0.00518115424, 0.999610364, -0.000631020754]},
+    {"id": 4, "type": "Cone", "type_id": 3, "inlier_count": 3305, "rmse": 0.00202538505, "robust_sigma": 0.00119254143, "soft_score": 0.871429248, "coefficients": [0.357448071, 0.352653742, 6.54821777, -0.0011628574, -0.000412881636, -0.999999225, 0.00774683617]}
+  ]
+}

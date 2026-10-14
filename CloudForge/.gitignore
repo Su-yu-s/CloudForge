@@ -1,0 +1,37 @@
+# 依赖与构建产物（可一键重建，不入库）
+node_modules/
+dist/
+src-tauri/target/
+src-tauri/gen/
+hackathon/cli/build/
+*.log
+__pycache__/
+*.pyc
+*.pyo
+
+# 本地配置与临时产物
+.claude/
+.agh-home/
+hackathon/.test-run/
+.vite/
+*.bak
+*.bak-*
+
+# 第三方研究许可代码：仅授权研究用途、未授予再分发权利，故不随本仓库分发。
+# 获取方式见 src-tauri/cpp/third_party/README.md
+src-tauri/cpp/third_party/ransac_sd/
+.playwright-mcp/
+.playwright-mcp/
+outputs/
+.playwright-mcp/
+*.step
+*.stl
+demo.pcd
+demo.truth.json
+demo_detect/
+
+# �����������ʱ����� hackathon/panel-preview �� AGH ��尴�����ɣ��ɸ��֣�
+hackathon/demo-data/**/preview.stl
+hackathon/demo-data/**/preview.stl.json
+.playwright-mcp/
+.venv-cad/

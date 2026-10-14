@@ -1,0 +1,45 @@
+/* ============================================================
+ * Glass UI 设计令牌 —— 见 DESIGN.md §2
+ * 组件只允许引用令牌，禁止硬编码颜色
+ * ============================================================ */
+
+:root {
+  /* 色彩（§2.1，全局冷白调） */
+  --canvas: #f5f6f8;                 /* 画布：冷白 */
+  --ink: #1d1d1f;                    /* 主文字 */
+  --ink-2: rgba(29, 29, 31, 0.74);   /* 次级文字（加深保证清晰） */
+  --ink-3: rgba(29, 29, 31, 0.5);    /* 弱化文字/占位 */
+  --accent: #1d1d1f;                 /* 强调/主操作：深炭黑（纯色，不用渐变） */
+  --accent-hover: #33363a;
+  --accent-2: #6e6e73;               /* 次强调：中性灰 */
+  --ok: #34c759;                     /* 语义·成功 */
+  --warn: #ff9500;                   /* 语义·警示 */
+  --danger: #ff3b30;                 /* 语义·危险 */
+  --glass: rgba(255, 255, 255, 0.86);   /* 玻璃面（提高不透明度保文字对比度） */
+  --glass-2: rgba(255, 255, 255, 0.74); /* 玻璃薄面 */
+  --glass-hi: rgba(255, 255, 255, 0.9); /* 玻璃高光 */
+  --hairline: rgba(29, 29, 31, 0.08);   /* 发丝线 */
+  --shade: rgba(29, 29, 31, 0.045);     /* 沉降面（凹） */
+  --focus-ring: rgba(0, 122, 255, 0.28);/* 输入框蓝色 focus ring */
+
+  /* 几何（§2.2） */
+  --r-xl: 28px;
+  --r-lg: 22px;
+  --r-md: 14px;
+  --r-sm: 10px;
+  --win-r: 12px;
+
+  /* 动效 */
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --shadow: 0 18px 50px -12px rgba(0, 0, 0, 0.18), 0 4px 14px -6px rgba(0, 0, 0, 0.08);
+  --shadow-soft: 0 8px 24px -10px rgba(0, 0, 0, 0.14), 0 2px 8px -4px rgba(0, 0, 0, 0.06);
+
+  /* 字体栈（§2.2）：跨平台 + 中文回退 */
+  --font:
+    "SF Pro Text", "Segoe UI Variable Text", "Segoe UI",
+    "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei",
+    system-ui, sans-serif;
+  --font-mono:
+    "SF Mono", "Cascadia Code", "Consolas",
+    "PingFang SC", "Microsoft YaHei UI", monospace;
+}

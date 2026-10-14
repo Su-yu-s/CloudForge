@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "file": "E:\\C++\\Point\\data\\livingroom1-fragments-ply\\cloud_bin_0.ply",
+  "format": "ply",
+  "points": 196133,
+  "centered": false,
+  "txt_stream_downsampled": false,
+  "bbox_min": [0.55859375, 0.83203125, 0.566637158],
+  "bbox_max": [3.96608973, 2.42747617, 2.55859375],
+  "span": 3.40749598
+}

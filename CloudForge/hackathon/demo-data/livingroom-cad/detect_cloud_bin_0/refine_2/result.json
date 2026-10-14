@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "source_cloud": "E:\\C++\\Point\\data\\livingroom1-fragments-ply\\cloud_bin_0.ply",
+  "input_point_count": 196133,
+  "shape_count": 1,
+  "inlier_point_sum": 6838,
+  "remaining_count": 4,
+  "shapes": [
+    {"id": 0, "type": "Plane", "type_id": 0, "inlier_count": 6838, "rmse": 0.00188422292, "robust_sigma": 0.00042410876, "soft_score": 0.795401315, "coefficients": [0.00576902227, 0.999791503, 0.0195868313, -1.94713473]}
+  ]
+}

@@ -1,0 +1,74 @@
+# ============================================================
+# 链接 / 缓存层：内部 junction 全部指向 agnes-harness，
+# 提交会造成上万重复文件，且在其他机器克隆后链接失效，故不入库。
+# ============================================================
+/.workbuddy/
+/.pnpm-store/
+
+# 误建的空嵌套仓库（仅含 .git 模板，无实际内容）
+/yuntao/
+
+# ---------------- Node 依赖与前端构建产物 ----------------
+**/node_modules/
+**/dist/
+**/.vite/
+*.tsbuildinfo
+
+# ---------------- Rust / Tauri 构建产物 ----------------
+**/target/
+
+# ---------------- Python 虚拟环境与缓存 ----------------
+**/.venv*/
+**/venv/
+**/__pycache__/
+*.py[cod]
+
+# ---------------- C++ / CMake 构建目录 ----------------
+CloudForge/hackathon/cli/build/
+**/cmake-build-*/
+**/CMakeFiles/
+
+# 第三方研究许可代码（"research purposes only"，未授予再分发权利）
+# 获取方式见 CloudForge/src-tauri/cpp/third_party/README.md
+CloudForge/src-tauri/cpp/third_party/ransac_sd/
+
+# ---------------- 日志 / 系统 / IDE 临时文件 ----------------
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+*.bak
+*.bak-*
+
+# Publication hygiene: personal state and generated submission archives
+**/.workbuddy/
+**/.pnpm-store/
+**/.agh-home/
+**/.agnes/
+**/.agnes-tmp/
+**/.agnes-scratch/
+**/.test-run/
+**/.claude/
+**/.cursor/
+**/.playwright-mcp/
+**/.superpowers/
+**/.worktrees/
+**/.codegraph/
+**/.agh/*
+!CloudForge/.agh/skills/
+CloudForge/.agh/skills/*
+!CloudForge/.agh/skills/cloud-casting/
+/CloudForge/outputs/
+/agnes-harness/outputs/
+/agnes-harness/scripts-tmp/
+/agnes-harness/learn/
+/agnes-harness/spikes/
+/agnes-harness/docs/task-records/
+/*.zip
+/*.zip.part
+/*.7z
+/上传包校验值-*
+/压缩包校验值-*
+.env
+.env.local
+.env.production

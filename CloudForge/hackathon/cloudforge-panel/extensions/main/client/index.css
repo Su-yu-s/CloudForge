@@ -1,0 +1,1410 @@
+/* CloudForge 控制台 · 面板样式（AGH 浅色设计系统）
+ *
+ * 变量全部收敛在 .cf-panel 作用域内：AGH 自己也用 --agnes-* 系列，
+ * 写 :root 会与宿主撞名并污染整页。
+ * CSS 通过 agnes.client.json 的 styles 走 <link> 同源加载——
+ * CSP 是 style-src 'self'（无 'unsafe-inline'），<style> 内联会被拒，
+ * element.style 内联属性不受 CSP 管辖（动态值仍走那里）。
+ * 面板几何**逐项对齐宿主右栏**（inset / width / 圆角 / 阴影），颜色**复用宿主语义 token**，
+ * 因此宿主的明暗主题（.dark 类）会自动跟随，不需要在本文件里再写一套色板。
+ * 高度由 inset 的上下边决定，没有 JS 高度链——写 element.style 会被 CSP 拦（见 §6）。
+ */
+
+.cf-host {
+  display: contents;
+}
+
+.cf-panel {
+  /* ---- 颜色：直接复用宿主语义 token（packages/web/public/style.css :root 定义了 62 个）
+   * 这样明暗主题自动跟随宿主（宿主用 .dark 类切换），不需要自己再写一套色板，
+   * 也不会出现「面板浅色 + 宿主深色」的割裂。所有 var() 都带 fallback，
+   * 万一宿主将来改名也不会把面板变成无色。 */
+  --cf-bg-panel: var(--agnes-bg-surface, #fff);
+  --cf-bg-card: var(--agnes-bg-card, #fff);
+  --cf-bg-elev: var(--agnes-bg-page, #f7f7f8);
+  --cf-bg-hover: var(--agnes-bg-hover, #f0f1f3);
+  --cf-bg-active: var(--agnes-bg-selected, #e8eefc);
+  --cf-border: var(--agnes-line-primary, #e5e5e5);
+  --cf-border-soft: var(--agnes-line-primary, #ededed);
+  --cf-text: var(--agnes-text-primary, #18181b);
+  --cf-text-dim: var(--agnes-text-secondary, #52525b);
+  --cf-text-mute: var(--agnes-text-tertiary, #a1a1aa);
+  --cf-accent: var(--agnes-brand-primary, #2563eb);
+  --cf-accent-soft: var(--agnes-brand-emphasis-soft, #eff6ff);
+  --cf-green: var(--agnes-status-success-text, #16a34a);
+  --cf-green-bg: var(--agnes-status-success-bg, #f0fdf4);
+  --cf-green-border: var(--agnes-status-success-bg, #bbf7d0);
+  --cf-warn: var(--agnes-status-warning-text, #d97706);
+  --cf-warn-bg: var(--agnes-status-warning-bg, #fffbeb);
+  --cf-err: var(--agnes-status-danger-text, #dc2626);
+  /* 紫色是**数据色**（几何叠加网格的图例项），不是 UI 强调色，故保留 */
+  --cf-purple: #7c3aed;
+  --cf-dark-btn: var(--agnes-text-primary, #18181b);
+
+  /* ---- 圆角尺度（全面板只用这三档，混用圆角是"看起来不专业"的主因）：
+   * 外卡 = 1rem（与宿主 rightbar 一致）/ 内卡 = 10px / 控件 = 7px */
+  --cf-radius: 10px;
+  --cf-radius-sm: 7px;
+
+  /* ---- 几何：**停靠成一列**，不再往宿主右栏上盖浮层。
+   *
+   * 宿主事实（实测 + style.css）：
+   *   [data-agnes-region="app"] 的 grid 只有两列 → grid-template-columns: 288px 1fr，
+   *   分别是 [data-agnes-region="sidebar"] 和 #main-content；
+   *   宿主自己的右栏**不在 grid 里**，它是 position:fixed 的浮层。
+   * 也就是说宿主没有"第三列"这个概念，右栏天生就是覆盖式的。
+   *
+   * 但我们的挂载点（data-agnes-slot-mount="workbench.panel"）正好是 #main-content 的
+   * **最后一个子元素**，而 #main-content 是 flex column——所以不需要搬动任何宿主 DOM，
+   * 只要把这个挂载点变成绝对定位的右侧一列，再给宿主自己的内容让出同样宽度：
+   *   会话是真的缩窄（像左侧栏），而不是被我们的卡片压在下面。
+   * 折叠态用 :has() 读我们面板自己的 data-rail，纯 CSS 完成，不写 inline style（CSP）。 */
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  box-sizing: border-box;
+  border: 0;
+  /* 只留一条左边线：停靠列贴满上/下/右边缘，观感与左侧栏一致（左侧栏也是满高、无圆角） */
+  border-left: 1px solid var(--cf-border);
+  border-radius: 0;
+  background: var(--cf-bg-panel);
+  box-shadow: none;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  color: var(--cf-text);
+  font: 13px/1.5 var(--font-sans, -apple-system), BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+/* ---------------- 停靠列的宽度与让位（作用在宿主容器上） ----------------
+ * 默认 32rem（512px）：原先跟着宿主右栏的 26rem/416px，对点云视口太窄。
+ * 上限 46vw——保证会话区在任何窗口下都不会被挤到没法读。
+ * 可拖拽加宽：面板左缘的把手每档 +48px，写成 data-w="0..7"，由下面 8 条规则落地。
+ * 为什么不用 setProperty('--w') 直接写宽度：那是 inline style，宿主 CSP 会拦（见 §6）。 */
+#main-content {
+  position: relative;
+  --cf-dock-reserve: min(32rem, 46vw);
+}
+#main-content:has(> [data-agnes-slot-mount='workbench.panel'] .cf-panel[data-w='1']) {
+  --cf-dock-reserve: min(35rem, 46vw);
+}
+#main-content:has(> [data-agnes-slot-mount='workbench.panel'] .cf-panel[data-w='2']) {
+  --cf-dock-reserve: min(38rem, 46vw);
+}
+#main-content:has(> [data-agnes-slot-mount='workbench.panel'] .cf-panel[data-w='3']) {
+  --cf-dock-reserve: min(41rem, 46vw);
+}
+#main-content:has(> [data-agnes-slot-mount='workbench.panel'] .cf-panel[data-w='4']) {
+  --cf-dock-reserve: min(44rem, 46vw);
+}
+#main-content:has(> [data-agnes-slot-mount='workbench.panel'] .cf-panel[data-w='5']) {
+  --cf-dock-reserve: min(47rem, 46vw);
+}
+#main-content:has(> [data-agnes-slot-mount='workbench.panel'] .cf-panel[data-w='6']) {
+  --cf-dock-reserve: min(50rem, 46vw);
+}
+#main-content:has(> [data-agnes-slot-mount='workbench.panel'] .cf-panel[data-w='7']) {
+  --cf-dock-reserve: min(53rem, 46vw);
+}
+
+/* 我们这一列：脱离文档流贴右缘，宽度跟着 --cf-dock-reserve 走 */
+#main-content > [data-agnes-slot-mount='workbench.panel'] {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: var(--cf-dock-reserve);
+  z-index: 3;
+}
+
+/* 让宿主的内容缩到左边。用 padding 而不是 margin：不改动它的 flex/grid 计算，
+   顶栏、会话区、输入框、审批区各自内部布局都不受影响。 */
+#main-content > *:not([data-agnes-slot-mount='workbench.panel']) {
+  padding-right: var(--cf-dock-reserve);
+  transition: padding-right 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 折叠：轨道 48px，列宽与让位同时收缩（一个变量驱动两处，不会错位） */
+#main-content:has(> [data-agnes-slot-mount='workbench.panel'] .cf-panel[data-rail='1']) {
+  --cf-dock-reserve: 48px;
+}
+
+/* 窄屏不再停靠：会话被挤到没法用。改回覆盖式浮层，靠右 16px、带圆角与阴影。 */
+@media (max-width: 1080px) {
+  #main-content > [data-agnes-slot-mount='workbench.panel'] {
+    position: static;
+    width: auto;
+  }
+  #main-content > *:not([data-agnes-slot-mount='workbench.panel']) {
+    padding-right: 0;
+  }
+  .cf-panel {
+    position: fixed;
+    inset: 4.75rem 1rem 1rem auto;
+    /* 浮层模式下没有可让位的列，宽度回落到按视口算；data-w 各档规则只作用于停靠模式 */
+    width: min(32rem, calc(100vw - 2rem));
+    border: 1px solid var(--cf-border);
+    border-radius: 1rem;
+    box-shadow: 0 0 0 0.5px var(--cf-border), 0 3px 8px rgb(0 0 0 / 4%), 0 0 20px rgb(0 0 0 / 5%);
+  }
+  /* 覆盖式浮层下折叠态保持 44px 独立窄条 */
+  #main-content:has(> [data-agnes-slot-mount='workbench.panel'] .cf-panel[data-rail='1']) {
+    --cf-dock-reserve: auto;
+  }
+  .cf-panel[data-rail='1'] {
+    inset: 4.75rem 1rem 1rem auto;
+    width: 44px;
+  }
+  /* 浮层模式宽度固定，拖拽把手无意义 */
+  .cf-grip {
+    display: none;
+  }
+}
+
+.cf-panel *,
+.cf-panel *::before,
+.cf-panel *::after {
+  box-sizing: border-box;
+}
+
+/* 会话头栏 .conversation-session-header 是 **display:block**，不是 flex
+ * （这点实测确认过），所以 justify-content 写了也不生效——按钮会被顶到行首，
+ * 夹在一行空白里读起来像渲染残留，而不是一个控件。
+ * 不去改宿主的 display（那会影响它自己 4 个 outlet 的排布），只用 float 右对齐，
+ * 这是块级容器里影响面最小的做法。 */
+.conversation-session-header .cf-toggle-fallback {
+  float: right;
+}
+
+/* ---------------- 会话头栏折叠按钮 ----------------
+ * 折叠开关注册在宿主会话头栏的 utilities 槽，外观直接复用宿主 `.icon-button`
+ * （28×28、border-radius 50%、透明底、0.14s 过渡），与「收起导航」那颗逐像素一致。
+ * 下面这条只补宿主没给的属性：万一将来宿主改名/移除 .icon-button，
+ * 按钮至少仍是 28×28 的正圆、可点击、可聚焦，而不会散成一团。 */
+/* ⚠ 兜底类只写宿主 `.icon-button` **没有**声明的属性。早先这里连 color/background/
+ * border 一起写了，结果特异性压过 `.icon-button`，把图标色从 rgb(66,70,86) 改成
+ * rgb(177,177,177)——比不用宿主类还糟。宿主若改名，最多退化成无样式按钮，
+ * 仍可点击、可聚焦、仍有 aria-label。 */
+.icon-button.cf-toggle-fallback {
+  flex: none;
+  cursor: pointer;
+}
+
+/* 列宽拖拽把手：贴左缘一条 8px 的隐形热区，hover/拖拽时才显形。
+ * 折叠态没有宽度可调，隐藏（pointer-events:none 免得挡住轨道上的图标）。 */
+.cf-grip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* .cf-panel 是 overflow:hidden，left:-4px 的外伸部分会被裁掉、
+     命中区只剩一半。改成 -4px 起、12px 宽，落在面板内的可命中条约 8px。 */
+  left: -4px;
+  width: 12px;
+  cursor: col-resize;
+  touch-action: none;
+  background: transparent;
+  border-left: 2px solid transparent;
+  transition: border-color 0.14s ease-out;
+}
+.cf-grip:hover,
+.cf-grip[data-dragging='1'] {
+  border-left-color: var(--cf-accent);
+}
+.cf-panel[data-rail='1'] .cf-grip {
+  display: none;
+}
+
+/* 空态：图标 + 标题 + 提示。空视口里一行灰字太单薄，
+ * 而「这里会有什么 / 现在该做什么」本来就是空态该回答的问题。 */
+.cf-blank {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  min-height: 180px;
+  padding: 24px 28px;
+  text-align: center;
+}
+.cf-blank.hidden {
+  display: none;
+}
+/* 视口内的空态：absolute 铺满画布，不占据文档流（否则把 canvas 顶下去） */
+.cf-viewer > .cf-blank {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.cf-blank-mark {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--cf-text-mute);
+  background: var(--cf-bg-elev);
+  border: 1px solid var(--cf-border-soft);
+  border-radius: 12px;
+}
+.cf-blank-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--cf-text-dim);
+}
+.cf-blank-hint {
+  max-width: 36ch;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--cf-text-mute);
+}
+
+/* 形状行尾的「只看这个」：图标化，避免 43 行重复 43 次 "solo" 文案 */
+.cf-solo {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  color: var(--cf-text-mute);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 0.14s ease-out,
+    background-color 0.14s ease-out,
+    color 0.14s ease-out;
+}
+.cf-row:hover .cf-solo,
+.cf-solo:focus-visible {
+  opacity: 1;
+}
+.cf-solo:hover {
+  color: var(--cf-accent);
+  background: var(--cf-accent-soft);
+}
+@media (hover: none) {
+  .cf-solo {
+    opacity: 1;
+  }
+}
+
+/* ---------------- 交互态 ----------------
+ * 面板里按钮/页签很多，只做 hover 会显得"飘"；补 :active 的按压反馈，
+ * 并把动效统一到 0.16s 附近的小位移——工程工具要的是即时感，不是表演。 */
+.cf-panel button {
+  transition:
+    background-color 0.14s ease,
+    color 0.14s ease,
+    border-color 0.14s ease,
+    transform 0.1s ease;
+}
+.cf-panel button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.cf-panel button:focus-visible,
+.cf-panel select:focus-visible {
+  outline: 2px solid var(--agnes-brand-focus-ring, var(--cf-accent));
+  outline-offset: 1px;
+  border-radius: var(--cf-radius-sm);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cf-panel *,
+  .cf-panel *::before,
+  .cf-panel *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+  #main-content > *:not([data-agnes-slot-mount='workbench.panel']) {
+    transition: none;
+  }
+}
+
+/* ---------------- 头部 ---------------- */
+.cf-head {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding-bottom: 10px;
+}
+.cf-head-text {
+  flex: 1;
+  min-width: 0;
+}
+.cf-head-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cf-head-sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 3px;
+  font-size: 11.5px;
+  color: var(--cf-text-mute);
+}
+.cf-head-status {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cf-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cf-text-mute);
+}
+.cf-dot[data-phase='ready'] {
+  background: var(--cf-green);
+}
+.cf-dot[data-phase='loading'],
+.cf-dot[data-phase='busy'] {
+  background: var(--cf-warn);
+  animation: cf-pulse 1.1s ease-in-out infinite;
+}
+@keyframes cf-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+.cf-select {
+  flex: 1;
+  min-width: 0;
+  height: 26px;
+  font: inherit;
+  font-size: 11.5px;
+  color: var(--cf-text-dim);
+  background: var(--cf-input-surface, var(--cf-bg-card));
+  border: 1px solid var(--agnes-input-border, var(--cf-border));
+  border-radius: var(--cf-radius-sm);
+  padding: 0 6px;
+  cursor: pointer;
+}
+.cf-select:hover {
+  border-color: var(--agnes-input-border-emphasis, var(--cf-border));
+}
+.cf-select:focus-visible {
+  outline: 2px solid var(--agnes-input-border-focus, var(--cf-accent));
+  outline-offset: -1px;
+}
+.cf-select.hidden {
+  display: none;
+}
+/* 场景过滤条：独占一行、整宽。原先它挤在标题行里只有 46% 宽，
+ * 「竣工核验 · 净高 / 开间 / 墙厚 / 平…」这类 preset 名会被截断 */
+.cf-toolbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--cf-border-soft);
+}
+.cf-toolbar.hidden {
+  display: none;
+}
+.cf-icon-btn {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  color: var(--cf-text-mute);
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.cf-icon-btn:hover {
+  background: var(--cf-bg-hover);
+  color: var(--cf-text-dim);
+}
+.cf-icon-btn.sm {
+  width: 22px;
+  height: 22px;
+}
+
+/* ---------------- 页签 ---------------- */
+.cf-tabs {
+  flex: none;
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--cf-border);
+}
+.cf-tab {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px 2px 8px;
+  margin-bottom: -1px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--cf-text-mute);
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cf-tab:hover {
+  color: var(--cf-text-dim);
+}
+.cf-tab.active {
+  color: var(--cf-text);
+  border-bottom-color: var(--cf-text);
+  font-weight: 500;
+}
+
+/* ---------------- 内容区 ---------------- */
+.cf-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  padding-top: 10px;
+}
+.cf-pane {
+  display: none;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+}
+.cf-pane.active {
+  display: flex;
+}
+
+/* 视口：必须 min-height:0，否则 canvas 会被内容撑开 */
+.cf-viewer {
+  position: relative;
+  flex: 1;
+  min-height: 120px;
+  overflow: hidden;
+  /* 径向渐变给视口一点纵深，而不是一块死白；中心亮、边缘沉，视觉焦点自然落在模型上。
+     用 color-mix 跟随宿主主题，暗色模式下自动变深。 */
+  background:
+    radial-gradient(120% 90% at 50% 38%, var(--cf-bg-card) 0%, var(--cf-bg-elev) 78%);
+  border: 1px solid var(--cf-border-soft);
+  border-radius: var(--cf-radius);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 60%);
+}
+.cf-viewer-tag {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  padding: 2px 7px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 10.5px;
+  color: var(--cf-text-dim);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--cf-border);
+  border-radius: 5px;
+  pointer-events: none;
+  max-width: calc(100% - 16px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cf-legend {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 8px;
+  font-size: 10px;
+  color: var(--cf-text-dim);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--cf-border);
+  border-radius: 6px;
+  pointer-events: none;
+}
+.cf-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.cf-swatch {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+/* 色值写在这里而不是 inline style：宿主 CSP 的 style-src 不含 'unsafe-inline' */
+.cf-swatch[data-pal='base'] { background: #56606e; }
+.cf-swatch[data-pal='overlay'] { background: #7c3aed; }
+.cf-swatch[data-pal='remaining'] { background: #808996; }
+.cf-swatch[data-pal='p0'] { background: #e85d5d; }
+.cf-swatch[data-pal='p1'] { background: #5e6ad2; }
+.cf-swatch[data-pal='p2'] { background: #29a9a0; }
+.cf-swatch[data-pal='p3'] { background: #b05ac8; }
+.cf-swatch[data-pal='p4'] { background: #db8e2f; }
+.cf-swatch[data-pal='p5'] { background: #35a66f; }
+.cf-swatch[data-pal='p6'] { background: #74859b; }
+
+.cf-viewer-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 0;
+  flex-wrap: wrap;
+}
+.cf-seg {
+  display: flex;
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius-sm);
+  overflow: hidden;
+}
+.cf-seg-btn {
+  font: inherit;
+  font-size: 11.5px;
+  padding: 3px 9px;
+  color: var(--cf-text-dim);
+  background: var(--cf-bg-card);
+  border: 0;
+  border-right: 1px solid var(--cf-border);
+  cursor: pointer;
+}
+.cf-seg-btn:last-child {
+  border-right: 0;
+}
+.cf-seg-btn.on {
+  color: var(--cf-text);
+  font-weight: 600;
+  background: var(--cf-bg-hover);
+}
+.cf-btn-xs {
+  font: inherit;
+  font-size: 11px;
+  padding: 3px 8px;
+  color: var(--cf-text-dim);
+  background: var(--cf-bg-card);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cf-btn-xs:hover {
+  color: var(--cf-text);
+  border-color: #d4d4d8;
+}
+.cf-btn-xs.on {
+  color: var(--cf-accent);
+  border-color: #c7dbfe;
+  background: var(--cf-accent-soft);
+}
+
+/* 滚动区 */
+.cf-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 2px;
+  /* 底部渐隐：没有它时列表最后一行会被滚动容器拦腰切断，看上去像渲染坏了。
+   * 纯 CSS（mask-image），不依赖脚本，也不影响滚动。 */
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent 100%);
+}
+/* 内容不足一屏时不需要渐隐，否则底部会莫名其妙淡掉 */
+.cf-scroll:not(:hover) {
+  scrollbar-width: thin;
+}
+.cf-picker:empty {
+  display: none;
+}
+.cf-picker {
+  margin-bottom: 6px;
+}
+.cf-picker .cf-select {
+  flex: 1;
+  max-width: none;
+  height: 22px;
+}
+/* 分节标题：安静的标签 + 一条延伸到底的发丝线。
+ * 去掉了原来的 text-transform:uppercase —— 对中文毫无作用，却会把 "AGH" 这类
+ * 拉丁缩写拉成 "A G H"，在中文标题里显得很怪。 */
+.cf-group-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 16px 0 7px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--cf-text-dim);
+}
+.cf-group-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--cf-border-soft);
+}
+.cf-group-title:first-child {
+  margin-top: 0;
+}
+.cf-sub-title {
+  margin: 8px 0 3px;
+  font-size: 11px;
+  color: var(--cf-text-dim);
+}
+
+/* 列表行 */
+.cf-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cf-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* 行高压到 5px + 去掉逐行描边：43 行各自带框会变成一堵"卡片墙"，
+   * 视觉噪音远大于信息量。改成靠 hover / 选中态强调，静止时只靠留白分组。 */
+  padding: 5px 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--cf-radius-sm);
+  cursor: pointer;
+  transition:
+    background-color 0.14s ease-out,
+    border-color 0.14s ease-out;
+}
+.cf-row:hover {
+  background: var(--cf-bg-hover);
+}
+.cf-row.active {
+  background: var(--cf-bg-card);
+  border-color: var(--cf-accent);
+  box-shadow: 0 0 0 2px var(--cf-accent-soft);
+}
+.cf-row.dim {
+  opacity: 0.42;
+}
+.cf-row-main {
+  flex: 1;
+  min-width: 0;
+}
+.cf-row-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--cf-text);
+}
+.cf-row-meta {
+  margin-top: 1px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--cf-text-mute);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cf-badge {
+  padding: 1px 6px;
+  font-size: 10px;
+  border-radius: 8px;
+  color: var(--cf-green);
+  background: var(--cf-green-bg);
+  border: 1px solid var(--cf-green-border);
+}
+.cf-bar {
+  margin-top: 3px;
+  height: 3px;
+  background: var(--cf-bg-elev);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.cf-bar > i {
+  display: block;
+  height: 100%;
+  background: var(--cf-green);
+}
+/* soft_score 每 5% 一档（data-score = round(score*20)）；精确值印在旁边的 meta 行里 */
+.cf-bar > i[data-score='0'] { width: 0; }
+.cf-bar > i[data-score='1'] { width: 5%; }
+.cf-bar > i[data-score='2'] { width: 10%; }
+.cf-bar > i[data-score='3'] { width: 15%; }
+.cf-bar > i[data-score='4'] { width: 20%; }
+.cf-bar > i[data-score='5'] { width: 25%; }
+.cf-bar > i[data-score='6'] { width: 30%; }
+.cf-bar > i[data-score='7'] { width: 35%; }
+.cf-bar > i[data-score='8'] { width: 40%; }
+.cf-bar > i[data-score='9'] { width: 45%; }
+.cf-bar > i[data-score='10'] { width: 50%; }
+.cf-bar > i[data-score='11'] { width: 55%; }
+.cf-bar > i[data-score='12'] { width: 60%; background: var(--cf-warn); }
+.cf-bar > i[data-score='13'] { width: 65%; background: var(--cf-warn); }
+.cf-bar > i[data-score='14'] { width: 70%; background: var(--cf-warn); }
+.cf-bar > i[data-score='15'] { width: 75%; background: var(--cf-warn); }
+.cf-bar > i[data-score='16'] { width: 80%; }
+.cf-bar > i[data-score='17'] { width: 85%; }
+.cf-bar > i[data-score='18'] { width: 90%; }
+.cf-bar > i[data-score='19'] { width: 95%; }
+.cf-bar > i[data-score='20'] { width: 100%; }
+
+.cf-card {
+  padding: 8px 10px;
+  background: var(--cf-bg-card);
+  border: 1px solid var(--cf-border-soft);
+  border-radius: var(--cf-radius);
+}
+.cf-card.active {
+  border-color: var(--cf-accent);
+}
+.cf-card-title {
+  font-size: 12px;
+  color: var(--cf-text);
+  word-break: break-all;
+}
+.cf-card-meta {
+  margin-top: 2px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 10.5px;
+  color: var(--cf-text-mute);
+}
+.cf-btn-row {
+  display: flex;
+  gap: 5px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+/* 键值行 */
+.cf-kv {
+  /* 两列定宽网格。原来是 flex + space-between：标签和值被推到面板两端，
+   * 500px 宽的列中间空一大片，值还容易被右侧切掉。 */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+  align-items: baseline;
+  gap: 12px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--cf-border-soft);
+  font-size: 11.5px;
+  color: var(--cf-text-dim);
+}
+.cf-kv > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cf-kv:last-of-type {
+  border-bottom: 0;
+}
+.cf-kv > span:last-child {
+  max-width: 55%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--cf-text);
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.ok-text {
+  color: var(--cf-green) !important;
+}
+.err-text {
+  color: var(--cf-err) !important;
+}
+
+/* 校验清单 */
+.cf-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  color: var(--cf-text-dim);
+}
+.cf-check.clickable {
+  cursor: pointer;
+}
+.cf-check:hover {
+  background: var(--cf-bg-hover);
+}
+.cf-check-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cf-check-val {
+  flex: none;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 10.5px;
+  color: var(--cf-text-mute);
+  max-width: 52%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cf-dot-ico {
+  flex: none;
+  /* inline-grid 而不是 grid：块级盒子放进 .cf-kv 的第一个 span 里会独占一行，
+     把后面的标签文字挤到下一行（"✓" 一行、"底座 AGH" 另一行）。 */
+  display: inline-grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  vertical-align: -3px;
+  border-radius: 50%;
+  font-size: 9px;
+  font-weight: 700;
+}
+.cf-dot-ico.ok {
+  color: var(--cf-green);
+  background: var(--cf-green-bg);
+  border: 1px solid var(--cf-green-border);
+}
+.cf-dot-ico.err {
+  color: var(--cf-err);
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+/* 鲁棒性热力 */
+/* 鲁棒性 12 格。
+ * 原来每格是**满幅饱和红/绿**：12 个色块铺满整个面板，视觉噪音压过信息本身，
+ * 而且红绿是典型的不可_accessible 配色。现在改成中性底 + 发丝边 + 小状态点，
+ * 只有失败格给一层很淡的 danger 底 + 左侧色条——「哪里失败」依然一眼可见，
+ * 但不再抢走整页的注意力。数字用等宽 + tabular-nums 对齐成列，便于横向比较。 */
+.cf-heat {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.cf-heat-cell {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    'num unit'
+    'num meta'
+    'dot meta';
+  align-items: center;
+  column-gap: 8px;
+  padding: 8px 10px;
+  background: var(--cf-bg-card);
+  border: 1px solid var(--cf-border-soft);
+  border-left: 2px solid var(--cf-border);
+  border-radius: var(--cf-radius-sm);
+  cursor: default;
+  transition: border-color 0.14s ease-out;
+}
+.cf-heat-cell.is-pass {
+  border-left-color: var(--cf-green);
+}
+.cf-heat-cell.is-fail {
+  border-left-color: var(--cf-err);
+  background: var(--cf-err-wash, color-mix(in srgb, var(--cf-err) 5%, var(--cf-bg-card)));
+}
+.cf-heat-num {
+  grid-area: num;
+  align-self: center;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  color: var(--cf-text);
+  line-height: 1.1;
+}
+.cf-heat-cell.is-fail .cf-heat-num {
+  color: var(--cf-err);
+}
+.cf-heat-unit {
+  grid-area: unit;
+  font-size: 10px;
+  color: var(--cf-text-mute);
+  align-self: end;
+  white-space: nowrap;
+}
+.cf-heat-meta {
+  grid-area: meta;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: var(--cf-text-dim);
+  align-self: start;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* 未检出时数值不是数字，弱化处理，避免看起来像"0.00 误差" */
+.cf-heat-cell.is-fail .cf-heat-num {
+  font-size: 12px;
+  color: var(--cf-text-dim);
+}
+
+.cf-note {
+  margin-top: 6px;
+  padding: 6px 8px;
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: var(--cf-text-mute);
+  background: var(--cf-bg-elev);
+  border-radius: var(--cf-radius-sm);
+}
+.cf-empty {
+  padding: 8px 2px;
+  font-size: 11.5px;
+  color: var(--cf-text-mute);
+}
+
+/* 执行链 */
+/* 执行链每一行：时间 / 类型 / 标签 / 备注 四列定宽。
+ * 原来 label 是 flex:none + max-width:42%、detail 吃剩下的 flex:1，
+ * 标签和备注被推到面板两端、右侧备注直接被切掉（截图里"需审批(never"就是断的）。
+ * 改成 grid 后四列纵向对齐，眼睛可以沿一列扫下去，右侧备注也不会溢出。 */
+.cf-chain-row {
+  display: grid;
+  grid-template-columns: 64px 40px minmax(0, 1fr) minmax(0, 34%);
+  align-items: center;
+  gap: 8px;
+  padding: 4px 2px;
+  border-radius: 5px;
+  font-size: 11px;
+  color: var(--cf-text-dim);
+}
+.cf-chain-row + .cf-chain-row {
+  border-top: 1px solid var(--cf-border-soft);
+}
+.cf-chain-time {
+  flex: none;
+  font-size: 9.5px;
+  color: var(--cf-text-mute);
+}
+.cf-chain-kind {
+  flex: none;
+  padding: 0 4px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  border-radius: 3px;
+}
+.cf-chain-kind.call {
+  color: var(--cf-accent);
+  background: var(--cf-accent-soft);
+}
+.cf-chain-kind.verify {
+  color: var(--cf-green);
+  background: var(--cf-green-bg);
+}
+.cf-chain-kind.plan {
+  color: var(--cf-warn);
+  background: var(--cf-warn-bg);
+}
+.cf-chain-label {
+  min-width: 0;
+  max-width: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+.cf-chain-detail {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+  font-size: 10px;
+  color: var(--cf-text-mute);
+  text-align: right;
+}
+
+/* 报告正文 */
+.cf-report {
+  font-size: 11.5px;
+  /* 1.75 在 11.5px 下过于松散，段落之间断得太开，读起来像诗歌不像报告 */
+  line-height: 1.62;
+  color: var(--cf-text-dim);
+  /* 报告里有大量 Windows 路径与长标识符，不换行会把整栏撑破 */
+  overflow-wrap: anywhere;
+}
+.cf-report h3,
+.cf-report h4 {
+  margin: 12px 0 6px;
+  font-size: 12px;
+  color: var(--cf-text);
+  font-weight: 600;
+}
+.cf-report p {
+  margin: 0 0 6px;
+}
+.cf-report ul {
+  margin: 0 0 8px;
+  padding-left: 16px;
+}
+.cf-report code {
+  padding: 0 4px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 10.5px;
+  background: var(--cf-bg-elev);
+  border: 1px solid var(--cf-border-soft);
+  border-radius: 4px;
+}
+.cf-report table {
+  width: 100%;
+  margin: 6px 0 10px;
+  border-collapse: collapse;
+  font-size: 10.5px;
+  /* 报告里那张「主力平面」表有 7 列，500px 的列宽里硬挤会每个字换一行。
+   * display:block + overflow-x 让它横向滚动，至少列还是对齐可读的。 */
+  display: block;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.cf-report th,
+.cf-report td {
+  padding: 3px 5px;
+  border: 1px solid var(--cf-border-soft);
+  text-align: left;
+  vertical-align: top;
+}
+.cf-report th {
+  background: var(--cf-bg-elev);
+  font-weight: 600;
+}
+
+/* ---------------- 底部工具条 ---------------- */
+.cf-foot {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 9px;
+  /* 停靠列满高，footer 是最后一个子元素：不留底部内边距，最后一行会直接压在视口下沿 */
+  padding-bottom: 12px;
+  border-top: 1px solid var(--cf-border-soft);
+}
+.cf-foot-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--cf-text-mute);
+}
+.cf-foot-row .spacer {
+  flex: 1;
+}
+.cf-foot-row .sep {
+  color: var(--cf-border);
+}
+.cf-foot-row .dim {
+  color: var(--cf-text-mute);
+  font-size: 10px;
+}
+.mono {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+/* 载入进度用 <progress> 元素：value/max 是**属性**不是 style，CSP 管不到 */
+progress.cf-progress {
+  display: block;
+  width: 100%;
+  height: 3px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  border-radius: 2px;
+  background: var(--cf-bg-elev);
+  overflow: hidden;
+}
+progress.cf-progress::-webkit-progress-bar {
+  background: var(--cf-bg-elev);
+}
+progress.cf-progress::-webkit-progress-value {
+  background: var(--cf-accent);
+  transition: width 0.4s ease;
+}
+progress.cf-progress::-moz-progress-bar {
+  background: var(--cf-accent);
+}
+
+/* three 的画布：class 而非 inline style（CSP） */
+.cf-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.cf-btn-sm {
+  font: inherit;
+  font-size: 11px;
+  padding: 3px 9px;
+  color: var(--cf-text-dim);
+  background: var(--cf-bg-card);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cf-btn-sm:hover {
+  color: var(--cf-text);
+  border-color: #d4d4d8;
+}
+.cf-btn-sm.primary {
+  color: var(--cf-accent);
+  border-color: #c7dbfe;
+  background: var(--cf-accent-soft);
+}
+.cf-btn-sm:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.cf-msg {
+  min-height: 16px;
+  font-size: 10.5px;
+  color: var(--cf-warn);
+  word-break: break-word;
+}
+.cf-primary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 34px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+  background: var(--cf-dark-btn);
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.cf-primary-btn:hover {
+  background: #000;
+}
+.cf-primary-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ---------------- 轨道折叠 ----------------
+ * 停靠列模式下宽度由 #main-content 的 --cf-dock-reserve 决定（48px），面板自己不再设宽。
+ * 目标：读作一条"停靠工具轨"，而不是一根飘着的白条——
+ *   · 四个页签图标竖排居中（页签按钮本来就带图标，只是把文字标签藏掉，零 JS 改动）
+ *   · 刷新/折叠按钮沉到最底部，用 order + margin-top:auto 实现，不改 DOM 顺序
+ *   · 隐藏工具栏与正文，不留空白块
+ */
+.cf-panel[data-rail='1'] {
+  padding: 0 !important;
+  gap: 6px;
+  align-items: center;
+}
+.cf-panel[data-rail='1'] .cf-head-text,
+.cf-panel[data-rail='1'] .cf-toolbar,
+.cf-panel[data-rail='1'] .cf-content,
+.cf-panel[data-rail='1'] .cf-foot {
+  display: none;
+}
+
+/* 页签图标：竖排、居中、占满中间 */
+.cf-panel[data-rail='1'] .cf-tabs {
+  order: 1;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+  border-bottom: 0;
+}
+.cf-panel[data-rail='1'] .cf-tab {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  border-bottom: 0;
+  border-radius: 9px;
+}
+.cf-panel[data-rail='1'] .cf-tab span {
+  display: none; /* 只留图标；title 属性仍带页签名，悬停可见 */
+}
+.cf-panel[data-rail='1'] .cf-tab.active {
+  background: var(--cf-accent-soft);
+  color: var(--cf-accent);
+}
+
+/* 动作按钮：留在顶部。折叠开关已移到宿主会话头栏，这里通常只剩「刷新」 */
+.cf-panel[data-rail='1'] .cf-head {
+  padding: 0;
+  flex-direction: row;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+}
+.cf-panel[data-rail='1'] .cf-head-sub {
+  display: none;
+}
+.cf-panel[data-rail='1'] .cf-icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+}
+
+/* ---------------- 窄屏紧凑化 ----------------
+ * 宿主卡片宽度 = min(26rem, 100vw - 2rem)，窄窗口下会自然变窄；
+ * 这里只做面板内部的紧凑排布，不改宿主定位。
+ */
+@media (max-width: 380px) {
+  .cf-select {
+    display: none;
+  }
+  .cf-tab span {
+    display: none;
+  }
+  .cf-heat {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .cf-legend {
+    display: none;
+  }
+}
+
+.cf-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.cf-scroll::-webkit-scrollbar-thumb {
+  background: #e4e4e7;
+  border-radius: 4px;
+}
+.cf-scroll::-webkit-scrollbar-thumb:hover {
+  background: #d4d4d8;
+}
+/* ── 「选择点云」状态位 ────────────────────────────────────────
+   原生对话框由服务端 PowerShell 弹出（拿真实磁盘路径），网页侧只负责
+   显示轮询状态。默认隐藏（display:none），开始选择后由 .on 显出，
+   结果停留 30s 后 JS 自动摘掉 .on。宽度有限，长文本 ellipsis 收尾。 */
+.cf-pick-note {
+  display: none;
+  max-width: 38%;
+  overflow: hidden;
+  font-size: 10.5px;
+  color: var(--cf-text-dim);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cf-pick-note.on {
+  display: inline-block;
+}
+
+/* CAD 建模入口：来源和重建范围先于视口，进度独立于底部文件选择状态。 */
+.cf-cad-build {
+  flex: none;
+  display: grid;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--cf-border-soft);
+  border-radius: var(--cf-radius);
+  background: var(--cf-bg-card);
+}
+.cf-cad-build > .hidden {
+  display: none;
+}
+.cf-cad-source {
+  font-size: 11px;
+  color: var(--cf-text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cf-cad-scope {
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: var(--cf-text-mute);
+}
+.cf-cad-job {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--cf-text-dim);
+  word-break: break-word;
+}
+.cf-cad-build .cf-primary-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+/* 点云检测入口：任务状态独立于原生文件选择，空状态控件不占布局。 */
+.cf-cloud-detect {
+  flex: none;
+  display: grid;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--cf-border-soft);
+  border-radius: var(--cf-radius);
+  background: var(--cf-bg-card);
+}
+.cf-cloud-detect > .hidden {
+  display: none;
+}
+.cf-cloud-source {
+  font-size: 11px;
+  color: var(--cf-text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cf-cloud-scope {
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: var(--cf-text-mute);
+}
+.cf-cloud-job {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--cf-text-dim);
+  word-break: break-word;
+}
+
+/* 当前验证的参数单位直接显示在输入旁，采用宿主主题。 */
+.cf-verify-thresholds {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 8px 0;
+}
+.cf-verify-thresholds label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--cf-text-dim);
+}
+.cf-verify-thresholds input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 8px;
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius-sm);
+  background: var(--cf-bg-card);
+  color: var(--cf-text);
+}
+.cf-verify-thresholds input:focus-visible {
+  outline: 2px solid var(--cf-accent);
+  outline-offset: 2px;
+}

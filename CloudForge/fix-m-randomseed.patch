@@ -1,0 +1,20 @@
+diff --git a/CloudForge/src-tauri/cpp/src/schnabel_detector.cpp b/CloudForge/src-tauri/cpp/src/schnabel_detector.cpp
+index 6597541..8333730 100644
+--- a/CloudForge/src-tauri/cpp/src/schnabel_detector.cpp
++++ b/CloudForge/src-tauri/cpp/src/schnabel_detector.cpp
+@@ -167,7 +167,6 @@ std::vector<DetectedShape> SchnabelDetector::detect(const PointCloudT::Ptr& inpu
+     cloud.calcNormals(0.01f * scale);
+ 
+     RansacShapeDetector::Options options;
+-    options.m_randomSeed = params.randomSeed;
+     options.m_epsilon = epsilon;
+     options.m_bitmapEpsilon = bitmapEpsilon;
+     options.m_normalThresh = std::cos(params.maxNormalDevDeg * static_cast<float>(M_PI) / 180.0f);
+@@ -352,7 +351,6 @@ std::vector<DetectedShape> SchnabelDetector::detectFromPoints(const float (*poin
+     cloud.calcNormals(0.01f * scale);
+ 
+     RansacShapeDetector::Options options;
+-    options.m_randomSeed = params.randomSeed;
+     options.m_epsilon = epsilon;
+     options.m_bitmapEpsilon = bitmapEpsilon;
+     options.m_normalThresh = std::cos(params.maxNormalDevDeg * static_cast<float>(M_PI) / 180.0f);

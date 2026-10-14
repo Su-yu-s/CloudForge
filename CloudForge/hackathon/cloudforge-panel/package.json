@@ -1,0 +1,26 @@
+{
+  "name": "cloudforge-panel",
+  "version": "0.2.0",
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build:client": "node tools/build-client.mjs"
+  },
+  "description": "云铸工作台右栏控制台（AGH client module）：点云/CAD/验证/报告四页签，几何叠加与 AGH 执行链留证",
+  "exports": "./extensions/main/index.mjs",
+  "agnes": {
+    "plugins": [
+      {
+        "export": "runtime",
+        "id": "ext:cloudforge/cloudforge-panel",
+        "runtime": "in-process"
+      }
+    ],
+    "clientDescriptors": [
+      {
+        "rowId": "ext:cloudforge/cloudforge-panel",
+        "path": "./extensions/main/agnes.client.json"
+      }
+    ]
+  }
+}

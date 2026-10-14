@@ -1,0 +1,34 @@
+{
+  "client": {
+    "entry": "./client/bundle/index.js",
+    "styles": ["./client/index.css"],
+    "slots": ["workbench.panel", "conversation.session.header.corner"],
+    "slotCatalogVersion": "dsh-client-slots/v1",
+    "publicConfig": {
+      "label": "云铸 · 点云逆向工程控制台"
+    },
+    "services": [
+      "cloudforge.report",
+      "cloudforge.pickcloud",
+      "cloudforge.pickstatus",
+      "cloudforge.cloud",
+      "cloudforge.cloudmeta",
+      "cloudforge.scene",
+      "cloudforge.mesh",
+      "cloudforge.verify",
+      "cloudforge.suite",
+      "cloudforge.trace",
+      "cloudforge.run",
+      "cloudforge.preview",
+      "cloudforge.export",
+      "cloudforge.exportstatus",
+      "cloudforge.cad",
+      "cloudforge.cadstatus",
+      "cloudforge.detect",
+      "cloudforge.detectstatus",
+      "cloudforge.verifyrequest",
+      "cloudforge.verifystatus"
+    ],
+    "projections": []
+  }
+}

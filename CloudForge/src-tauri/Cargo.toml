@@ -1,0 +1,32 @@
+[package]
+name = "cloudforge"
+version = "0.1.0"
+edition = "2021"
+description = "CloudForge — 点云基元识别工作台"
+
+[lib]
+name = "cloudforge_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+cmake = "0.1"
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+chrono = "0.4"
+
+[features]
+# 生产构建必须由 `tauri build` 启用：tauri 的 build.rs 用 `dev = !custom_protocol` 决定
+# 载入内嵌前端还是 devUrl，因此裸 `cargo build --release` 会编出"去连 localhost:5183"的版本。
+custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

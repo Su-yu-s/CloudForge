@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "input_point_count": 65000,
+  "shape_count": 1,
+  "inlier_point_sum": 6702,
+  "remaining_count": 2262,
+  "shapes": [
+    {"id": 0, "type": "Cone", "type_id": 3, "inlier_count": 6702, "rmse": 0.00150173972, "robust_sigma": 0.000963871078, "soft_score": 0.88277294, "coefficients": [0.373668343, 0.34470433, -8.36772537, -0.00279848068, 0.00063870626, 0.999995887, 0.00591380754]}
+  ]
+}
