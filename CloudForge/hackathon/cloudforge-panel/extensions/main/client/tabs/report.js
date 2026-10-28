@@ -178,7 +178,7 @@ export function createReportTab({ ctx, data, state }) {
         state.message = `轨迹读取失败：${String(e.message || e).slice(0, 80)}`
       }
     },
-    renderFooter(foot, { state: st, data: dl, reload }) {
+    renderFooter(foot, { state: st }) {
       const row = el('div', { class: 'cf-foot-row' })
       const t = st.trace
       row.appendChild(el('span', { class: 'mono', text: t?.ok === false ? '无轨迹证据' : `${num(t?.eventCount)} 事件 · ${t?.model ?? '—'}` }))
@@ -202,31 +202,36 @@ export function createReportTab({ ctx, data, state }) {
     }
     btn.disabled = true
     state.message = '正在调用 AGH 官方 export 命令…'
+    state.notify?.()
     try {
       // 两段式：effect 只负责启动（AGH 服务上限 30s），进度用 query 轮询
-      const started = await dl.runEffect('cloudforge.export', { session_id: sid })
+      const started = await data.runEffect('cloudforge.export', { session_id: sid })
       if (!started?.started) {
         state.message = `无法启动导出：${started?.error ?? '未知'}`
+        state.notify?.()
         btn.disabled = false
         return
       }
       const deadline = Date.now() + 180000
       for (;;) {
-        const st = await dl.call('cloudforge.exportstatus', { job: started.job })
+        const st = await data.call('cloudforge.exportstatus', { job: started.job })
         if (st.done) {
           state.message = st.ok
             ? `已导出 ${st.jsonl.split(/[\\/]/).pop()}（${(st.bytes / 1024).toFixed(0)} KB）${st.html ? ' + HTML' : ''}`
             : `导出失败：${(st.stderr || '未知').slice(0, 120)}`
+          state.notify?.()
           break
         }
         if (Date.now() > deadline) {
           state.message = '导出超时，可稍后再试'
+          state.notify?.()
           break
         }
         await new Promise((r) => setTimeout(r, 1200))
       }
     } catch (e) {
       state.message = `导出失败：${String(e.message || e).slice(0, 100)}`
+      state.notify?.()
     }
     btn.disabled = false
   }
@@ -240,8 +245,10 @@ export function createReportTab({ ctx, data, state }) {
         '使用 cloud-casting 流程分析工作区里最新的 CloudForge 检测结果：导出 CAD 到 STEP、执行 verify 并把结论写进报告。',
       )
       state.message = '已发送；本轮结束后面板会自动刷新'
+      state.notify?.()
     } catch (e) {
       state.message = `发送失败：${String(e.message || e).slice(0, 100)}`
+      state.notify?.()
       btn.textContent = label
       btn.disabled = false
       return
