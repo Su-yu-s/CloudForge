@@ -117,30 +117,35 @@ The live run demonstrates:
 
 ## Architecture
 
-```mermaid
-flowchart TB
-  U["Engineer / reviewer"] --> W["AGH Web workbench"]
-  W --> S["cloud-casting Skill"]
-  W --> P["cloudforge-panel<br>point cloud / CAD / verify / report"]
-  W --> T["cloudforge-tools plugin"]
-  T --> CLI["cloudforge-cli.exe"]
-  P --> CLI
-  P --> PY["CadQuery / FreeCAD"]
-  CLI --> CORE["C++ geometry core"]
-  CORE --> R["qRANSAC_SD detection"]
-  CORE --> F["Robust refiner"]
-  CORE --> CAD["CadQuery script export"]
-  T --> TR["AGH approvals + execution trail"]
-  P --> TR
-```
+The vertical diagram keeps the workbench, the three layers, and the deliverables readable on narrow screens; paths and responsibilities follow below.
+
+<p align="center">
+  <img src="docs/assets/cloudforge-architecture.en.svg" alt="CloudForge three-layer architecture: engineer → AGH Web workbench → agent orchestration → tool and CLI integration → geometry core → parameters / CAD / verification report" width="420" />
+</p>
 
 ### Three layers
 
-| Layer | Main paths | Responsibility |
-| --- | --- | --- |
-| **Agent orchestration** | `agnes-harness/`, `CloudForge/.agh/skills/cloud-casting/` | Sessions, planning, approvals, tool governance, Skills, execution records |
-| **Tool and CLI integration** | `CloudForge/hackathon/cloudforge-tools/`, `CloudForge/hackathon/cli/`, `CloudForge/hackathon/cloudforge-panel/` | Seven AGH tools, a JSON CLI, and the four-tab workbench panel |
-| **Geometry core** | `CloudForge/src-tauri/cpp/`, `CloudForge/src-tauri/src/` | qRANSAC_SD detection, robust refinement, C ABI/FFI, Tauri commands, desktop UI |
+**① Agent orchestration**
+
+- Paths:
+  - `agnes-harness/`
+  - `CloudForge/.agh/skills/cloud-casting/`
+- Responsibility: sessions, planning, approvals, tool governance, Skills, execution records
+
+**② Tool and CLI integration**
+
+- Paths:
+  - `CloudForge/hackathon/cloudforge-tools/`
+  - `CloudForge/hackathon/cli/`
+  - `CloudForge/hackathon/cloudforge-panel/`
+- Responsibility: seven AGH tools, a JSON CLI, and the four-tab workbench panel
+
+**③ Geometry core**
+
+- Paths:
+  - `CloudForge/src-tauri/cpp/`
+  - `CloudForge/src-tauri/src/`
+- Responsibility: qRANSAC_SD detection, robust refinement, C ABI/FFI, Tauri commands, desktop UI
 
 `agnes-harness/` is a vendored copy of the upstream Agnes Harness source with the project's Windows fixes. Build this copy rather than checking out an older upstream revision.
 

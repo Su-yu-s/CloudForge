@@ -117,30 +117,35 @@ B 站上传版本是正式流媒体版本；仓库内提供 720p 预览，72.8 M
 
 ## 架构介绍（Architecture）
 
-```mermaid
-flowchart TB
-  U["工程师 / 评审"] --> W["AGH Web 工作台"]
-  W --> S["cloud-casting Skill"]
-  W --> P["cloudforge-panel<br>点云 / CAD / 验证 / 报告"]
-  W --> T["cloudforge-tools 插件"]
-  T --> CLI["cloudforge-cli.exe"]
-  P --> CLI
-  P --> PY["CadQuery / FreeCAD"]
-  CLI --> CORE["C++ 几何核心"]
-  CORE --> R["qRANSAC_SD 检测"]
-  CORE --> F["鲁棒精拟合"]
-  CORE --> CAD["CadQuery 脚本导出"]
-  T --> TR["AGH 审批 + 执行轨迹"]
-  P --> TR
-```
+下图按纵向链路展示工作台、三层组件与最终交付物，窄屏也能完整显示；具体路径与职责见下方。
+
+<p align="center">
+  <img src="docs/assets/cloudforge-architecture.zh.svg" alt="CloudForge 三层架构：工程师 → AGH Web 工作台 → 智能体编排层 → 工具与 CLI 集成层 → 几何核心层 → 参数 / CAD / 验证报告" width="420" />
+</p>
 
 ### 三层结构
 
-| 层级 | 主要路径 | 职责 |
-| --- | --- | --- |
-| **智能体编排层** | `agnes-harness/`、`CloudForge/.agh/skills/cloud-casting/` | 会话、规划、审批、工具治理、Skill、执行记录 |
-| **工具与 CLI 集成层** | `CloudForge/hackathon/cloudforge-tools/`、`CloudForge/hackathon/cli/`、`CloudForge/hackathon/cloudforge-panel/` | 七个 AGH 工具、JSON CLI、四页签工作台面板 |
-| **几何核心层** | `CloudForge/src-tauri/cpp/`、`CloudForge/src-tauri/src/` | qRANSAC_SD 检测、鲁棒精拟合、C ABI/FFI、Tauri 命令、桌面端 UI |
+**① 智能体编排层**
+
+- 路径：
+  - `agnes-harness/`
+  - `CloudForge/.agh/skills/cloud-casting/`
+- 职责：会话、规划、审批、工具治理、Skill、执行记录
+
+**② 工具与 CLI 集成层**
+
+- 路径：
+  - `CloudForge/hackathon/cloudforge-tools/`
+  - `CloudForge/hackathon/cli/`
+  - `CloudForge/hackathon/cloudforge-panel/`
+- 职责：七个 AGH 工具、JSON CLI、四页签工作台面板
+
+**③ 几何核心层**
+
+- 路径：
+  - `CloudForge/src-tauri/cpp/`
+  - `CloudForge/src-tauri/src/`
+- 职责：qRANSAC_SD 检测、鲁棒精拟合、C ABI/FFI、Tauri 命令、桌面端 UI
 
 `agnes-harness/` 是随仓提供的 Agnes Harness 源码副本，包含本项目的 Windows 配套修复。请直接构建这一份，不要另行检出旧的上游提交。
 

@@ -4,6 +4,8 @@
 | --- | --- | --- |
 | `cloudforge-poster.png` | Produced for this project | Standalone static poster and social preview; the animated trailer is the README hero. |
 | `cloudforge-trailer.webp` | Produced for this project from the demo scan and live AGH panel captures | 1024×576, 18 s, looping animated overview. |
+| `cloudforge-architecture.zh.svg` | Produced for this project | Mobile-safe three-layer architecture diagram for the Chinese README. |
+| `cloudforge-architecture.en.svg` | Produced for this project | English version of the three-layer architecture diagram. |
 | `cloudforge-video-cover.png` | Frame from `cloudforge-demo-720p.mp4` with a play-button overlay | Thumbnail for the demo-video link in the README. |
 | `cloudforge-demo-720p.mp4` | Produced by this project | 720p preview of the demo. The Bilibili upload is the canonical copy; third-party credits, if any, are listed on the [Bilibili page](https://www.bilibili.com/video/BV19spk6vEL9/). |
 | `screenshot-agh-*.png` | Captured from the real AGH workbench | Show the installed CloudForge panel and project demo data. No model keys or account credentials are visible. |
