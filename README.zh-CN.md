@@ -3,7 +3,7 @@
 [English](README.md) | 简体中文
 
 <p align="center">
-  <img src="docs/assets/cloudforge-poster.webp" alt="云铸 CloudForge：从百万点云到实体参数" width="100%" />
+  <img src="docs/assets/cloudforge-poster.png" alt="云铸 CloudForge：从百万点云到实体参数" width="100%" />
 </p>
 
 <div align="center">
@@ -60,7 +60,7 @@
 
 **仓库内 720p 预览：** [docs/assets/cloudforge-demo-720p.mp4](docs/assets/cloudforge-demo-720p.mp4)（13 MB，H.264/AAC）
 
-[![云铸 CloudForge 演示视频](docs/assets/cloudforge-poster.webp)](https://b23.tv/wLaIodS)
+[![云铸 CloudForge 演示视频](docs/assets/cloudforge-poster.png)](https://b23.tv/wLaIodS)
 
 视频按以下顺序展开：
 
@@ -104,18 +104,18 @@ B 站上传版本是正式流媒体版本；仓库内提供 720p 预览，72.8 M
 
 ```mermaid
 flowchart TB
-  U[工程师 / 评审] --> W[AGH Web 工作台]
-  W --> S[cloud-casting Skill]
-  W --> P[cloudforge-panel<br/>点云 / CAD / 验证 / 报告]
-  W --> T[cloudforge-tools 插件]
-  T --> CLI[cloudforge-cli.exe]
+  U["工程师 / 评审"] --> W["AGH Web 工作台"]
+  W --> S["cloud-casting Skill"]
+  W --> P["cloudforge-panel<br>点云 / CAD / 验证 / 报告"]
+  W --> T["cloudforge-tools 插件"]
+  T --> CLI["cloudforge-cli.exe"]
   P --> CLI
-  P --> PY[CadQuery / FreeCAD]
-  CLI --> CORE[C++ 几何核心]
-  CORE --> R[qRANSAC_SD 检测]
-  CORE --> F[鲁棒精拟合]
-  CORE --> CAD[CadQuery 脚本导出]
-  T --> TR[AGH 审批 + 执行轨迹]
+  P --> PY["CadQuery / FreeCAD"]
+  CLI --> CORE["C++ 几何核心"]
+  CORE --> R["qRANSAC_SD 检测"]
+  CORE --> F["鲁棒精拟合"]
+  CORE --> CAD["CadQuery 脚本导出"]
+  T --> TR["AGH 审批 + 执行轨迹"]
   P --> TR
 ```
 

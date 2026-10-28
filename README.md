@@ -3,7 +3,7 @@
 English | [简体中文](README.zh-CN.md)
 
 <p align="center">
-  <img src="docs/assets/cloudforge-poster.webp" alt="CloudForge: from point clouds to physical parameters" width="100%" />
+  <img src="docs/assets/cloudforge-poster.png" alt="CloudForge: from point clouds to physical parameters" width="100%" />
 </p>
 
 <div align="center">
@@ -60,7 +60,7 @@ Direct video ID: [BV19spk6vEL9](https://www.bilibili.com/video/BV19spk6vEL9/)
 
 **In-repo 720p preview:** [docs/assets/cloudforge-demo-720p.mp4](docs/assets/cloudforge-demo-720p.mp4) (13 MB, H.264/AAC)
 
-[![CloudForge demo video](docs/assets/cloudforge-poster.webp)](https://b23.tv/wLaIodS)
+[![CloudForge demo video](docs/assets/cloudforge-poster.png)](https://b23.tv/wLaIodS)
 
 The demo walks through the complete story:
 
@@ -104,18 +104,18 @@ The live run demonstrates:
 
 ```mermaid
 flowchart TB
-  U[Engineer / reviewer] --> W[AGH Web workbench]
-  W --> S[cloud-casting Skill]
-  W --> P[cloudforge-panel<br/>point cloud / CAD / verify / report]
-  W --> T[cloudforge-tools plugin]
-  T --> CLI[cloudforge-cli.exe]
+  U["Engineer / reviewer"] --> W["AGH Web workbench"]
+  W --> S["cloud-casting Skill"]
+  W --> P["cloudforge-panel<br>point cloud / CAD / verify / report"]
+  W --> T["cloudforge-tools plugin"]
+  T --> CLI["cloudforge-cli.exe"]
   P --> CLI
-  P --> PY[CadQuery / FreeCAD]
-  CLI --> CORE[C++ geometry core]
-  CORE --> R[qRANSAC_SD detection]
-  CORE --> F[Robust refiner]
-  CORE --> CAD[CadQuery script export]
-  T --> TR[AGH approvals + execution trail]
+  P --> PY["CadQuery / FreeCAD"]
+  CLI --> CORE["C++ geometry core"]
+  CORE --> R["qRANSAC_SD detection"]
+  CORE --> F["Robust refiner"]
+  CORE --> CAD["CadQuery script export"]
+  T --> TR["AGH approvals + execution trail"]
   P --> TR
 ```
 
