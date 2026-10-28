@@ -28,7 +28,7 @@ Agnes Harness（AGH 智能体底座：会话 / 审批 / 轨迹留证）
 | [cli/](cli/) | `cloudforge-cli.exe`：info / detect / refine / synth / verify / cad 六个子命令，JSON 输出 |
 | [cloudforge-tools/](cloudforge-tools/) | AGH 后端插件（零依赖 index.mjs）+ 工具级自测 tools.test.mjs |
 | [cloudforge-panel/](cloudforge-panel/) | **AGH 右栏控制台**（点云 / CAD / 验证 / 报告四页签）。集成约束见 [PANEL-AGH.md](cloudforge-panel/PANEL-AGH.md)，离线预览台 `node hackathon/cloudforge-panel/tools/preview.mjs` |
-| [panel evidence/](evidence/panel/) | 面板截图（STEP→STL 预览 + 模型信息） |
+| [panel evidence/](evidence/panel/) | 面板截图（STEP→STL 预览 + 模型信息）；脱敏后的 AGH 轨迹证据见 [evidence/README.md](evidence/README.md) |
 | [demo-data/](demo-data/) | 演示数据产物（Redwood livingroom1 检测结果、合成件 CAD 导出等） |
 | [PLAN.md](PLAN.md) | 参赛规划与里程碑 |
 | 仓库根 `.agh/skills/cloud-casting/` | AGH 工作区 Skill（智能体工作流说明书） |

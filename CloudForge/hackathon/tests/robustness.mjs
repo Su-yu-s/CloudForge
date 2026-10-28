@@ -5,11 +5,14 @@
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { writeFileSync, mkdirSync, rmSync } from 'node:fs'
-import { join } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const run = promisify(execFile)
-const CLI = process.env.CLOUDFORGE_CLI || 'E:/C++/Point/CloudForge/hackathon/cli/build/Release/cloudforge-cli.exe'
-const OUT = 'E:/C++/Point/CloudForge/hackathon/tests/results'
+const HERE = dirname(fileURLToPath(import.meta.url))
+const REPO = resolve(HERE, '../../..')
+const CLI = process.env.CLOUDFORGE_CLI || join(REPO, 'CloudForge/hackathon/cli/build/Release/cloudforge-cli.exe')
+const OUT = join(REPO, 'CloudForge/hackathon/tests/results')
 const Tmp = join(OUT, 'robustness-tmp')
 mkdirSync(Tmp, { recursive: true })
 

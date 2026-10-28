@@ -5,12 +5,15 @@
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { writeFileSync, mkdirSync, rmSync, existsSync } from 'node:fs'
-import { join } from 'node:path'
+import { dirname, join, relative, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const run = promisify(execFile)
-const CLI = process.env.CLOUDFORGE_CLI || 'E:/C++/Point/CloudForge/hackathon/cli/build/Release/cloudforge-cli.exe'
-const OUT = 'E:/C++/Point/CloudForge/hackathon/tests/results'
-const DATA = 'E:/C++/Point/data'
+const HERE = dirname(fileURLToPath(import.meta.url))
+const REPO = resolve(HERE, '../../..')
+const CLI = process.env.CLOUDFORGE_CLI || join(REPO, 'CloudForge/hackathon/cli/build/Release/cloudforge-cli.exe')
+const OUT = join(REPO, 'CloudForge/hackathon/tests/results')
+const DATA = join(REPO, 'data')
 const Tmp = join(OUT, 'tmp')
 
 mkdirSync(Tmp, { recursive: true })
@@ -110,7 +113,7 @@ async function boundary() {
 
 async function failure() {
   // F1 文件不存在
-  const f1 = await cli(['info', 'E:/definitely/not-exist.ply'])
+  const f1 = await cli(['info', join(Tmp, 'not-exist.ply')])
   record('failure', 'F1 文件不存在', f1.json?.ok === false && /not found/.test(f1.json?.error ?? ''), f1.json?.error)
 
   // F2 损坏 PLY（随机字节）
@@ -144,13 +147,16 @@ await failure()
 
 rmSync(Tmp, { recursive: true, force: true })
 mkdirSync(OUT, { recursive: true })
+const sanitize = (value) => typeof value === 'string'
+  ? value.replaceAll(REPO, '<repo>').replace(/[A-Za-z]:[\\/][^\s"']*/g, '<path>')
+  : value
 const summary = {
   timestamp: new Date().toISOString(),
-  cli: CLI,
+  cli: relative(REPO, CLI).replaceAll('\\', '/'),
   total: results.length,
   passed: results.filter((r) => r.pass).length,
   failed: results.filter((r) => !r.pass).length,
-  results,
+  results: results.map((r) => ({ ...r, detail: sanitize(r.detail) })),
 }
 writeFileSync(join(OUT, 'suite-result.json'), JSON.stringify(summary, null, 2))
 console.log(`\n${summary.passed}/${summary.total} PASS → ${join(OUT, 'suite-result.json')}`)

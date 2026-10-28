@@ -56,7 +56,7 @@ npm run tauri build  # 正式构建（--no-bundle 可只出 exe、跳过 NSIS �
 
 前置条件：Rust (MSVC)、Node 24、CMake、Visual Studio（含 C++ 工具集）。
 
-AI 识别依赖 WSL Ubuntu 中的分割环境（`/opt/cloudforge-venv` + `/mnt/e/C++/Point/CloudForge-Neural`），
+AI 识别依赖 WSL Ubuntu 中的分割环境（默认 `/opt/cloudforge-venv`；模型路径与输出目录由用户在 GUI 设置中指定，不在本仓库），
 输入要求：室内模型为带 RGB 的 PLY/PCD，NuScenes 为 float32 N×5 的 .bin。
 该分割环境是**第三方开源模型**（非本仓库内容、不随本仓库分发，也**不在本作品的 AGH 执行链路与演示中**），
 第三方素材披露见 [`hackathon/declaration.md`](hackathon/declaration.md)。

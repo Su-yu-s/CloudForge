@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-10-04T06:20:47.594Z",
-  "cli": "hackathon/cli/build/Release/cloudforge-cli.exe",
+  "timestamp": "2026-10-28T14:26:23.328Z",
+  "cli": "CloudForge/hackathon/cli/build/Release/cloudforge-cli.exe",
   "total": 11,
   "passed": 11,
   "failed": 0,
@@ -9,13 +9,13 @@
       "group": "normal",
       "name": "N1 合成基准全链路",
       "pass": true,
-      "detail": "shapes=6, verify=2/2, 平面误差=1.65e-5m, 圆柱误差=0.0006m"
+      "detail": "shapes=6, verify=2/2, 平面误差=1.65e-5m, 圆柱误差=0.0008m"
     },
     {
       "group": "normal",
       "name": "N2 真实室内扫描平面反演",
       "pass": true,
-      "detail": "196133 pts → 41 平面, 内点覆盖 81.8%, 耗时 986ms"
+      "detail": "196133 pts → 41 平面, 内点覆盖 82.2%, 耗时 900ms"
     },
     {
       "group": "normal",
@@ -45,25 +45,25 @@
       "group": "failure",
       "name": "F1 文件不存在",
       "pass": true,
-      "detail": "file not found: E:\\definitely\\not-exist.ply"
+      "detail": "file not found: <repo>\\CloudForge\\hackathon\\tests\\results\\tmp\\not-exist.ply"
     },
     {
       "group": "failure",
       "name": "F2 损坏 PLY",
       "pass": true,
-      "detail": "failed to load point cloud (0 points): E:\\C++\\Point\\CloudFor"
+      "detail": "failed to load point cloud (0 points): <repo>\\Cl"
     },
     {
       "group": "failure",
       "name": "F3 空文件",
       "pass": true,
-      "detail": "failed to load point cloud (0 points): E:\\C++\\Point\\CloudFor"
+      "detail": "failed to load point cloud (0 points): <repo>\\Cl"
     },
     {
       "group": "failure",
       "name": "F4 错误 BIN 格式",
       "pass": true,
-      "detail": "failed to load point cloud (0 points): E:\\C++\\Point\\CloudFor"
+      "detail": "failed to load point cloud (0 points): <repo>\\Cl"
     },
     {
       "group": "failure",

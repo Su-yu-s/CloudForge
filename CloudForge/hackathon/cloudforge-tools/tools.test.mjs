@@ -1,6 +1,15 @@
 // cloudforge-tools 工具级自测：mock AGH extension API，直接调 execute() 验证 CLI 调用链
 // 运行：node hackathon/cloudforge-tools/tools.test.mjs（需要先构建 hackathon/cli）
 
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const HERE = dirname(fileURLToPath(import.meta.url))
+const PROJECT = resolve(HERE, '../..')
+const runProcess = promisify(execFile)
+
 const registered = []
 const fakeAgnes = {
   registerTool(def) { registered.push(def) },
@@ -14,7 +23,7 @@ mod.cloudforgeTools.apply(fakeCtx)
 
 const names = registered.map((t) => t.name)
 console.log('registered tools:', names.join(', '))
-if (names.length !== 6) throw new Error(`expected 6 tools, got ${names.length}`)
+if (names.length !== 7) throw new Error(`expected 7 tools, got ${names.length}`)
 for (const t of registered) {
   if (!t.name || !t.description || !t.parameters || !t.meta) throw new Error(`tool ${t.name} missing fields`)
   for (const k of ['isReadOnly', 'isDestructive', 'isConcurrencySafe', 'isOpenWorld', 'replay', 'costHint', 'deferLoading', 'requiresApproval']) {
@@ -23,9 +32,32 @@ for (const t of registered) {
 }
 
 const T = Object.fromEntries(registered.map((t) => [t.name, t.execute]))
-const run = async (name, args) => (await T[name](args)).structured
+const toolContext = {
+  cwd: PROJECT,
+  timeoutMs: 300000,
+  async exec(args, options = {}) {
+    try {
+      const { stdout, stderr } = await runProcess(args[0], args.slice(1), {
+        cwd: options.cwd || PROJECT,
+        timeout: options.timeoutMs || 300000,
+        maxBuffer: 32 * 1024 * 1024,
+        windowsHide: true,
+      })
+      return { code: 0, stdout, stderr, timedOut: false, truncated: false }
+    } catch (error) {
+      return {
+        code: error.code ?? 1,
+        stdout: error.stdout ?? '',
+        stderr: error.stderr ?? '',
+        timedOut: !!error.killed,
+        truncated: false,
+      }
+    }
+  },
+}
+const run = async (name, args) => (await T[name](args, toolContext)).structured
 
-const Tmp = 'E:/C++/Point/CloudForge/hackathon/.test-run'
+const Tmp = join(HERE, '..', '.test-run')
 let failed = 0
 const check = (label, cond, extra) => {
   console.log(`${cond ? 'PASS' : 'FAIL'} ${label}${extra ? ' — ' + extra : ''}`)
@@ -53,7 +85,7 @@ const few = await run('cloudforge_refine', { cloud: Tmp + '/t.pcd', indices_file
 check('refine ok', few.ok === true && few.shapes.length >= 1, `${few.selected} pts → ${few.shapes.length} shape(s)`)
 
 // 6) 失败路径：不存在的文件
-const bad = await run('cloudforge_cloud_info', { cloud: 'E:/not-exists.ply' })
+const bad = await run('cloudforge_cloud_info', { cloud: Tmp + '/not-exists.ply' })
 check('info bad file → ok:false', bad.ok === false && /not found/.test(bad.error ?? ''))
 
 // 7) CAD 导出：检测产物 → 可执行 CadQuery 脚本

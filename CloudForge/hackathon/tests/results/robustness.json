@@ -1,23 +1,23 @@
 {
-  "timestamp": "2026-10-04T04:41:46.473Z",
+  "timestamp": "2026-10-28T14:38:46.105Z",
   "description": "合成零件（平面 z=0 + 圆柱 r=0.05m）在噪声注入 × 随机降采样网格下的参数稳定性",
   "grid": [
     {
       "noise_sigma": 0,
       "keep_ratio": 1,
       "points": 65000,
-      "shapes": 6,
+      "shapes": 5,
       "plane_err_m": 0.0000164938501,
-      "cyl_err_m": 0.000603861146,
+      "cyl_err_m": 0.000680055587,
       "verify_pass": true
     },
     {
       "noise_sigma": 0,
       "keep_ratio": 0.5,
       "points": 32422,
-      "shapes": 3,
+      "shapes": 4,
       "plane_err_m": 0.0000369768932,
-      "cyl_err_m": 0.000716471513,
+      "cyl_err_m": 0.000582668398,
       "verify_pass": true
     },
     {
@@ -26,25 +26,25 @@
       "points": 16092,
       "shapes": 2,
       "plane_err_m": 0.0000945693828,
-      "cyl_err_m": 0.000319787272,
+      "cyl_err_m": 0.00085685289,
       "verify_pass": true
     },
     {
       "noise_sigma": 0.002,
       "keep_ratio": 1,
       "points": 65000,
-      "shapes": 8,
+      "shapes": 5,
       "plane_err_m": 0.0000290679545,
-      "cyl_err_m": 0.0011311923,
+      "cyl_err_m": 0.000410032416,
       "verify_pass": true
     },
     {
       "noise_sigma": 0.002,
       "keep_ratio": 0.5,
       "points": 32643,
-      "shapes": 6,
-      "plane_err_m": 0.0000765430159,
-      "cyl_err_m": 0.000614135686,
+      "shapes": 4,
+      "plane_err_m": 0.0000765403238,
+      "cyl_err_m": 0.000727907182,
       "verify_pass": true
     },
     {
@@ -53,7 +53,7 @@
       "points": 16449,
       "shapes": 2,
       "plane_err_m": 0.0000753455897,
-      "cyl_err_m": 0.000747725679,
+      "cyl_err_m": 0.000779115543,
       "verify_pass": true
     },
     {
@@ -61,8 +61,8 @@
       "keep_ratio": 1,
       "points": 65000,
       "shapes": 2,
-      "plane_err_m": 0.000299909327,
-      "cyl_err_m": 0.00193629187,
+      "plane_err_m": 0.000148880994,
+      "cyl_err_m": 0.00197715694,
       "verify_pass": true
     },
     {
@@ -70,17 +70,17 @@
       "keep_ratio": 0.5,
       "points": 32643,
       "shapes": 3,
-      "plane_err_m": 0.000204998636,
-      "cyl_err_m": 1e+30,
-      "verify_pass": false
+      "plane_err_m": 0.000181820942,
+      "cyl_err_m": 0.00155318895,
+      "verify_pass": true
     },
     {
       "noise_sigma": 0.005,
       "keep_ratio": 0.25,
       "points": 16449,
       "shapes": 2,
-      "plane_err_m": 0.000258314045,
-      "cyl_err_m": 0.000675820721,
+      "plane_err_m": 0.000207688456,
+      "cyl_err_m": 0.00067439083,
       "verify_pass": true
     },
     {

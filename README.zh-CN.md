@@ -502,6 +502,7 @@ cloudforge-cli.exe verify --truth <temp>/synth.truth.json --result <temp>/synth-
 - **旧桌面端的局部分割链路是独立的。** 原 GUI 包含可选的第三方本地分割模型（LitePT）；它不在 AGH 执行链和本次演示中，几何核心也不调用任何模型。
 - **RANSAC 源码仅授权研究用途。** `ransac_sd` 不随仓库分发，当前版本树也不分发 qRANSAC_SD 的编译产物；复现构建需自行获取源码并遵守其许可。
 - **部分历史文档包含开发者本机路径。** 它们作为构建记录保留；全新克隆不依赖这些路径。请以本 README 和复现指南中的项目相对路径为准。
+- **执行证据已脱敏。** 随仓 AGH 轨迹中的操作者 ID、账号路由、会话键和本机路径已替换为中性值；事件顺序、时间戳、工具调用和结果计数未改动。
 - **仓库不提交密钥。** 模型凭据应配置在本地 AGH 中；`.env`、AGH home、会话、输出目录和本地虚拟环境均被忽略。随仓 AGH 测试集中出现的 `sk-...` 是刻意构造的测试哨兵，不是真实凭据。
 
 ## 许可与第三方说明（Licensing and Third-Party Notices）
@@ -510,16 +511,18 @@ cloudforge-cli.exe verify --truth <temp>/synth.truth.json --result <temp>/synth-
 
 | 组件 | 许可 | 分发情况 |
 | --- | --- | --- |
-| Agnes Harness（AGH） | Apache-2.0 | 随仓位于 `agnes-harness/`；见 [LICENSE](agnes-harness/LICENSE)、[NOTICE](agnes-harness/NOTICE) |
-| qRANSAC_SD / PrimitiveShapes 1.1（Schnabel & Wahl，波恩大学） | 仅研究用途，未授予再分发权利 | 不随仓库分发，需自行获取 |
-| Eigen 5.0.1 | MPL2 / BSD / Apache-2.0（见其 `COPYING.*`） | 随仓 |
-| CadQuery | Apache-2.0 | 作为 Python 依赖安装 |
-| Tauri 2 / Vue 3 / Vite / Three.js | MIT | 源码与面板内随包资源 |
-| Redwood / 3DMatch 室内扫描 | 公开研究数据集，遵循上游条款 | `data/` |
-| Open3D 示例片段（`DemoColoredICPPointClouds`） | 遵循 Open3D 数据条款 | `data/` |
+| [Agnes Harness（AGH）](https://github.com/AgnesAI-Labs/agnes-harness) | Apache-2.0 | 随仓位于 `agnes-harness/`；见 [LICENSE](agnes-harness/LICENSE)、[NOTICE](agnes-harness/NOTICE) |
+| [qRANSAC_SD / PrimitiveShapes 1.1](https://github.com/CloudCompare/CloudCompare/tree/master/plugins/core/Standard/qRANSAC_SD/extern/RANSAC_SD)（Schnabel & Wahl，波恩大学） | 仅研究用途，未授予再分发权利 | 不随仓库分发，需自行获取 |
+| [Eigen 5.0.1](https://eigen.tuxfamily.org/) | MPL2 / BSD / Apache-2.0（见其 `COPYING.*`） | 随仓 |
+| [CadQuery](https://github.com/CadQuery/cadquery) | Apache-2.0 | 作为 Python 依赖安装 |
+| [Tauri 2](https://github.com/tauri-apps/tauri) / [Vue 3](https://github.com/vuejs/core) / [Vite](https://github.com/vitejs/vite) / [Three.js](https://github.com/mrdoob/three.js) | MIT | 源码与面板内随包资源 |
+| [Redwood / 3DMatch](http://redwood-data.org/3dscan/) 室内扫描 | 公开研究数据集，遵循上游条款 | `data/` |
+| [Open3D](https://www.open3d.org/) 示例片段（`DemoColoredICPPointClouds`） | 遵循 Open3D 数据条款 | `data/` |
+| [LitePT](https://arxiv.org/abs/2512.13689)（可选本地分割，不在 AGH 链路中） | MIT | 不随仓库分发，仅用户自建环境 |
+| 演示视频、海报与 README 截图 | 本项目制作；如有第三方素材，来源见 [B 站页面](https://www.bilibili.com/video/BV19spk6vEL9/) | `docs/assets/` |
 | 合成点云 | 本项目生成 | `CloudForge/hackathon/demo-data/` |
 
-完整的第三方清单与独立完成声明见 [CloudForge/hackathon/declaration.md](CloudForge/hackathon/declaration.md) 与 [CloudForge/src-tauri/cpp/third_party/README.md](CloudForge/src-tauri/cpp/third_party/README.md)。
+完整的第三方清单与独立完成声明见 [CloudForge/hackathon/declaration.md](CloudForge/hackathon/declaration.md) 与 [CloudForge/src-tauri/cpp/third_party/README.md](CloudForge/src-tauri/cpp/third_party/README.md)。数据集条款见 [data/README.md](data/README.md)，截图与演示素材来源见 [docs/assets/README.md](docs/assets/README.md)。
 
 ## 致谢
 

@@ -52,17 +52,17 @@
 
 **A. 无头回归（已跑通）**
 ```bash
-cd E:/C++/Point/agnes-harness
-node scripts-tmp/cf-panel-repro.mjs        "E:/C++/Point/CloudForge/hackathon/cloudforge-panel/extensions/main/client/index.js"
-node scripts-tmp/cf-panel-verify-debug.mjs "E:/C++/Point/CloudForge/hackathon/cloudforge-panel/extensions/main/client/index.js"
+cd <AGH_ROOT>
+node scripts-tmp/cf-panel-repro.mjs        "<REPO>/CloudForge/hackathon/cloudforge-panel/extensions/main/client/index.js"
+node scripts-tmp/cf-panel-verify-debug.mjs "<REPO>/CloudForge/hackathon/cloudforge-panel/extensions/main/client/index.js"
 ```
 期望：`applyError=null`、`setIntervalCalls=[8000]`、`workflowRendered=true`、三段标题（工作流/验证/交付物）都在；收展在 `320px ↔ 40px` 之间切换且 `headMain` 显示/隐藏正确；`__CF_DEBUG` 的 `tick/renderData/root/state` 齐全，`renderData(undefined)` 不抛。
 
 **B. 装回 AGH（需 daemon 在跑）**
 ```bash
 # 注意：file: 引用按当前目录解析，CWD 必须是 CloudForge 仓库根
-cd E:/C++/Point/CloudForge
-pnpm exec tsx E:/C++/Point/agnes-harness/scripts-tmp/install-package.mts file:./hackathon/cloudforge-panel cloudforge-panel
+cd <REPO>/CloudForge
+pnpm exec tsx <AGH_ROOT>/scripts-tmp/install-package.mts file:./hackathon/cloudforge-panel cloudforge-panel
 ```
 安装脚本会走 inspect → install → trust → enable，并按内容哈希重算 `sha256-<rev>` 目录与 `_client-modules.json` 注册表——**只改仓库文件、不重装，浏览器拿到的还是旧 sha 副本，不会生效。**
 
