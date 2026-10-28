@@ -1,6 +1,6 @@
 {
   "timestamp": "2026-10-04T06:20:47.594Z",
-  "cli": "E:/C++/Point/CloudForge/hackathon/cli/build/Release/cloudforge-cli.exe",
+  "cli": "hackathon/cli/build/Release/cloudforge-cli.exe",
   "total": 11,
   "passed": 11,
   "failed": 0,

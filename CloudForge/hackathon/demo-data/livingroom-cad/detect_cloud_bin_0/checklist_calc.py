@@ -1,7 +1,7 @@
 # livingroom1 cloud_bin_0 竣工核验：主要平行墙对间距
 import json
 
-RES = r'E:\C++\Point\CloudForge\hackathon\demo-data\livingroom-cad\detect_cloud_bin_0\result.json'
+RES = r'hackathon\demo-data\livingroom-cad\detect_cloud_bin_0\result.json'
 d = json.load(open(RES))
 
 # from detection summary: shape -> (normal, d, inlier)

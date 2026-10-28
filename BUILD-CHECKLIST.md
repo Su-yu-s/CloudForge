@@ -1,6 +1,6 @@
 # pointhks 工作区安装与运行 — 错误清单（Checklist）
 
-> 生成时间：2026-10-12 18:40 ｜ 环境：Windows + Git Bash + MSVC 14.44.35207 (D:\vs2022) + Windows SDK 10.0.26100 (D:\Windows Kits) + CMake 4.3.0 + Node 24.21.0 + pnpm 10.34.5 + Rust 1.99.0
+> 生成时间：2026-10-12 18:40 ｜ 环境：Windows + Git Bash + MSVC 14.44.35207 + Windows SDK 10.0.26100 + CMake 4.3.0 + Node 24.21.0 + pnpm 10.34.5 + Rust 1.99.0
 > 规则遵循：**未修改任何仓库源码**；问题仅以清单 + 独立补丁文件形式交付（补丁：`CloudForge/fix-m-randomseed.patch`，已通过 `git apply --check` 验证可干净应用）。
 
 ## 一、总体状态
@@ -46,7 +46,7 @@
 | 服务 | 地址 | 启动命令（关键：先 unset 小写代理变量） |
 |---|---|---|
 | CloudForge 前端 | http://localhost:5183/ | `cd CloudForge && npm run dev` |
-| AGH 智能体服务 | http://127.0.0.1:4177/ | `cd CloudForge && unset https_proxy http_proxy && node /e/yuntao/agnes-harness/packages/cli/dist/local/agnes.mjs serve` |
+| AGH 智能体服务 | http://127.0.0.1:4177/ | `cd CloudForge && unset https_proxy http_proxy && node ../agnes-harness/packages/cli/dist/local/agnes.mjs serve` |
 | CloudForge 桌面端（tauri dev） | — | 待 E1 补丁应用后：`cd CloudForge && unset https_proxy http_proxy && npm run tauri dev` |
 
 后续使用注意：
@@ -59,5 +59,5 @@
 本次已移除 `schnabel_detector.cpp` 两处对不存在的 `Options.m_randomSeed` 字段赋值，
 保留原有 `std::srand(params.randomSeed)`。E1 的源码构建阻塞已解决。
 使用 VS 2022 x64 / Windows SDK 10.0.26100.0 完成 `cloudforge-cli` Release 构建，产物为
-`<workspace>\CloudForge\hackathon\cli\build\Release\cloudforge-cli.exe`。
+`CloudForge\hackathon\cli\build\Release\cloudforge-cli.exe`。
 此次只构建和更新 AGH 插件，未执行检测、CAD 转换或页面检验。

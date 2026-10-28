@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "file": "E:\\C++\\Point\\data\\livingroom1-fragments-ply\\cloud_bin_0.ply",
+  "file": "data/livingroom1-fragments-ply/cloud_bin_0.ply",
   "format": "ply",
   "points": 196133,
   "centered": false,

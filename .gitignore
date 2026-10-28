@@ -25,6 +25,7 @@
 
 # ---------------- C++ / CMake 构建目录 ----------------
 CloudForge/hackathon/cli/build/
+CloudForge/src-tauri/cpp/build/
 **/cmake-build-*/
 **/CMakeFiles/
 

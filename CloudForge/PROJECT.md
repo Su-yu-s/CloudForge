@@ -101,7 +101,7 @@ CloudForge/
 npm install                                   # 前端依赖（GUI 用）
 cmake -S hackathon/cli -B hackathon/cli/build # 构建 cloudforge-cli
 cmake --build hackathon/cli/build --config Release
-# AGH 框架单独从源码构建：github.com/AgnesAI-Labs/agnes-harness
+# AGH 随仓位于 ../agnes-harness（上游 github.com/AgnesAI-Labs/agnes-harness）
 
 # 1) 智能体主线（比赛演示）
 cd CloudForge
@@ -131,7 +131,7 @@ npm run tauri dev
 | 插件与工具源码 | hackathon/cloudforge-tools/ · hackathon/cli/ | ✅ 已验证 |
 | 真实数据演示产物 | hackathon/demo-data/ | ✅ |
 | AGH 轨迹留证 | AGH 会话导出 | ⏳ 等 Agnes 模型 Key |
-| 3–5 分钟演示视频 | — | ⏳ M5 |
+| 3–5 分钟演示视频 | [B 站](https://b23.tv/wLaIodS) | ✅ 已发布 |
 
 ## 五、许可与声明
 

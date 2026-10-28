@@ -6,7 +6,7 @@
 ## 测量设置
 
 - 工具：CloudCompare（或任意点云软件）+ 秒表
-- 数据：`E:/C++/Point/data/livingroom1-fragments-ply/cloud_bin_0.ply`（与云铸 N2 同一份数据）
+- 数据：`data/livingroom1-fragments-ply/cloud_bin_0.ply`（与云铸 N2 同一份数据）
 - 任务：模拟测量员对点云做"墙体/地面参数提取"，完成 **3 个平面**的全流程
   （选中点云区域 → 拟合平面 → 记录方程/法向/偏差 → 汇总进表格）
 

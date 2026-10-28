@@ -1,7 +1,7 @@
 # 点云演示验证报告：demo-part/demo.pcd
 
 ## 输入概况
-- 文件：`E:\C++\Point\CloudForge\hackathon\demo-data\demo-part\demo.pcd`
+- 文件：`hackathon\demo-data\demo-part\demo.pcd`
 - 格式：PCD，点数 65,000
 - 坐标系：未居中（centered=false）
 - 包围盒：[0, 0, -0.0078] → [0.6, 0.6, 0.2]，跨度 0.6 m

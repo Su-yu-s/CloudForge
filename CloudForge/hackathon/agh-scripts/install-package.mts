@@ -3,10 +3,10 @@
 // （CLI 的交互确认要求 TTY，SDK 是官方提供的程序化管理路径）
 //
 // 用法（必须在 CloudForge 仓库根执行，因为 file: 源只接受 file:./ 相对路径）：
-//   cd E:\C++\Point\CloudForge
-//   pnpm --dir E:\C++\Point\agnes-harness exec tsx ..\CloudForge\hackathon\tools\agh\install-package.mts "file:./hackathon/cloudforge-panel" "cloudforge-panel"
+//   cd CloudForge
+//   pnpm --dir ../agnes-harness exec tsx hackathon/agh-scripts/install-package.mts "file:./hackathon/cloudforge-panel" "cloudforge-panel"
 //   # 或先设好 AGH_ROOT，然后：
-//   npx tsx hackathon/tools/agh/install-package.mts "file:./hackathon/cloudforge-panel" "cloudforge-panel"
+//   npx tsx hackathon/agh-scripts/install-package.mts "file:./hackathon/cloudforge-panel" "cloudforge-panel"
 
 import { randomUUID } from 'node:crypto'
 import { connect, sleep } from './bootstrap.mts'

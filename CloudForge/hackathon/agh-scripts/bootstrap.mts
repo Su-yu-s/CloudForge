@@ -18,8 +18,8 @@ const here = dirname(fileURLToPath(import.meta.url))
 export function resolveAghRoot() {
   const candidates = [
     process.env.AGH_ROOT,
-    resolve(here, '../../../../agnes-harness'), // E:\C++\Point\CloudForge\hackathon\tools\agh → 同级
-    resolve(here, '../../../agnes-harness'),
+    resolve(here, '../../../../agnes-harness'), // 仓库同级（旧布局）
+    resolve(here, '../../../agnes-harness'),    // 随仓 agnes-harness/
   ].filter(Boolean)
   for (const dir of candidates) {
     if (existsSync(join(dir, 'packages/sdk/src/index.node.ts'))) return dir
@@ -27,7 +27,7 @@ export function resolveAghRoot() {
   throw new Error(
     '找不到 agnes-harness 仓库。\n' +
       '  设一个环境变量再跑，例如：\n' +
-      '    $env:AGH_ROOT = "E:/C++/Point/agnes-harness"\n' +
+      '    $env:AGH_ROOT = "<repo>/agnes-harness"\n' +
       '  仓库地址：https://github.com/AgnesAI-Labs/agnes-harness',
   )
 }

@@ -48,16 +48,15 @@ hackathon\cli\build\Release\cloudforge-cli.exe        # 能打印用法即为成
 
 ---
 
-## 3. 构建 AGH 框架（不在本仓库内）
+## 3. 构建随仓 AGH 框架（`agnes-harness/`）
 
 ```sh
-cd <CloudForge 的上一级目录>
-git clone https://github.com/AgnesAI-Labs/agnes-harness.git
-cd agnes-harness
-git checkout a6b8319                 # 我们锁定的 commit，避免 pre-alpha API 漂移
+cd <仓库根>\agnes-harness
 pnpm install --frozen-lockfile
 pnpm --filter @agnes/cli build:local
 ```
+
+随仓 `agnes-harness/` 已包含本项目的 Windows 配套修复；不要另行检出旧上游 commit `a6b8319`。上游仓库为 `AgnesAI-Labs/agnes-harness`，仅作对照参考。
 
 **可能遇到**：`serve` 启动报缺少 native 模块 `agnes-system.node` —— 从 CLI 快照拷到
 `packages/system-node/dist/native/`，或跑 `pnpm --filter @agnes/system-node build:native`。
@@ -71,8 +70,8 @@ AGH 的插件治理是 inspect → install → trust → enable 四步。**我�
 把四步串成幂等流程（可反复覆盖安装）：
 
 ```sh
-# 脚本自己按 AGH_ROOT 找框架仓库（找同级 ../agnes-harness 也行），不用复制进 agnes-harness
-export AGH_ROOT=/path/to/agnes-harness        # Windows PowerShell: $env:AGH_ROOT = "E:/C++/Point/agnes-harness"
+# 脚本自己按 AGH_ROOT 找框架仓库（默认找同级的 ../agnes-harness），不用复制进 agnes-harness
+export AGH_ROOT=/path/to/agnes-harness        # Windows PowerShell: $env:AGH_ROOT = (Resolve-Path ..\agnes-harness).Path
 
 cd <CloudForge>
 pnpm exec tsx hackathon/agh-scripts/install-package.mts
@@ -99,8 +98,8 @@ pnpm exec tsx hackathon/agh-scripts/probe-assets.mts <integrity>   # 逐资源�
 ## 5. 启动 AGH 并配置模型
 
 ```sh
-cd <你的路径>\CloudForge            # ← 必须在 CloudForge 目录启动
-node <agnes-harness 路径>\packages\cli\dist\local\agnes.mjs serve
+cd <仓库根>\CloudForge             # ← 必须在 CloudForge 目录启动
+node ..\agnes-harness\packages\cli\dist\local\agnes.mjs serve
 ```
 
 浏览器打开 **http://127.0.0.1:4177**：

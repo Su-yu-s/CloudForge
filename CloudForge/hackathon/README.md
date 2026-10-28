@@ -6,6 +6,7 @@
 
 - **主赛道**：D. 工程设计与数字世界
 - **具体方向**：D3. 3D 设计与空间智能
+- **演示视频**：[B 站](https://b23.tv/wLaIodS)（5 分 38 秒）
 - **完整参赛规划**：见 [PLAN.md](PLAN.md)
 
 ## 架构
@@ -37,9 +38,11 @@ Agnes Harness（AGH 智能体底座：会话 / 审批 / 轨迹留证）
 **逐步骤的详细版（含前置、踩坑、验证）见 [ONBOARDING.md](ONBOARDING.md)。**
 
 ```sh
-# 1. 构建 AGH（源码：github.com/AgnesAI-Labs/agnes-harness，不在本仓库内）
-git clone https://github.com/AgnesAI-Labs/agnes-harness.git && cd agnes-harness
-git checkout a6b8319 && pnpm install --frozen-lockfile && pnpm --filter @agnes/cli build:local
+# 1. 构建随仓 AGH（agnes-harness/，含本项目修复；上游 github.com/AgnesAI-Labs/agnes-harness）
+cd agnes-harness
+pnpm install --frozen-lockfile
+pnpm --filter @agnes/cli build:local
+cd ..
 
 # 2. 构建 cloudforge-cli
 cd CloudForge
@@ -51,7 +54,7 @@ node ../agnes-harness/packages/cli/dist/local/agnes.mjs serve
 
 # 4. 安装插件（幂等，自动 inspect→install→trust→enable）
 #    脚本自己按 AGH_ROOT 找框架仓库，**不用**先复制进 agnes-harness
-$env:AGH_ROOT = "E:/C++/Point/agnes-harness"
+$env:AGH_ROOT = (Resolve-Path ..\agnes-harness).Path
 node $env:AGH_ROOT/node_modules/tsx/dist/cli.mjs hackathon/agh-scripts/install-package.mts "file:./hackathon/cloudforge-panel" "cloudforge-panel"
 
 # 5. 打开 http://127.0.0.1:4177 → 配置 Agnes 模型 → 创建会话，发送：

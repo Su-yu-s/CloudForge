@@ -1,6 +1,6 @@
 import json, math, os, struct
 
-RES = r'E:\C++\Point\CloudForge\hackathon\demo-data\livingroom-cad\detect_cloud_bin_0\result.json'
+RES = r'hackathon\demo-data\livingroom-cad\detect_cloud_bin_0\result.json'
 d = json.load(open(RES))
 ply = d['source_cloud']
 print('source:', ply)
