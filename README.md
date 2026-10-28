@@ -117,54 +117,63 @@ The live run demonstrates:
 
 ## Architecture
 
-The vertical diagram keeps the workbench, the three layers, and the deliverables readable on narrow screens; paths and responsibilities follow below.
+CloudForge runs around AGH: the host owns sessions, approvals, and the execution trail; `cloudforge-panel` is an in-host client module and `cloudforge-tools` is an in-host plugin; `cloudforge-cli.exe` and the C++ geometry core are native; CadQuery/FreeCAD are external. The AGH model plans and explains; the measurement path never calls a model.
+
+### Runtime components
 
 <p align="center">
-  <img src="docs/assets/cloudforge-architecture.en.svg" alt="CloudForge three-layer architecture: engineer → AGH Web workbench → agent orchestration → tool and CLI integration → geometry core → parameters / CAD / verification report" width="420" />
+  <img src="docs/assets/cloudforge-runtime.en.svg" alt="CloudForge runtime architecture: the AGH host with the Web workbench, cloud-casting Skill, cloudforge-panel, and cloudforge-tools; the native layer with cloudforge-cli.exe and the C++ geometry core; external CadQuery/FreeCAD; deliverables are parameters, STEP/STL, a verification report, and the execution trail" width="420" />
 </p>
 
-### Three layers
+**Inside the AGH host (same process)**
 
-**① Agent orchestration**
+- **AGH Web workbench** — sessions, approvals, execution trail; hosts the panel and tools.
+- **cloud-casting Skill** — planning, tool calls, metric checks, weak-fit retries.
+- **cloudforge-panel** — point cloud / CAD / verification / report tabs; AGH query/effect and paged binary transport.
+- **cloudforge-tools** — seven AGH tools; bridges to the native layer through the JSON CLI.
 
-- Paths:
-  - `agnes-harness/`
-  - `CloudForge/.agh/skills/cloud-casting/`
-- Responsibility: sessions, planning, approvals, tool governance, Skills, execution records
+**Native layer (outside AGH)**
 
-**② Tool and CLI integration**
+- **cloudforge-cli.exe** — JSON CLI, file picking, diagnostics; stdin/stdout is the stable interface.
+- **C++ geometry core** — qRANSAC_SD, robust refinement, CAD export; C ABI/FFI; the desktop UI reuses the same core.
+- **Tauri desktop UI** — optional desktop entry and viewer; Tauri commands into the core.
 
-- Paths:
-  - `CloudForge/hackathon/cloudforge-tools/`
-  - `CloudForge/hackathon/cli/`
-  - `CloudForge/hackathon/cloudforge-panel/`
-- Responsibility: seven AGH tools, a JSON CLI, and the four-tab workbench panel
+**External**
 
-**③ Geometry core**
+- **CadQuery / FreeCAD** — STEP/STL generation and model preview; Python API.
 
-- Paths:
-  - `CloudForge/src-tauri/cpp/`
-  - `CloudForge/src-tauri/src/`
-- Responsibility: qRANSAC_SD detection, robust refinement, C ABI/FFI, Tauri commands, desktop UI
+The logical three-layer split remains agent orchestration (workbench + Skill), tool integration (panel / tools / CLI), and geometry core (C++); the diagram shows the runtime boundaries. Paths are in [Repository layout](#repository-layout).
 
-`agnes-harness/` is a vendored copy of the upstream Agnes Harness source with the project's Windows fixes. Build this copy rather than checking out an older upstream revision.
+### Control and data flow
 
-### Core pipeline
+A task starts with point-cloud inspection and proceeds in the order below; tool calls and approvals stay in the AGH session.
 
-1. **Inspect** - `cloudforge_cloud_info` reports point count, bounding box, span, format, and whether the loader centered the cloud.
-2. **Detect** - `cloudforge_detect` runs qRANSAC_SD with the selected preset, then re-fits each accepted primitive. Results include coefficients, inlier counts, RMSE, robust sigma, and soft score.
-3. **Feedback and retry** - the Skill inspects the metrics. Weak primitives can be re-fitted with `cloudforge_refine` on their inlier subset. A selection below 50 points is rejected by the core; the agent reports that honestly instead of forcing a result.
-4. **Verify** - `cloudforge_verify` compares a result against a truth file, including cylinder-to-cone equivalent-radius matching. In the workbench, `cloudforge_verify_current` executes the current request through a live AGH session and writes `verify.json` and `verify-report.md`.
-5. **CAD** - `cloudforge_cad_export` or the panel's CAD tab generates an executable CadQuery model and STEP/STL deliverables.
-6. **Report and export** - the report tab combines the agent's explanation, scene-specific conversions, and the actual AGH execution chain. AGH's own export command produces the audit record.
+1. **Inspect** — `cloudforge_cloud_info` reports point count, bounding box, span, format, and whether the loader centered the cloud.
+2. **Detect** — `cloudforge_detect` runs qRANSAC_SD with the selected preset, then re-fits each accepted primitive. Results include coefficients, inlier counts, RMSE, robust sigma, and soft score.
+3. **Feedback and retry** — the Skill inspects the metrics. Weak primitives can be re-fitted with `cloudforge_refine` on their inlier subset. A selection below 50 points is rejected by the core.
+4. **Verify** — `cloudforge_verify` compares a result against a truth file, including cylinder-to-cone equivalent-radius matching. In the workbench, `cloudforge_verify_current` executes the current request through a live AGH session and writes `verify.json` and `verify-report.md`.
+5. **CAD** — `cloudforge_cad_export` or the panel's CAD tab generates an executable CadQuery model and STEP/STL deliverables.
+6. **Report and export** — the report tab combines the agent's explanation, scene-specific conversions, and the actual AGH execution chain. AGH's own export command produces the audit record.
+
+> **Approval boundary:** tool calls and approvals go through the AGH session; the panel executes verification requests through the active session, never bypassing the approval channel, and exports the real execution record. Tool-level approval rules are in [Integration standards](#integration-standards).
+
+> **Failure paths:** weak primitives are retried with `cloudforge_refine`; if they still miss, ground truth is absent, or a selection has fewer than 50 points, the system reports that honestly instead of forcing a result. Without ground truth, `precisionVerified=false`.
+
+### Design decisions
+
+1. **A deterministic measurement path.** The AGH model plans and explains; C++ computes the geometry. No model is called inside the measurement path.
+2. **A panel built around AGH constraints.** The client module respects the 1 MiB service budget, 30 s service timeout, CSP restrictions, and paged binary transport instead of assuming a conventional web backend.
+3. **A native boundary.** The CLI uses stdin/stdout JSON as a stable interface, and the C++ core exposes a C ABI/FFI; the desktop UI and the AGH panel share the same core.
+4. **One engine, three report profiles.** Completion acceptance, ship/mechanical segments, and heritage components share the geometry core but use different report semantics and conversions.
+5. **Verification with a real boundary.** With ground truth, the system returns an explicit pass/fail. Without it, it reports only what it can check and keeps `precisionVerified=false`.
 
 ### Implementation notes
 
 - **Detection:** adaptive progressive qRANSAC_SD; thresholds are tuned from cloud resolution and scene scale; presets differ in enabled primitives, normal tolerance, and support rules.
 - **Refinement:** up to seven Tukey IRLS iterations. Planes use weighted PCA, spheres use a weighted algebraic solve, and cylinders/cones/tori use damped non-linear least squares with geometric constraints.
 - **Metrics:** RMSE is the geometric root-mean-square residual; `robust_sigma` is `1.4826 × MAD`; `soft_score` is a MAGSAC-style truncated Gaussian inlier ratio in `[0, 1]`.
-- **CAD:** building scans use a floor/ceiling plus full-height wall skeleton; mechanical scans use planes as trimmed slabs and cylinders/cones/spheres as parametric solids. The panel checks empty solids, invalid geometry, units, source span, and mesh coverage before presenting a model.
-- **Panel transport:** point clouds are paginated at 65,536 points per response using uint16 quantization and base64; meshes are paginated at 65,536 triangles. The panel uses AGH's query/effect service model and does not bypass its approval path.
+- **CAD:** building scans use a floor/ceiling plus full-height wall skeleton; mechanical scans cut planes into plates and turn cylinders/cones/spheres into parametric solids. The panel checks empty solids, invalid geometry, units, source-cloud span, and mesh coverage before showing a model.
+- **Panel transport:** point clouds are paged at 65,536 points with uint16 quantization and base64; meshes are paged at 65,536 triangles. The panel uses AGH's query/effect service model and does not bypass the approval channel.
 
 ## Integration Standards
 

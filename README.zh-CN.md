@@ -117,46 +117,55 @@ B 站上传版本是正式流媒体版本；仓库内提供 720p 预览，72.8 M
 
 ## 架构介绍（Architecture）
 
-下图按纵向链路展示工作台、三层组件与最终交付物，窄屏也能完整显示；具体路径与职责见下方。
+云铸围绕 AGH 运行：AGH 宿主负责会话、审批与执行轨迹；`cloudforge-panel` 是宿主内的客户端模块，`cloudforge-tools` 是宿主内的工具插件；`cloudforge-cli.exe` 和 C++ 几何核心在原生层；CadQuery/FreeCAD 在外部。AGH 模型负责规划与解释，测量链路不调用模型。
+
+### 运行时组件
 
 <p align="center">
-  <img src="docs/assets/cloudforge-architecture.zh.svg" alt="CloudForge 三层架构：工程师 → AGH Web 工作台 → 智能体编排层 → 工具与 CLI 集成层 → 几何核心层 → 参数 / CAD / 验证报告" width="420" />
+  <img src="docs/assets/cloudforge-runtime.zh.svg" alt="CloudForge 运行时架构：AGH 宿主内的 Web 工作台、cloud-casting Skill、cloudforge-panel、cloudforge-tools；原生层的 cloudforge-cli.exe 与 C++ 几何核心；外部 CadQuery/FreeCAD；交付参数、STEP/STL、验证报告与执行轨迹" width="420" />
 </p>
 
-### 三层结构
+**AGH 宿主内（同进程）**
 
-**① 智能体编排层**
+- **Web 工作台** — 会话、审批、执行轨迹；承载 panel 与 tools。
+- **cloud-casting Skill** — 规划、工具调用、读取指标、弱拟合重试。
+- **cloudforge-panel** — 点云 / CAD / 验证 / 报告四个页签；AGH query/effect 与分页二进制传输。
+- **cloudforge-tools** — 7 个 AGH 工具；通过 JSON CLI 调用原生层。
 
-- 路径：
-  - `agnes-harness/`
-  - `CloudForge/.agh/skills/cloud-casting/`
-- 职责：会话、规划、审批、工具治理、Skill、执行记录
+**原生层（进程外）**
 
-**② 工具与 CLI 集成层**
+- **cloudforge-cli.exe** — JSON CLI、文件选择、诊断输出；stdin/stdout 是稳定接口。
+- **C++ 几何核心** — qRANSAC_SD、鲁棒精拟合、CAD 导出；C ABI/FFI；桌面端复用同一核心。
+- **Tauri 桌面端** — 可选桌面入口与查看器；通过 Tauri commands 调用核心。
 
-- 路径：
-  - `CloudForge/hackathon/cloudforge-tools/`
-  - `CloudForge/hackathon/cli/`
-  - `CloudForge/hackathon/cloudforge-panel/`
-- 职责：七个 AGH 工具、JSON CLI、四页签工作台面板
+**外部**
 
-**③ 几何核心层**
+- **CadQuery / FreeCAD** — STEP/STL 生成与模型预览；Python API。
 
-- 路径：
-  - `CloudForge/src-tauri/cpp/`
-  - `CloudForge/src-tauri/src/`
-- 职责：qRANSAC_SD 检测、鲁棒精拟合、C ABI/FFI、Tauri 命令、桌面端 UI
+逻辑上仍分三层：智能体编排（工作台 + Skill）、工具与集成（panel / tools / CLI）、几何核心（C++）。运行时边界见上图；具体路径见[目录结构](#目录结构repository-layout)。
 
-`agnes-harness/` 是随仓提供的 Agnes Harness 源码副本，包含本项目的 Windows 配套修复。请直接构建这一份，不要另行检出旧的上游提交。
+### 控制与数据流
 
-### 核心流水线
+一次任务从点云侦察开始，按下面的顺序推进；工具调用与审批都留在 AGH 会话中。
 
 1. **侦察**：`cloudforge_cloud_info` 返回点数、包围盒、跨度、格式，以及加载器是否做了质心居中。
 2. **检测**：`cloudforge_detect` 按预设运行 qRANSAC_SD，再对每个保留基元做精拟合；输出系数、内点数、RMSE、鲁棒 σ 和软评分。
-3. **反馈与重试**：Skill 检查指标。弱基元可以用 `cloudforge_refine` 在其内点子集上重新拟合；少于 50 个点的选择会被核心拒绝，智能体应如实报告，而不是强行给出结果。
+3. **反馈与重试**：Skill 检查指标。弱基元可以用 `cloudforge_refine` 在其内点子集上重新拟合；少于 50 个点的选择会被核心拒绝。
 4. **验证**：`cloudforge_verify` 将结果与真值比较，支持圆柱↔圆锥的等效半径泛化匹配。工作台中的 `cloudforge_verify_current` 通过活动 AGH 会话执行当前请求，并写入 `verify.json` 与 `verify-report.md`。
 5. **CAD**：`cloudforge_cad_export` 或面板的 CAD 页生成可执行 CadQuery 模型，并导出 STEP/STL。
 6. **报告与导出**：报告页组合智能体解释、场景换算和真实 AGH 执行链；AGH 自带的导出命令生成审计记录。
+
+> **审批边界**：工具调用与审批都通过 AGH 会话；panel 通过活动会话执行验证请求，不绕过审批通道，并导出真实执行记录。工具级审批策略见[集成标准](#集成标准integration-standards)。
+
+> **失败路径**：弱基元先 `cloudforge_refine` 重试；仍不达标、无真值或少于 50 个点时，如实报告，不强行给出结果；无真值时保持 `precisionVerified=false`。
+
+### 关键设计决策
+
+1. **确定性测量链路。** AGH 模型负责规划与解释，几何由 C++ 计算；测量链路内部不调用任何模型。
+2. **按 AGH 约束设计的面板。** 客户端模块遵守 1 MiB 服务预算、30 秒服务超时、CSP 限制与分页二进制传输，而不是假设一个常规 Web 后端。
+3. **原生边界。** CLI 以 stdin/stdout JSON 作为稳定接口，C++ 核心以 C ABI/FFI 暴露；桌面端与 AGH 面板复用同一核心。
+4. **一套引擎，三份报告。** 竣工核验、船舶/机械分段、文物构件共用几何核心，但使用不同的报告语义与换算规则。
+5. **有边界的验证。** 有真值时给出明确的通过/失败；没有真值时只报告实际能检查的项，并保持 `precisionVerified=false`。
 
 ### 实现要点
 
