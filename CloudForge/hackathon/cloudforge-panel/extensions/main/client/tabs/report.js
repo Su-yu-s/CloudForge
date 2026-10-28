@@ -183,14 +183,13 @@ export function createReportTab({ ctx, data, state }) {
       const t = st.trace
       row.appendChild(el('span', { class: 'mono', text: t?.ok === false ? '无轨迹证据' : `${num(t?.eventCount)} 事件 · ${t?.model ?? '—'}` }))
       row.appendChild(el('span', { class: 'spacer' }))
-      const exportBtn = el('button', { class: 'cf-btn-sm', title: '用 AGH 官方 export 命令导出当前会话证据' }, '导出记录')
+      const analyzeBtn = el('button', { class: 'cf-btn-sm', title: '从当前点云重新执行检测、CAD 与验证' }, [icon('play', 12), el('span', { text: '一键分析' })])
+      analyzeBtn.addEventListener('click', () => void analyze(analyzeBtn))
+      row.appendChild(analyzeBtn)
+      const exportBtn = el('button', { class: 'cf-primary-btn', title: '用 AGH 官方 export 命令导出当前会话证据' }, [icon('download', 12), el('span', { text: '导出记录' })])
       exportBtn.addEventListener('click', () => void exportTrace(exportBtn))
       row.appendChild(exportBtn)
       foot.appendChild(row)
-
-      const primary = el('button', { class: 'cf-primary-btn' }, [icon('play', 13), el('span', { text: '一键分析（检测 → CAD → 验证）' })])
-      primary.addEventListener('click', () => void analyze(primary))
-      foot.appendChild(primary)
       if (st.message) foot.appendChild(el('div', { class: 'cf-msg', text: st.message }))
     },
   }

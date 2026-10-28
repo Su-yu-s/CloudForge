@@ -41,6 +41,7 @@ Jiangsu's smart-construction policy explicitly calls for **3D digital completion
 - **Verification with a real boundary.** When ground truth is available, `verify` compares parameters and angles and returns an explicit pass/fail. When it is not, the system reports only what it can actually check and keeps `precisionVerified=false`.
 - **CAD delivery.** Detection results become an executable CadQuery script, then STEP/STL. Building scans use a wall/floor/ceiling skeleton route; mechanical parts use parametric primitive solids. The exported model is checked for validity, units, bounds, and mesh coverage.
 - **A workbench, not a black box.** The AGH right-side panel has four tabs: point cloud, CAD, verification, and report. It shows the current input, primitive list, fit evidence, CAD preview, verification request, and the actual AGH execution chain.
+- **A guided workbench layout.** A four-step flow strip, a current-result summary, one primary action per tab, and progressive disclosure keep the 38-row detection list readable in a 512 px AGH panel.
 - **Audit trail by default.** Tool calls, approvals, and results stay in the AGH session. The panel exports the real execution record instead of fabricating a trace.
 
 ### What is new here

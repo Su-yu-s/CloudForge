@@ -66,6 +66,7 @@ export function mountPanel(host, ctx, { applyStartedAt } = {}) {
   // ---- 头部
   const statusDot = el('span', { class: 'cf-dot' })
   const statusText = el('span', { class: 'cf-head-status' }, '连接中…')
+  const statusPill = el('span', { class: 'cf-status-pill', dataset: { phase: 'empty' } }, [statusDot, statusText])
   const sceneSelect = el('select', { class: 'cf-select', title: '场景 profile：决定检测预设与报告语义' })
   for (const s of SCENES) sceneSelect.appendChild(el('option', { value: s.id, text: `${s.label} · ${s.report}` }))
   sceneSelect.addEventListener('change', () => {
@@ -79,24 +80,34 @@ export function mountPanel(host, ctx, { applyStartedAt } = {}) {
   })
 
   // 场景 profile 是**全局过滤器**（决定检测预设与报告语义），语义上不属于标题，
-  // 挤在标题行里会和标题抢宽度、还会把长 preset 名截断，所以单独一条工具栏
+  // 挤在标题行里会和标题抢宽度、还会把长 preset 名截断，所以单独一条工具栏。
   // 折叠按钮不放这里：宿主已有同款图标按钮模式（图二 #sidebar-toggle），
   // 我们的折叠开关注册到会话头栏槽 conversation.session.header.utilities，
   // 由 index.js 渲染并复用宿主的 .icon-button 样式——两棵 React 树靠 rail store 同步。
   const railBtn = el('button', { class: 'cf-icon-btn', title: '折叠面板', dataset: { cf: 'rail' } }, [icon('collapse')])
+  const helpBtn = el('button', {
+    class: 'cf-icon-btn cf-help-btn',
+    title: '数据说明：uint16 量化 · 单批 65,536 点 · 服务端上限 1 MiB',
+    'aria-label': '数据说明',
+  }, '?')
+  const refreshBtn = el('button', { class: 'cf-icon-btn', title: '刷新', dataset: { cf: 'refresh' } }, [icon('refresh')])
+  const headActions = el('div', { class: 'cf-head-actions' }, [helpBtn, refreshBtn])
   const header = el('header', { class: 'cf-head' }, [
     el('div', { class: 'cf-head-text' }, [
-      el('div', { class: 'cf-head-title' }, 'CloudForge 控制台'),
-      el('div', { class: 'cf-head-sub' }, [statusDot, statusText]),
+      el('div', { class: 'cf-head-title' }, '云铸 CloudForge'),
+      el('div', { class: 'cf-head-sub' }, [
+        statusPill,
+        el('span', { class: 'cf-head-tagline', text: '点云逆向工程工作台' }),
+      ]),
     ]),
-    el('button', { class: 'cf-icon-btn', title: '刷新', dataset: { cf: 'refresh' } }, [icon('refresh')]),
+    headActions,
   ])
   // 没有活动会话时宿主不渲染会话头栏（该槽是 session 作用域），折叠开关会无处可寻，
   // 此时才退回面板内置那颗，保证任何状态下都能收起
-  if (!ctx.session?.sessionId) header.appendChild(railBtn)
+  if (!ctx.session?.sessionId) headActions.appendChild(railBtn)
   root.appendChild(header)
 
-  // ---- 页签条
+  // ---- 页签条（先创建，稍后按“流程带 → 摘要 → 下一步 → 页签”的顺序挂载）
   const tabBar = el('nav', { class: 'cf-tabs' })
   const tabButtons = new Map()
   for (const t of TABS) {
@@ -105,11 +116,55 @@ export function mountPanel(host, ctx, { applyStartedAt } = {}) {
     tabBar.appendChild(b)
     tabButtons.set(t.id, b)
   }
-  root.appendChild(tabBar)
 
   // 场景过滤条：独占一行、整宽，长 preset 名不会再被截断
-  const toolbar = el('div', { class: 'cf-toolbar' }, [sceneSelect])
+  const toolbar = el('div', { class: 'cf-toolbar' }, [
+    el('span', { class: 'cf-scene-label', text: '场景' }),
+    sceneSelect,
+  ])
   root.appendChild(toolbar)
+
+  // ---- 流程带：点云 → 检测 → CAD → 验证/报告
+  const flow = el('div', { class: 'cf-flow', 'aria-label': '工作流状态' })
+  const flowSteps = []
+  for (const [i, label] of ['点云', '检测', 'CAD', '验证 / 报告'].entries()) {
+    const dot = el('span', { class: 'cf-flow-dot', text: String(i + 1) })
+    const step = el('div', { class: 'cf-flow-step', dataset: { state: 'next' } }, [
+      dot,
+      el('span', { class: 'cf-flow-label', text: label }),
+    ])
+    flowSteps.push({ step, dot })
+    flow.appendChild(step)
+  }
+  root.appendChild(flow)
+
+  // ---- 摘要：当前工作流 + 点数/覆盖率/上次运行
+  const summaryName = el('span', { text: '尚未选择点云' })
+  const summaryBadge = el('span', { class: 'cf-summary-badge hidden', text: '本次结果已就绪' })
+  const summaryMeta = el('div', { class: 'cf-summary-meta', text: '选择点云后开始检测' })
+  const summaryCard = el('div', { class: 'cf-summary-card' }, [
+    el('div', { class: 'cf-summary-main' }, [
+      el('div', { class: 'cf-summary-title' }, [summaryName, summaryBadge]),
+      summaryMeta,
+    ]),
+  ])
+  root.appendChild(summaryCard)
+
+  // ---- 下一步提示：只在点云页、已有结果时显示
+  const nextText = el('p', { class: 'cf-next-text' })
+  const nextBtn = el('button', { class: 'cf-next-btn', type: 'button' })
+  nextBtn.addEventListener('click', () => {
+    const target = nextTarget()
+    if (target) selectTab(target)
+  })
+  const nextCard = el('div', { class: 'cf-next-card hidden' }, [
+    el('span', { class: 'cf-next-icon', text: '✦' }),
+    nextText,
+    nextBtn,
+  ])
+  root.appendChild(nextCard)
+
+  root.appendChild(tabBar)
 
   // ---- 内容区
   const content = el('div', { class: 'cf-content' })
@@ -368,6 +423,83 @@ export function mountPanel(host, ctx, { applyStartedAt } = {}) {
     }
   })
 
+  function workflowTime(wf) {
+    const value = wf?.updatedMs ?? (wf?.updated ? Date.parse(wf.updated) : NaN)
+    if (!Number.isFinite(value)) return ''
+    try {
+      return new Date(value).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+    } catch {
+      return ''
+    }
+  }
+
+  function hasCadArtifact() {
+    return Array.isArray(state.report?.artifacts) && state.report.artifacts.some((a) => a.kind === 'step' || a.kind === 'stl')
+  }
+
+  function verificationDone() {
+    const value = state.report?.currentVerification
+    const status = value?.status || value?.state
+    return !!status && !['queued', 'running', 'pending', 'error', 'stale'].includes(status)
+  }
+
+  function updateFlow() {
+    const hasWorkflow = !!state.workflow
+    const hasCad = hasCadArtifact()
+    const verified = verificationDone()
+    const states = !hasWorkflow
+      ? ['active', 'next', 'next', 'next']
+      : !hasCad
+        ? ['done', 'done', 'active', 'next']
+        : !verified
+          ? ['done', 'done', 'done', 'next']
+          : ['done', 'done', 'done', 'done']
+    flowSteps.forEach(({ step, dot }, i) => {
+      step.dataset.state = states[i]
+      dot.textContent = states[i] === 'done' ? '✓' : String(i + 1)
+    })
+  }
+
+  function updateSummary() {
+    const wf = state.workflow
+    if (!wf) {
+      summaryName.textContent = '尚未选择点云'
+      summaryBadge.classList.add('hidden')
+      summaryMeta.textContent = state.message || '选择点云后开始检测'
+      return
+    }
+    summaryName.textContent = wf.name || '当前工作流'
+    summaryBadge.classList.remove('hidden')
+    const bits = []
+    if (wf.points != null) bits.push(`${num(wf.points)} 点`)
+    if (wf.coverage != null) bits.push(`覆盖 ${pct(wf.coverage)}`)
+    if (wf.preset) bits.push(wf.preset)
+    const time = workflowTime(wf)
+    if (time) bits.push(`上次 ${time}`)
+    summaryMeta.textContent = bits.join(' · ') || '结果已就绪'
+  }
+
+  function nextTarget() {
+    if (!state.workflow) return 'cloud'
+    if (!hasCadArtifact()) return 'cad'
+    if (!verificationDone()) return 'verify'
+    return 'report'
+  }
+
+  function updateNext() {
+    const show = state.tab === 'cloud' && !!state.workflow
+    nextCard.classList.toggle('hidden', !show)
+    if (!show) return
+    const target = nextTarget()
+    const copy = {
+      cad: '生成 CAD，把当前检测结果变成可编辑模型。',
+      verify: '把当前模型交给 AGH 验证，留下执行记录。',
+      report: '查看报告，导出本次执行记录。',
+    }[target] || '继续完成当前工作流。'
+    nextText.replaceChildren(el('b', { text: '下一步：' }), el('span', { text: copy }))
+    nextBtn.textContent = target === 'cad' ? '去 CAD' : target === 'verify' ? '去验证' : '查看报告'
+  }
+
   // ---- 渲染
   function render() {
     root.dataset.rail = state.rail ? '1' : '0'
@@ -383,9 +515,13 @@ export function mountPanel(host, ctx, { applyStartedAt } = {}) {
       if (activeTabId) tabs[activeTabId].activate?.()
     }
     statusDot.dataset.phase = state.phase
+    statusPill.dataset.phase = state.phase
     statusText.textContent = statusLine()
     sceneSelect.classList.toggle('hidden', state.rail)
     toolbar.classList.toggle('hidden', state.rail)
+    updateFlow()
+    updateSummary()
+    updateNext()
     // 折叠按钮图标随状态翻转，轨道态才读得出「可以展开」
     railBtn.title = state.rail ? '展开面板' : '收起面板'
     railBtn.replaceChildren(icon(state.rail ? 'expand' : 'collapse'))
@@ -401,18 +537,8 @@ export function mountPanel(host, ctx, { applyStartedAt } = {}) {
   function statusLine() {
     if (state.phase === 'loading') return '读取中…'
     if (state.phase === 'busy') return '执行中…'
-    if (state.phase === 'empty') return state.message ? '待命' : '待命'
-    const w = state.workflow
-    const selected = state.cloudOverride || state.cloudPath
-    const pathKey = (value) => String(value || '').replace(/\\/g, '/').toLowerCase()
-    if (selected && (!w?.sourceCloud || pathKey(selected) !== pathKey(w.sourceCloud))) {
-      const points = state.progress?.total
-      return `${points != null ? `${num(points)} 点 · ` : ''}待检测`
-    }
-    if (!w) return '已连接 · 无结果'
-    const cov = w.coverage ? ` · 覆盖 ${pct(w.coverage)}` : ''
-    const el2 = w.elapsedMs != null ? ` · ${w.elapsedMs} ms` : ''
-    return `${num(w.points)} 点 · ${w.shapes} 基元${cov}${el2}`
+    if (state.phase === 'empty') return '待命'
+    return '已连接'
   }
 
   // 只留 DOM 时间戳供性能检查，不把实现细节放进产品界面。

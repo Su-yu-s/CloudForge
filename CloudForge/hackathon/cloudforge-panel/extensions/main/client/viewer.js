@@ -55,7 +55,7 @@ function decimate(positions, count) {
 
 /** 视口公用骨架：renderer / scene / camera(Z-up) / controls / ResizeObserver / 渲染循环 */
 function createStage(container, { onPick } = {}) {
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: false })
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true })
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
   renderer.setClearColor(COLORS.bg, 1)
   container.appendChild(renderer.domElement)
@@ -64,6 +64,7 @@ function createStage(container, { onPick } = {}) {
   renderer.domElement.classList.add('cf-canvas')
 
   const scene = new THREE.Scene()
+  scene.background = new THREE.Color(COLORS.bg)
   // Lambert 之类的材质需要光；点云用 PointsMaterial 不受影响，但共用一个场景
   scene.add(new THREE.AmbientLight(0xffffff, 1.35))
   const key = new THREE.DirectionalLight(0xffffff, 1.6)

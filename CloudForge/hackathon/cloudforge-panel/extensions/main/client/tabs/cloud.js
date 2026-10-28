@@ -19,7 +19,7 @@ const samePath = (a, b) => !!a && !!b && keyPath(a) === keyPath(b)
 const fileName = (path) => String(path || '').split(/[\\/]/).pop()
 
 const MODES = [
-  { id: 'detect', label: '检测结果' },
+  { id: 'detect', label: '检测' },
   { id: 'raw', label: '原始' },
   { id: 'inliers', label: '内点' },
   { id: 'remaining', label: '剩余' },
@@ -111,9 +111,37 @@ export function createCloudTab({ ctx, data, state }) {
 
   const listWrap = el('div', { class: 'cf-scroll' })
   const picker = el('div', { class: 'cf-picker' })
+  const shapeHead = el('div', { class: 'cf-shape-head' })
+  const shapeTitle = el('h3', { text: '检测结果' })
+  const shapeCount = el('span', { class: 'cf-shape-count', text: '0' })
+  const chips = el('div', { class: 'cf-chips', 'aria-label': '筛选检测基元' })
+  const chipDefs = [['all', '全部'], ['plane', '平面'], ['low', '需关注']]
+  const chipButtons = new Map()
+  for (const [id, label] of chipDefs) {
+    const b = el('button', { class: 'cf-chip', type: 'button', dataset: { filter: id } }, `${label} 0`)
+    b.addEventListener('click', () => {
+      shapeFilter = id
+      showAllShapes = false
+      listDirty = true
+      renderList()
+    })
+    chips.appendChild(b)
+    chipButtons.set(id, b)
+  }
+  shapeHead.append(shapeTitle, shapeCount, chips)
   const shapeList = el('div', { class: 'cf-list' })
+  const moreRow = el('div', { class: 'cf-shape-more hidden' })
+  const moreBtn = el('button', { type: 'button' })
+  moreBtn.addEventListener('click', () => {
+    showAllShapes = !showAllShapes
+    listDirty = true
+    renderList()
+  })
+  moreRow.appendChild(moreBtn)
   listWrap.appendChild(picker)
+  listWrap.appendChild(shapeHead)
   listWrap.appendChild(shapeList)
+  listWrap.appendChild(moreRow)
   root.appendChild(listWrap)
 
   let viewer = null
@@ -126,6 +154,8 @@ export function createCloudTab({ ctx, data, state }) {
   let requestedMode = 'detect'
   let visible = false
   let listDirty = true
+  let shapeFilter = 'all'
+  let showAllShapes = false
   let loadController = null
   let loadJob = null
   let framedCloud = null
@@ -148,7 +178,8 @@ export function createCloudTab({ ctx, data, state }) {
     sourceLabel.textContent = source ? `当前点云：${fileName(source)}` : '请先选择要检测的点云'
     sourceLabel.title = source || ''
     detectBtn.disabled = !source || busy
-    detectBtn.textContent = busy ? (job.startError || job.pollError ? '检测状态待确认' : '正在检测…') : '开始检测'
+    detectBtn.textContent = busy ? (job.startError || job.pollError ? '检测状态待确认' : '正在检测…') : state.workflow ? '重新检测' : '开始检测'
+    detectBtn.classList.toggle('is-secondary', !!state.workflow && !busy)
     const status = job?.startError || job?.pollError || job?.stage || ''
     jobNote.textContent = status ? `${fileName(job.sourceCloud)}：${status}` : ''
     jobNote.classList.toggle('hidden', !status)
@@ -371,14 +402,38 @@ export function createCloudTab({ ctx, data, state }) {
     listDirty = false
     shapeList.replaceChildren()
     const shapes = scene?.shapes ?? []
+    const isPlane = (s) => s.type === 'Plane' || s.type === 'plane' || typeCn(s.type) === '平面'
+    const isLow = (s) => typeof s.soft_score === 'number' && s.soft_score < 0.82
+    const planeCount = shapes.filter(isPlane).length
+    const lowCount = shapes.filter(isLow).length
+    const filtered = shapeFilter === 'plane' ? shapes.filter(isPlane) : shapeFilter === 'low' ? shapes.filter(isLow) : shapes
+    const visibleShapes = showAllShapes ? filtered : filtered.slice(0, 6)
+
+    shapeCount.textContent = String(shapes.length)
+    for (const [id, label] of chipDefs) {
+      const count = id === 'all' ? shapes.length : id === 'plane' ? planeCount : lowCount
+      const button = chipButtons.get(id)
+      button.textContent = `${label} ${count}`
+      button.classList.toggle('active', shapeFilter === id)
+    }
+
     if (!shapes.length) {
+      shapeHead.classList.add('hidden')
+      moreRow.classList.add('hidden')
       const detected = scene?.input_point_count != null || !!scene?.preset
       shapeList.appendChild(el('div', { class: 'cf-empty' }, detected
         ? '已完成检测，未检出几何基元，可切换场景后重试'
         : '暂无检测结果——选择点云后点击上方“开始检测”'))
       return
     }
-    for (const s of shapes) {
+    shapeHead.classList.remove('hidden')
+    if (!filtered.length) {
+      moreRow.classList.add('hidden')
+      shapeList.appendChild(el('div', { class: 'cf-empty' }, '当前筛选没有基元'))
+      return
+    }
+
+    for (const s of visibleShapes) {
       const row = el('div', {
         class: `cf-row${activeId === s.id ? ' active' : ''}${hidden.has(s.id) ? ' dim' : ''}`,
         dataset: { id: String(s.id) },
@@ -397,8 +452,8 @@ export function createCloudTab({ ctx, data, state }) {
           el('i', { dataset: { score: String(Math.round(Math.min(1, Math.max(0, s.soft_score ?? 0)) * 20)) } }),
         ]),
       ])
-      // 「只看这个」用图标而不是文字：43 行列表里每行都一个 "solo" 文字按钮，
-      // 重复 43 次的文案会变成噪音；图标 + title 保留可发现性与悬停说明。
+      // 「只看这个」用图标而不是文字：大量列表里每行都一个 "solo" 文字按钮，
+      // 重复的文案会变成噪音；图标 + title 保留可发现性与悬停说明。
       const solo = el('button', { class: 'cf-btn-xs cf-solo', title: '只看这个基元', 'aria-label': `只看基元 #${s.id}` }, [icon('iso', 12)])
       solo.addEventListener('click', (ev) => {
         ev.stopPropagation()
@@ -414,6 +469,8 @@ export function createCloudTab({ ctx, data, state }) {
       })
       shapeList.appendChild(row)
     }
+    moreRow.classList.toggle('hidden', filtered.length <= 6)
+    moreBtn.textContent = showAllShapes ? '收起列表' : `查看全部 ${filtered.length} 个基元 →`
   }
 
   function updateTag() {
@@ -697,18 +754,18 @@ export function createCloudTab({ ctx, data, state }) {
       foot.appendChild(row)
 
       if (st.progress && st.progress.total) {
-        // 用 <progress> 的 value/max **属性**而不是 inline width：CSP 的 style-src 不含
-        // 'unsafe-inline'，style 属性会被浏览器拦掉
-        const p = document.createElement('progress')
-        p.className = 'cf-progress'
-        p.max = st.progress.total
-        p.value = Math.min(st.progress.loaded, st.progress.total)
-        foot.appendChild(p)
+        if (st.progress.loaded < st.progress.total) {
+          // 用 <progress> 的 value/max **属性**而不是 inline width：CSP 的 style-src 不含
+          // 'unsafe-inline'，style 属性会被浏览器拦掉
+          const p = document.createElement('progress')
+          p.className = 'cf-progress'
+          p.max = st.progress.total
+          p.value = Math.min(st.progress.loaded, st.progress.total)
+          foot.appendChild(p)
+        }
         foot.appendChild(
           el('div', { class: 'cf-foot-row' }, [
             el('span', { class: 'mono', text: `已载入 ${num(st.progress.loaded)} / ${num(st.progress.total)}` }),
-            el('span', { class: 'spacer' }),
-            el('span', { class: 'dim', text: 'uint16 量化 · 单批 65,536 点 · 服务端上限 1 MiB' }),
           ]),
         )
       }
