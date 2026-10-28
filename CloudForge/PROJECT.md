@@ -132,6 +132,7 @@ npm run tauri dev
 | 真实数据演示产物 | hackathon/demo-data/ | ✅ |
 | AGH 轨迹留证 | AGH 会话导出 | ⏳ 等 Agnes 模型 Key |
 | 3–5 分钟演示视频 | [B 站](https://b23.tv/wLaIodS) | ✅ 已发布 |
+| 真实运行截图与实测 | 根 README · Screenshots / Live Verification | ✅ |
 
 ## 五、许可与声明
 

@@ -71,6 +71,34 @@
 
 B 站上传版本是正式流媒体版本；仓库内提供 720p 预览，72.8 MB 母版不随仓库提交。
 
+## 真实运行截图（Screenshots from the Live Run）
+
+以下截图来自**真实 AGH Web 工作台** `http://127.0.0.1:4177/`，使用已安装的云铸客户端模块和本机配置的 `agnes-3.0-flash` 模型。面板加载随仓 `livingroom-run` 结果：**196,133 点、38 个基元、81.5% 覆盖率**；CAD 页渲染 **756 三角面**预览网格。
+
+![真实 AGH 工作台中的云铸面板](docs/assets/screenshot-agh-workbench.png)
+
+<sub>左侧是真实 AGH 会话与轨迹，右侧是云铸面板；聊天区内容来自之前的一次云铸演示会话。</sub>
+
+<details>
+<summary><b>展开四个面板页签</b>（点云 / CAD / 验证 / 报告）</summary>
+
+| 点云 | CAD |
+| --- | --- |
+| ![点云页签](docs/assets/screenshot-agh-panel.png) | ![CAD 页签](docs/assets/screenshot-agh-panel-cad.png) |
+| **验证** | **报告** |
+| ![验证页签](docs/assets/screenshot-agh-panel-verify.png) | ![报告页签](docs/assets/screenshot-agh-panel-report.png) |
+
+</details>
+
+这次真实运行展示：
+
+- **点云**：真实 196,133 点云、基元内点着色、RMSE、鲁棒 σ 和 38 行基元清单。
+- **CAD**：面板直接读取 `livingroom-model.stl`，显示 756 三角面、包围盒 2.914 × 1.595 × 1.527 m。
+- **验证**：回归套件 **11/11 PASS** 与噪声 × 采样鲁棒性网格；表单仍明确“没有真值就不给精度证书”。
+- **报告**：真实 AGH 执行链：12 次工具调用、25 条 tool/step/turn verifier 判定、模型 `agnes-3.0-flash`。
+
+> `hackathon/cloudforge-panel/tools/preview.mjs` 是不依赖 AGH 的离线预览台；以上截图来自真实 AGH 工作台，不是预览台。
+
 ## 架构介绍（Architecture）
 
 ```mermaid
@@ -346,6 +374,14 @@ $tsx = '..\agnes-harness\node_modules\.bin\tsx.cmd'
 
 打开 `http://127.0.0.1:4177/`，信任 CloudForge 工作区，启用 `cloud-casting` Skill，并在"设置"中配置自己的 Agnes 模型。仓库不包含模型 Key、密码或共享账号。
 
+如果 AGH 报 `credential store is unavailable`，移除 `~/.agh` 上被沙箱注入的 ACE（本次真实截图机器上就需要这一步）：
+
+```powershell
+icacls "$env:USERPROFILE\.agh" /remove:g SU\CodexSandboxUsers
+```
+
+仅在 ACE 存在时执行；这是 [PANEL-AGH.md](CloudForge/hackathon/cloudforge-panel/PANEL-AGH.md) 记录的修复，不会改动会话或凭据文件。
+
 ### 6. 运行演示
 
 先使用随仓小样本：
@@ -380,7 +416,7 @@ npm.cmd run tauri build -- --no-bundle
 | `agnes-harness/` | 随仓 AGH 源码及本项目修复 |
 | `data/` | Redwood/3DMatch 室内扫描与 Open3D 示例片段 |
 | `deliverables/` | 海报、政策页与演示 PPT 素材 |
-| `docs/assets/` | README 视觉素材与 720p 演示预览 |
+| `docs/assets/` | README 视觉素材、真实运行截图与 720p 演示预览 |
 | `复现指南.md` | 完整 Windows 复现指南 |
 | `BUILD-CHECKLIST.md` | 历史构建记录与 Windows 已知问题 |
 | `依赖清单.txt`、`CAD依赖锁定-Windows-Python312.txt` | 工具链与 Python 依赖快照 |
@@ -398,6 +434,50 @@ npm.cmd run tauri build -- --no-bundle
 | 工具级自测 | 7 / 7 PASS | `CloudForge/hackathon/cloudforge-tools/tools.test.mjs` |
 
 测试套件还记录了一次可比的 19.6 万点运行，检测耗时 986 ms。耗时会随机型、输入和预设变化。
+
+## 实际运行验证（2026-10-28）
+
+以下为开发机上的新鲜运行记录，与上面的历史产物分开。
+
+| 项 | 值 |
+| --- | --- |
+| 操作系统 | Windows 10/11 x64 |
+| Node.js / pnpm | 24.15.0 / 10.34.5 |
+| CMake / MSVC | 4.3.0 / MSVC 14.51.36231（便携版 Visual Studio 2022） |
+| AGH | 从 `agnes-harness/` 执行 `pnpm install --frozen-lockfile` 与 `pnpm --filter @agnes/cli build:local` |
+| 模型 | `agnes-3.0-flash`（本机配置；仓库不含 Key） |
+
+### AGH 与面板
+
+- AGH 启动于 `http://127.0.0.1:4177/`，工作台显示 **本地后台已连接**。
+- 已安装的 `cloudforge-panel` 客户端模块加载 `livingroom-run`：**196,133 点、38 个基元、81.5% 覆盖率**。
+- CAD 页读取 `livingroom-model.stl`：**756 三角面**，包围盒 **2.914 × 1.595 × 1.527 m**。
+- 验证页显示回归套件 **11/11 PASS** 与鲁棒性网格。
+- 报告页显示 **12 次工具调用**、**25 条 verifier 判定**，模型 `agnes-3.0-flash`。
+
+### CLI 新鲜运行
+
+命令（路径已缩短）：
+
+```powershell
+cloudforge-cli.exe info CloudForge/hackathon/demo-data/cloud_bin_0.ply
+cloudforge-cli.exe detect CloudForge/hackathon/demo-data/cloud_bin_0.ply --preset outdoor --output <temp>/demo-detect
+cloudforge-cli.exe synth <temp>/synth.pcd --scene plane-cylinder
+cloudforge-cli.exe detect <temp>/synth.pcd --preset mechanical --output <temp>/synth-detect
+cloudforge-cli.exe verify --truth <temp>/synth.truth.json --result <temp>/synth-detect/result.json --tol 0.005 --angle-deg 2
+```
+
+| 步骤 | 结果 |
+| --- | --- |
+| `info` | 196,133 点；PLY；跨度 3.4075 m；`centered=false` |
+| 真实 `detect`（outdoor） | **36 个平面基元**；158,859 个内点；37,274 个剩余点 |
+| `synth` | 65,000 点；平面 + 圆柱；写出真值 JSON |
+| 合成 `detect`（mechanical） | 5 个基元：3 个平面 + 2 个圆锥（圆柱泛化为圆锥） |
+| 合成 `verify` | **PASS 2/2**；平面误差 1.649×10⁻⁵ m / 0.0059°；圆柱泛化误差 5.93×10⁻⁴ m / 0.076° |
+
+面板展示的是随仓 38 基元的 `livingroom-run` 产物；本次 CLI 用 `outdoor` 预设重新检测得到 36 个平面。基元数量会随预设和预处理变化；上面的验证数字来自本次合成基准运行。
+
+> CLI 使用仅授权研究用途的 `ransac_sd` 源码在本机构建；该源码与构建产物不随仓库提交。
 
 ## 范围、诚实边界与已知限制
 

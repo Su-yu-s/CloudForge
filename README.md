@@ -71,6 +71,34 @@ The demo walks through the complete story:
 
 The Bilibili upload is the canonical streaming copy. A 720p preview is included in the repository; the 72.8 MB master is not committed.
 
+## Screenshots from the Live Run
+
+These screenshots were captured from the **real AGH Web workbench** at `http://127.0.0.1:4177/` with the installed CloudForge client module and the locally configured `agnes-3.0-flash` model. The panel loaded the bundled `livingroom-run` result: **196,133 points, 38 primitives, 81.5% coverage**. The CAD tab rendered the **756-triangle** preview mesh.
+
+![CloudForge panel inside the live AGH workbench](docs/assets/screenshot-agh-workbench.png)
+
+<sub>The left side is the real AGH session and trajectory; the right side is the CloudForge panel. The chat content is a prior CloudForge demo session.</sub>
+
+<details>
+<summary><b>Open the four panel tabs</b> (point cloud / CAD / verification / report)</summary>
+
+| Point cloud | CAD |
+| --- | --- |
+| ![Point cloud tab](docs/assets/screenshot-agh-panel.png) | ![CAD tab](docs/assets/screenshot-agh-panel-cad.png) |
+| **Verification** | **Report** |
+| ![Verification tab](docs/assets/screenshot-agh-panel-verify.png) | ![Report tab](docs/assets/screenshot-agh-panel-report.png) |
+
+</details>
+
+The live run demonstrates:
+
+- **Point cloud:** the actual 196,133-point cloud with per-primitive inlier coloring, RMSE, robust sigma, and a 38-row primitive list.
+- **CAD:** the panel reads `livingroom-model.stl` directly and reports 756 triangles and a 2.914 × 1.595 × 1.527 m bounding box.
+- **Verification:** the regression suite reports **11/11 PASS** and the noise × sampling robustness grid; the form still states that no ground truth means no precision certificate.
+- **Report:** the panel shows the real AGH execution chain: 12 tool calls, 25 tool/step/turn verifier judgments, and the `agnes-3.0-flash` model.
+
+> The standalone preview at `hackathon/cloudforge-panel/tools/preview.mjs` is an offline UI harness; it deliberately bypasses AGH. The screenshots above come from the real AGH workbench, not the preview.
+
 ## Architecture
 
 ```mermaid
@@ -346,6 +374,14 @@ $tsx = '..\agnes-harness\node_modules\.bin\tsx.cmd'
 
 Open `http://127.0.0.1:4177/`, trust the CloudForge workspace, enable the `cloud-casting` Skill, and configure your own Agnes model in **Settings**. The repository does not contain model keys, passwords, or a shared account.
 
+If AGH stops with `credential store is unavailable`, remove the sandbox-injected ACE from the AGH home. This was required on the machine used for the live screenshots:
+
+```powershell
+icacls "$env:USERPROFILE\.agh" /remove:g SU\CodexSandboxUsers
+```
+
+Only remove this ACE if it exists. It is the documented fix in [PANEL-AGH.md](CloudForge/hackathon/cloudforge-panel/PANEL-AGH.md) and does not touch sessions or credential files.
+
 ### 6. Run a demo
 
 Use the bundled small samples first:
@@ -380,7 +416,7 @@ The full Windows troubleshooting guide is [复现指南.md](复现指南.md). Pa
 | `agnes-harness/` | Vendored Agnes Harness source with project fixes |
 | `data/` | Redwood/3DMatch indoor scans and Open3D demo fragments |
 | `deliverables/` | Posters, policy page, and presentation assets |
-| `docs/assets/` | README visuals and the 720p demo preview |
+| `docs/assets/` | README visuals, live-run screenshots, and the 720p demo preview |
 | `复现指南.md` | Detailed Windows reproduction guide (Chinese) |
 | `BUILD-CHECKLIST.md` | Historical build log and known Windows issues |
 | `依赖清单.txt`, `CAD依赖锁定-Windows-Python312.txt` | Toolchain and Python dependency snapshots |
@@ -398,6 +434,50 @@ These are recorded results from the repository's test artifacts, not a fresh run
 | Tool self-test | 7 / 7 PASS | `CloudForge/hackathon/cloudforge-tools/tools.test.mjs` |
 
 The test suite also records a 986 ms detection for a comparable 196k-point run. Timing varies by machine, input, and preset.
+
+## Live Verification (2026-10-28)
+
+This section records a fresh run on the development machine, separate from the historical artifacts above.
+
+| Item | Value |
+| --- | --- |
+| OS | Windows 10/11 x64 |
+| Node.js / pnpm | 24.15.0 / 10.34.5 |
+| CMake / MSVC | 4.3.0 / MSVC 14.51.36231 (portable Visual Studio 2022) |
+| AGH | Built from `agnes-harness/` with `pnpm install --frozen-lockfile` and `pnpm --filter @agnes/cli build:local` |
+| Model | `agnes-3.0-flash` (configured locally; no key is stored in the repository) |
+
+### AGH and panel
+
+- AGH started at `http://127.0.0.1:4177/`; the workbench reported **本地后台已连接** (local backend connected).
+- The installed `cloudforge-panel` client module loaded `livingroom-run`: **196,133 points, 38 primitives, 81.5% coverage**.
+- The CAD tab read `livingroom-model.stl`: **756 triangles**, bounding box **2.914 × 1.595 × 1.527 m**.
+- The verification tab reported **11/11 PASS** for the regression suite plus the robustness grid.
+- The report tab showed **12 tool calls**, **25 verifier judgments**, and model `agnes-3.0-flash`.
+
+### Fresh CLI run
+
+Commands (paths shortened):
+
+```powershell
+cloudforge-cli.exe info CloudForge/hackathon/demo-data/cloud_bin_0.ply
+cloudforge-cli.exe detect CloudForge/hackathon/demo-data/cloud_bin_0.ply --preset outdoor --output <temp>/demo-detect
+cloudforge-cli.exe synth <temp>/synth.pcd --scene plane-cylinder
+cloudforge-cli.exe detect <temp>/synth.pcd --preset mechanical --output <temp>/synth-detect
+cloudforge-cli.exe verify --truth <temp>/synth.truth.json --result <temp>/synth-detect/result.json --tol 0.005 --angle-deg 2
+```
+
+| Step | Result |
+| --- | --- |
+| `info` | 196,133 points; PLY; span 3.4075 m; `centered=false` |
+| Real `detect` (outdoor) | **36 plane primitives**; 158,859 inliers; 37,274 remaining |
+| `synth` | 65,000 points; plane + cylinder; truth JSON written |
+| Synthetic `detect` (mechanical) | 5 primitives: 3 planes + 2 cones (cylinder generalized as cone) |
+| Synthetic `verify` | **PASS 2/2**; plane error 1.649×10⁻⁵ m / 0.0059°; cylinder generalized error 5.93×10⁻⁴ m / 0.076° |
+
+The panel uses the bundled 38-primitive `livingroom-run` artifact; the fresh CLI run produced 36 planes with the `outdoor` preset. Primitive counts vary with preset and preprocessing; the verification numbers above are from the fresh synthetic run.
+
+> The CLI was built locally with the research-only `ransac_sd` source. That source and the build outputs are not committed.
 
 ## Scope, Honesty, and Known Boundaries
 

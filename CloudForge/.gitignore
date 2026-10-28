@@ -26,6 +26,7 @@ outputs/
 .playwright-mcp/
 *.step
 *.stl
+!hackathon/demo-data/livingroom-run/livingroom-model.stl
 demo.pcd
 demo.truth.json
 demo_detect/

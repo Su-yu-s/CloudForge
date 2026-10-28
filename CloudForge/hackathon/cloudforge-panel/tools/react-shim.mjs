@@ -1,6 +1,14 @@
-// 预览台用的 react shim：只实现 client/index.js 用到的 createElement（支持 ref 回调）。
-// 之所以要它：client/index.js 里 `import { createElement } from 'react'` 是 AGH 的写法
-// （react 在 AGH 的 import map 白名单里），在预览台里没有 import map，就用这个等价物顶上。
+// 预览台用的 react shim：实现 client/index.js 用到的 createElement 与 hooks 占位。
+// 之所以要它：client/index.js 里 `import { createElement, useEffect, useState } from 'react'`
+// 是 AGH 的写法（react 在 AGH 的 import map 白名单里），预览台没有 import map。
+export function useState(initial) {
+  return [typeof initial === 'function' ? initial() : initial, () => {}]
+}
+
+export function useEffect() {
+  /* 预览台只做一次静态挂载；订阅/清理由真实宿主负责。 */
+}
+
 export function createElement(tag, props, ...children) {
   const node = document.createElement(tag)
   for (const [k, v] of Object.entries(props ?? {})) {
@@ -23,4 +31,4 @@ export function createElement(tag, props, ...children) {
   return node
 }
 
-export default { createElement }
+export default { createElement, useEffect, useState }

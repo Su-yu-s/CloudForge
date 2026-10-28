@@ -3,7 +3,7 @@
 ## 结论
 
 - 已选取工作区内最新的 CloudForge 检测结果：`hackathon/demo-data/livingroom-run/result.json`。
-- 检测结果共 38 个 Plane，源点云为 `data/livingroom1-fragments-ply/cloud_bin_0.ply`（通过同目录 `info.json` 确认），点数 196,133，包围盒 span 约 3.407 m。
+- 检测结果共 38 个 Plane，源点云为 `../cloud_bin_0.ply`（通过同目录 `info.json` 确认），点数 196,133，包围盒 span 约 3.407 m。
 - 因全部形状为 Plane，已按 cloud-casting 规则走“建筑剖面骨架”路线（floor/ceil + 竖直墙），生成 CadQuery 模型并导出 STEP：`hackathon/demo-data/livingroom-run/livingroom-latest.step`。
 - STEP 生成成功：14 个 solids，bbox 约 `2.91 x 1.60 x 1.53 m`，文件 837,027 bytes；bbox 未超过点云 span 的 1.5 倍（3.407 × 1.5 = 5.111 m），通过尺寸合理性检查。
 - 已尝试执行 FreeCAD verify 流程，但当前环境未安装 FreeCAD（`hackathon/tools/find-freecad.py` 无可用候选路径），因此 `freecad-verify.py` 的 OpenCASCADE 二次验证未能执行；该验证缺口已在“验证结果”中如实说明。
@@ -13,7 +13,7 @@
 ## 输入概况
 
 - 检测结果：`hackathon/demo-data/livingroom-run/result.json`
-- 源点云：`data/livingroom1-fragments-ply/cloud_bin_0.ply`
+- 源点云：`../cloud_bin_0.ply`
 - 点云信息（来自 `info.json`）：
   - `points`: 196,133
   - `format`: ply

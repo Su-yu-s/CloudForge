@@ -71,7 +71,7 @@ const ctx = {
     execute: async (id, input) => { say('execute', id + ' ' + JSON.stringify(input)); return { ok: true } },
     register: () => () => {},
   },
-  slots: { register: (opts, comp) => { say('slot.register', `${opts.name} priority=${opts.priority}`); mount(comp); return () => {} } },
+  slots: { register: (opts, comp) => { say('slot.register', `${opts.name} priority=${opts.priority}`); if (opts.name === 'workbench.panel') mount(comp); return () => {} } },
   effect: (fn) => { ctx.__effects.push(fn); return () => {} },
   __effects: [],
 }
