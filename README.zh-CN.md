@@ -135,8 +135,7 @@ B 站上传版本是正式流媒体版本；仓库内提供 720p 预览，72.8 M
 **原生层（进程外）**
 
 - **cloudforge-cli.exe** — JSON CLI、文件选择、诊断输出；stdin/stdout 是稳定接口。
-- **C++ 几何核心** — qRANSAC_SD、鲁棒精拟合、CAD 导出；C ABI/FFI；桌面端复用同一核心。
-- **Tauri 桌面端** — 可选桌面入口与查看器；通过 Tauri commands 调用核心。
+- **C++ 几何核心** — qRANSAC_SD、鲁棒精拟合、CAD 导出；C ABI/FFI；确定性核心。
 
 **外部**
 
@@ -163,7 +162,7 @@ B 站上传版本是正式流媒体版本；仓库内提供 720p 预览，72.8 M
 
 1. **确定性测量链路。** AGH 模型负责规划与解释，几何由 C++ 计算；测量链路内部不调用任何模型。
 2. **按 AGH 约束设计的面板。** 客户端模块遵守 1 MiB 服务预算、30 秒服务超时、CSP 限制与分页二进制传输，而不是假设一个常规 Web 后端。
-3. **原生边界。** CLI 以 stdin/stdout JSON 作为稳定接口，C++ 核心以 C ABI/FFI 暴露；桌面端与 AGH 面板复用同一核心。
+3. **原生边界。** CLI 以 stdin/stdout JSON 作为稳定接口，C++ 核心以 C ABI/FFI 暴露；AGH 工具通过 CLI 边界使用核心。
 4. **一套引擎，三份报告。** 竣工核验、船舶/机械分段、文物构件共用几何核心，但使用不同的报告语义与换算规则。
 5. **有边界的验证。** 有真值时给出明确的通过/失败；没有真值时只报告实际能检查的项，并保持 `precisionVerified=false`。
 
@@ -259,7 +258,7 @@ CLI 的查找顺序是 `CLOUDFORGE_CLI`，然后是工作区下的 `hackathon/cl
 
 **支持的输入：** PLY（ASCII 与 binary little-endian）、PCD（ASCII 与 binary）、TXT（每行前三个浮点数）、STL（ASCII 与 binary）、OBJ（`v` 行）、NuScenes BIN（`float32` N×5 记录）。不支持 PLY 顶点属性表中的 `list` 属性、PCD `binary_compressed` 和大端 PLY。
 
-**坐标与单位：** 系数使用点云坐标单位，随仓演示数据为米。GUI 与面板使用 Z-up 视图约定。PLY/PCD/BIN 保留原始采集坐标系；TXT 与 STL 会被核心做质心居中，报告必须注明。工作台中的检测点索引与预览使用的同一份有序点云对应。
+**坐标与单位：** 系数使用点云坐标单位，随仓演示数据为米。面板使用 Z-up 视图约定。PLY/PCD/BIN 保留原始采集坐标系；TXT 与 STL 会被核心做质心居中，报告必须注明。工作台中的检测点索引与预览使用的同一份有序点云对应。
 
 **系数布局**（CLI JSON 中均为 `float32`）：
 
@@ -314,7 +313,6 @@ CLI 的查找顺序是 `CLOUDFORGE_CLI`，然后是工作区下的 `hackathon/cl
 | pnpm | 10.34.5 |
 | Python | 3.12 x64 |
 | CadQuery / NumPy / SciPy | 2.6.1 / 2.2.6 / 1.15.3 |
-| Rust | Stable MSVC 工具链（仅桌面 GUI 需要） |
 | FreeCAD | 可选，用于外部 STEP 检查 |
 | Eigen | 5.0.1，随仓位于 `src-tauri/cpp/third_party/` |
 
@@ -424,12 +422,7 @@ icacls "$env:USERPROFILE\.agh" /remove:g SU\CodexSandboxUsers
 | `data/livingroom1-fragments-ply/` | 完整客厅片段 |
 | `data/office1-fragments-ply/` | 完整办公室片段 |
 
-在面板中选择点云并运行检测。要展示完整智能体链路，请新建会话，让智能体使用 `cloud-casting` 工作流分析该文件，然后查看验证页和报告页。桌面 GUI 可选构建：
-
-```powershell
-Set-Location CloudForge
-npm.cmd run tauri build -- --no-bundle
-```
+在面板中选择点云并运行检测。要展示完整智能体链路，请新建会话，让智能体使用 `cloud-casting` 工作流分析该文件，然后查看验证页和报告页。
 
 完整的 Windows 排错说明见 [复现指南.md](复现指南.md)，面板集成约束见 [CloudForge/hackathon/cloudforge-panel/PANEL-AGH.md](CloudForge/hackathon/cloudforge-panel/PANEL-AGH.md)。
 
@@ -437,7 +430,7 @@ npm.cmd run tauri build -- --no-bundle
 
 | 路径 | 内容 |
 | --- | --- |
-| `CloudForge/` | Vue 3 / Three.js 工作台、Tauri 2 桌面端、Rust 与 C++ 核心、Python CAD 工具 |
+| `CloudForge/` | C++ 核心与 Python CAD 工具 |
 | `CloudForge/hackathon/cloudforge-tools/` | AGH 后端插件，注册七个智能体工具 |
 | `CloudForge/hackathon/cloudforge-panel/` | AGH 客户端模块：点云 / CAD / 验证 / 报告四页签 |
 | `CloudForge/hackathon/cli/` | `cloudforge-cli.exe` 与原生文件选择器 |
@@ -513,7 +506,6 @@ cloudforge-cli.exe verify --truth <temp>/synth.truth.json --result <temp>/synth-
 
 - **没有真值，就不给精度证书。** 对没有独立参考的真实扫描，`verify` 可以检查有效性、索引、拟合残差、CAD 有效性、单位和包围盒，但会保持 `precisionVerified=false`，不能宣称精度 PASS。
 - **视频与历史产物展示的是过去运行。** 重新演示时应重新选择随仓点云并生成当前结果，不能把旧 PASS 当作新输入的结论。
-- **旧桌面端的局部分割链路是独立的。** 原 GUI 包含可选的第三方本地分割模型（LitePT）；它不在 AGH 执行链和本次演示中，几何核心也不调用任何模型。
 - **RANSAC 源码仅授权研究用途。** `ransac_sd` 不随仓库分发，当前版本树也不分发 qRANSAC_SD 的编译产物；复现构建需自行获取源码并遵守其许可。
 - **部分历史文档包含开发者本机路径。** 它们作为构建记录保留；全新克隆不依赖这些路径。请以本 README 和复现指南中的项目相对路径为准。
 - **执行证据已脱敏。** 随仓 AGH 轨迹中的操作者 ID、账号路由、会话键和本机路径已替换为中性值；事件顺序、时间戳、工具调用和结果计数未改动。
@@ -532,7 +524,6 @@ cloudforge-cli.exe verify --truth <temp>/synth.truth.json --result <temp>/synth-
 | [Tauri 2](https://github.com/tauri-apps/tauri) / [Vue 3](https://github.com/vuejs/core) / [Vite](https://github.com/vitejs/vite) / [Three.js](https://github.com/mrdoob/three.js) | MIT | 源码与面板内随包资源 |
 | [Redwood / 3DMatch](http://redwood-data.org/3dscan/) 室内扫描 | 公开研究数据集，遵循上游条款 | `data/` |
 | [Open3D](https://www.open3d.org/) 示例片段（`DemoColoredICPPointClouds`） | 遵循 Open3D 数据条款 | `data/` |
-| [LitePT](https://arxiv.org/abs/2512.13689)（可选本地分割，不在 AGH 链路中） | MIT | 不随仓库分发，仅用户自建环境 |
 | 演示视频、海报与 README 截图 | 本项目制作；如有第三方素材，来源见 [B 站页面](https://www.bilibili.com/video/BV19spk6vEL9/) | `docs/assets/` |
 | 合成点云 | 本项目生成 | `CloudForge/hackathon/demo-data/` |
 
@@ -540,4 +531,4 @@ cloudforge-cli.exe verify --truth <temp>/synth.truth.json --result <temp>/synth-
 
 ## 致谢
 
-云铸建立在 Agnes Harness 与 Agnes 模型、Ruwen Schnabel 与 Roland Wahl 的 qRANSAC_SD、Eigen、CadQuery、FreeCAD、Tauri、Vue、Vite 和 Three.js 之上。演示数据来自 Redwood/3DMatch 室内扫描与 Open3D 示例片段。感谢黑客松组织方，以及让这条流水线成为可能的开源维护者。
+云铸建立在 Agnes Harness 与 Agnes 模型、Ruwen Schnabel 与 Roland Wahl 的 qRANSAC_SD、Eigen、CadQuery、FreeCAD、Vue、Vite 和 Three.js 之上。演示数据来自 Redwood/3DMatch 室内扫描与 Open3D 示例片段。感谢黑客松组织方，以及让这条流水线成为可能的开源维护者。

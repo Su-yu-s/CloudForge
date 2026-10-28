@@ -45,11 +45,6 @@
 - **演示数据**：Redwood 室内扫描公开数据集（livingroom1 / office1 片段）与自行生成的合成点云，来源已在材料中注明；
 - **模型调用合规**：作品中的智能体规划、工具决策与报告生成全部使用 Agnes 模型；
   C++ 核心为确定性几何算法（非模型）；
-- **本地分割环境（未接入作品）**：本队本地 WSL 环境中部署有第三方开源模型
-  LitePT（"Lighter Yet Stronger Point Transformer"，arXiv:2512.13689，项目主页 litept.github.io，
-  MIT License，Copyright (c) 2025 Photogrammetry and Remote Sensing Lab），
-  部署时仅做了最小适配（事件协议前缀与入口脚本重命名）。该模型**未接入本作品的
-  AGH 智能体执行链路**，作品主线与演示均不依赖它，作品的所有模型调用仅使用 Agnes 模型。
 - **演示材料与执行证据**：演示视频、海报与 README 截图由本队制作；视频中如有第三方音乐或素材，
   来源与许可见 B 站页面简介。随仓 AGH 轨迹证据中的操作者 ID、账号路由、会话键与本机路径已脱敏，
   事件顺序、时间戳、工具调用与结果计数未改动。

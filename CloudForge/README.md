@@ -75,6 +75,5 @@ UI 采用 Glass UI 设计系统（设计稿在工作室内部文档中，不在�
 |---|---|---|---|
 | Eigen 5 | `src-tauri/cpp/third_party/eigen-5.0.1/` | MPL2 / BSD / Apache-2.0（见其 `COPYING.*`） | ✅ |
 | qRANSAC_SD (PrimitiveShapes 1.1, Schnabel & Wahl, Uni Bonn) | `src-tauri/cpp/third_party/ransac_sd/` | **仅研究用途，未授予再分发权利** | ❌ 已 gitignore，复现构建需自行获取，见 [`third_party/README.md`](src-tauri/cpp/third_party/README.md) |
-| 点云分割模型（LitePT，ETH/牛津/苏黎世大学，MIT） | 仓库外（WSL 环境） | MIT | ❌ 不随仓库分发；本作品未将其接入 AGH 执行链路与演示 |
 
 完整第三方素材清单与独立完成声明见 [`hackathon/declaration.md`](hackathon/declaration.md)。

@@ -135,8 +135,7 @@ CloudForge runs around AGH: the host owns sessions, approvals, and the execution
 **Native layer (outside AGH)**
 
 - **cloudforge-cli.exe** — JSON CLI, file picking, diagnostics; stdin/stdout is the stable interface.
-- **C++ geometry core** — qRANSAC_SD, robust refinement, CAD export; C ABI/FFI; the desktop UI reuses the same core.
-- **Tauri desktop UI** — optional desktop entry and viewer; Tauri commands into the core.
+- **C++ geometry core** — qRANSAC_SD, robust refinement, CAD export; C ABI/FFI; deterministic.
 
 **External**
 
@@ -163,7 +162,7 @@ A task starts with point-cloud inspection and proceeds in the order below; tool 
 
 1. **A deterministic measurement path.** The AGH model plans and explains; C++ computes the geometry. No model is called inside the measurement path.
 2. **A panel built around AGH constraints.** The client module respects the 1 MiB service budget, 30 s service timeout, CSP restrictions, and paged binary transport instead of assuming a conventional web backend.
-3. **A native boundary.** The CLI uses stdin/stdout JSON as a stable interface, and the C++ core exposes a C ABI/FFI; the desktop UI and the AGH panel share the same core.
+3. **A native boundary.** The CLI uses stdin/stdout JSON as a stable interface, and the C++ core exposes a C ABI/FFI; AGH tools reach the core through that CLI boundary.
 4. **One engine, three report profiles.** Completion acceptance, ship/mechanical segments, and heritage components share the geometry core but use different report semantics and conversions.
 5. **Verification with a real boundary.** With ground truth, the system returns an explicit pass/fail. Without it, it reports only what it can check and keeps `precisionVerified=false`.
 
@@ -259,7 +258,7 @@ Example `detect` output (values from the bundled living-room run, rounded):
 
 **Supported inputs:** PLY (ASCII and binary little-endian), PCD (ASCII and binary), TXT (first three floats per line), STL (ASCII and binary), OBJ (`v` lines), and NuScenes BIN (`float32` N×5 records). PLY vertex lists with `list` properties, PCD `binary_compressed`, and big-endian PLY are not supported.
 
-**Coordinates and units:** coefficients use the cloud's coordinate units, which are metres for the bundled demo data. The GUI and panel use a Z-up view convention. PLY/PCD/BIN preserve the source frame. TXT and STL are centroid-centered by the core; reports state this explicitly. In the workbench, detected point indices refer to the same ordered cloud used for preview.
+**Coordinates and units:** coefficients use the cloud's coordinate units, which are metres for the bundled demo data. The panel uses a Z-up view convention. PLY/PCD/BIN preserve the source frame. TXT and STL are centroid-centered by the core; reports state this explicitly. In the workbench, detected point indices refer to the same ordered cloud used for preview.
 
 **Coefficient layouts** (all values are `float32` in the CLI JSON):
 
@@ -314,7 +313,6 @@ Point clouds are split into 65,536-point pages. The span is quantized to uint16,
 | pnpm | 10.34.5 |
 | Python | 3.12 x64 |
 | CadQuery / NumPy / SciPy | 2.6.1 / 2.2.6 / 1.15.3 |
-| Rust | Stable MSVC toolchain (optional, desktop GUI only) |
 | FreeCAD | Optional, for external STEP inspection |
 | Eigen | 5.0.1, included in `src-tauri/cpp/third_party/` |
 
@@ -424,12 +422,7 @@ Use the bundled small samples first:
 | `data/livingroom1-fragments-ply/` | Full living-room fragments |
 | `data/office1-fragments-ply/` | Full office fragments |
 
-In the panel, choose a cloud and run detection. For the full agent path, start a session and ask it to analyze the file with the `cloud-casting` workflow. Then inspect the verification and report tabs. For a desktop GUI build:
-
-```powershell
-Set-Location CloudForge
-npm.cmd run tauri build -- --no-bundle
-```
+In the panel, choose a cloud and run detection. For the full agent path, start a session and ask it to analyze the file with the `cloud-casting` workflow. Then inspect the verification and report tabs.
 
 The full Windows troubleshooting guide is [复现指南.md](复现指南.md). Panel integration constraints are in [CloudForge/hackathon/cloudforge-panel/PANEL-AGH.md](CloudForge/hackathon/cloudforge-panel/PANEL-AGH.md).
 
@@ -437,7 +430,7 @@ The full Windows troubleshooting guide is [复现指南.md](复现指南.md). Pa
 
 | Path | Contents |
 | --- | --- |
-| `CloudForge/` | Vue 3 / Three.js workbench, Tauri 2 desktop shell, Rust and C++ core, Python CAD tools |
+| `CloudForge/` | C++ core and Python CAD tools |
 | `CloudForge/hackathon/cloudforge-tools/` | AGH backend plugin with seven agent tools |
 | `CloudForge/hackathon/cloudforge-panel/` | AGH client module: point cloud / CAD / verification / report tabs |
 | `CloudForge/hackathon/cli/` | `cloudforge-cli.exe` and the native file picker |
@@ -513,7 +506,6 @@ The panel uses the bundled 38-primitive `livingroom-run` artifact; the fresh CLI
 
 - **No ground truth means no precision certificate.** For a real scan without an independent reference, `verify` can check validity, indexing, fit residuals, CAD validity, units, and bounds, but it keeps `precisionVerified=false`. It must not claim a precision PASS.
 - **The video and historical artifacts show past runs.** Re-select the bundled cloud and regenerate results before presenting them as current. Do not reuse an old PASS for a new input.
-- **The legacy desktop segmentation path is separate.** The original GUI contains an optional local third-party segmentation model (LitePT). It is not part of the AGH execution chain or the hackathon demo, and no model is called by the geometry core.
 - **The RANSAC source is research-only.** `ransac_sd` is not distributed here; the current tree also does not distribute compiled qRANSAC_SD binaries. Obtain the source under its own terms for a build.
 - **Some historical documents reference developer-local paths.** They are retained as build records; a fresh clone does not depend on them. Use the project-relative paths in this README and the reproduction guide.
 - **Execution evidence is normalized for publication.** Operator IDs, account routes, session keys, and local filesystem paths in the checked-in AGH trajectory were replaced with neutral values; event order, timestamps, tool calls, and result counts were not changed.
@@ -532,7 +524,6 @@ The project's own code is licensed under **Apache-2.0** (see [LICENSE](LICENSE))
 | [Tauri 2](https://github.com/tauri-apps/tauri) / [Vue 3](https://github.com/vuejs/core) / [Vite](https://github.com/vitejs/vite) / [Three.js](https://github.com/mrdoob/three.js) | MIT | Source and vendored panel assets |
 | [Redwood / 3DMatch](http://redwood-data.org/3dscan/) indoor scans | Public research dataset; follow the upstream terms | `data/` |
 | [Open3D](https://www.open3d.org/) demo fragments (`DemoColoredICPPointClouds`) | Follow the Open3D data terms | `data/` |
-| [LitePT](https://arxiv.org/abs/2512.13689) (optional local segmentation, not in the AGH path) | MIT | Not distributed; user-provided environment only |
 | Demo video, poster, and README screenshots | Produced by this project; third-party credits (if any) are listed on the [Bilibili page](https://www.bilibili.com/video/BV19spk6vEL9/) | `docs/assets/` |
 | Synthetic point clouds | Generated by this project | `CloudForge/hackathon/demo-data/` |
 
@@ -540,4 +531,4 @@ The complete third-party inventory and the independence statement are in [CloudF
 
 ## Acknowledgements
 
-CloudForge builds on Agnes Harness and the Agnes model, qRANSAC_SD by Ruwen Schnabel and Roland Wahl, Eigen, CadQuery, FreeCAD, Tauri, Vue, Vite, and Three.js. The demo data comes from the Redwood/3DMatch indoor scans and Open3D sample fragments. The project thanks the hackathon organizers and the open-source maintainers whose work made the pipeline possible.
+CloudForge builds on Agnes Harness and the Agnes model, qRANSAC_SD by Ruwen Schnabel and Roland Wahl, Eigen, CadQuery, FreeCAD, Vue, Vite, and Three.js. The demo data comes from the Redwood/3DMatch indoor scans and Open3D sample fragments. The project thanks the hackathon organizers and the open-source maintainers whose work made the pipeline possible.
