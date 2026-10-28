@@ -82,8 +82,7 @@ These screenshots were captured from the **real AGH Web workbench** at `http://1
 
 <sub>The left side is the real AGH session and trajectory; the right side is the CloudForge panel. The chat content is a prior CloudForge demo session.</sub>
 
-<details>
-<summary><b>Open the four panel tabs</b> (point cloud / CAD / verification / report)</summary>
+### Panel tabs
 
 | Point cloud | CAD |
 | --- | --- |
@@ -91,7 +90,21 @@ These screenshots were captured from the **real AGH Web workbench** at `http://1
 | **Verification** | **Report** |
 | ![Verification tab](docs/assets/screenshot-agh-panel-verify.png) | ![Report tab](docs/assets/screenshot-agh-panel-report.png) |
 
-</details>
+### Interaction states
+
+| Inlier coloring | Geometry overlay | CAD + point cloud |
+| --- | --- | --- |
+| ![Point cloud inlier view](docs/assets/screenshot-agh-panel-inliers.png) | ![Geometry overlay](docs/assets/screenshot-agh-panel-overlay.png) | ![CAD with point cloud overlay](docs/assets/screenshot-agh-panel-cad-overlay.png) |
+
+### CAD delivery in the workbench
+
+![CAD delivery in the live AGH workbench](docs/assets/screenshot-agh-workbench-cad.png)
+
+### Verification and execution record
+
+| Verification | Report |
+| --- | --- |
+| ![Verification in the AGH workbench](docs/assets/screenshot-agh-workbench-verify.png) | ![Execution record in the AGH workbench](docs/assets/screenshot-agh-workbench-report.png) |
 
 The live run demonstrates:
 

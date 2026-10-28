@@ -82,8 +82,7 @@ B 站上传版本是正式流媒体版本；仓库内提供 720p 预览，72.8 M
 
 <sub>左侧是真实 AGH 会话与轨迹，右侧是云铸面板；聊天区内容来自之前的一次云铸演示会话。</sub>
 
-<details>
-<summary><b>展开四个面板页签</b>（点云 / CAD / 验证 / 报告）</summary>
+### 面板页签
 
 | 点云 | CAD |
 | --- | --- |
@@ -91,7 +90,21 @@ B 站上传版本是正式流媒体版本；仓库内提供 720p 预览，72.8 M
 | **验证** | **报告** |
 | ![验证页签](docs/assets/screenshot-agh-panel-verify.png) | ![报告页签](docs/assets/screenshot-agh-panel-report.png) |
 
-</details>
+### 交互状态
+
+| 内点着色 | 几何叠加 | CAD 叠加点云 |
+| --- | --- | --- |
+| ![点云内点视图](docs/assets/screenshot-agh-panel-inliers.png) | ![几何叠加](docs/assets/screenshot-agh-panel-overlay.png) | ![CAD 叠加点云](docs/assets/screenshot-agh-panel-cad-overlay.png) |
+
+### 工作台中的 CAD 交付
+
+![真实 AGH 工作台中的 CAD 预览](docs/assets/screenshot-agh-workbench-cad.png)
+
+### 验证与执行记录
+
+| 验证 | 报告 |
+| --- | --- |
+| ![真实 AGH 工作台中的验证页](docs/assets/screenshot-agh-workbench-verify.png) | ![真实 AGH 工作台中的执行记录](docs/assets/screenshot-agh-workbench-report.png) |
 
 这次真实运行展示：
 
