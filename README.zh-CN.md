@@ -5,10 +5,10 @@
 **仓库地址：** [github.com/Su-yu-s/CloudForge](https://github.com/Su-yu-s/CloudForge)
 
 <p align="center">
-  <img src="docs/assets/cloudforge-trailer.webp" alt="云铸 CloudForge 动画概览：点云检测、CAD 交付、验证与 AGH 执行轨迹" width="100%" />
+  <img src="docs/assets/cloudforge-trailer.webp" alt="云铸 CloudForge 动画概览：点云采集、CAD 重建、证据面板与智能体交接" width="100%" />
 </p>
 
-<p align="center"><sub>动画概览 · 12 秒循环 · 真实 AGH 面板画面 · <a href="docs/assets/cloudforge-poster.png">静态海报</a></sub></p>
+<p align="center"><sub>动画概览 · 18 秒循环 · 真实扫描数据 + AGH 面板画面 · <a href="docs/assets/cloudforge-poster.png">静态海报</a></sub></p>
 
 <div align="center">
 
@@ -16,20 +16,18 @@
 
 **基于 Agnes Harness 的点云逆向工程、几何验证与 CAD 交付智能体工作台。**
 
-<img src="https://img.shields.io/badge/status-hackathon%20submission-f59e0b" alt="状态：黑客松参赛作品" />
+<img src="https://img.shields.io/badge/status-active%20development-2ea44f" alt="状态：持续开发中" />
 <img src="https://img.shields.io/badge/license-Apache--2.0-2F4F4F" alt="许可：Apache-2.0" />
 <img src="https://img.shields.io/badge/agent-Agnes%20Harness-3b8fff" alt="智能体底座：Agnes Harness" />
 <img src="https://img.shields.io/badge/platform-Windows%20x64-0078D6" alt="平台：Windows x64" />
 
 [项目介绍](#项目介绍project-overview) · [视频介绍](#视频介绍demo-video) · [架构介绍](#架构介绍architecture) · [集成标准](#集成标准integration-standards) · [快速开始](#快速开始quick-start) · [目录结构](#目录结构repository-layout) · [许可](#许可与第三方说明licensing-and-third-party-notices)
 
-<sub>2026 年江苏省高校 AI+科学与工程创新实践黑客松 · 本科生组 · 主赛道 D（工程设计与数字世界） · 方向 D3（3D 设计与空间智能）</sub>
-
 </div>
 
 ## 项目介绍（Project Overview）
 
-云铸 CloudForge 把一份三维扫描点云转化为一组几何参数、一个可编辑的 CAD 模型和一份可复核的验证报告。项目面向 **2026 年江苏省高校 AI+科学与工程创新实践黑客松**（本科生组，主赛道 D，方向 D3）。
+云铸 CloudForge 把一份三维扫描点云转化为结构化几何参数、可编辑的 CAD 模型，以及可复核、可重跑的验证报告。它面向 **建筑与基础设施的竣工核验和 BIM 交付**、**船舶与机械分段检测**、**文物构件数字化建档** 等场景——在这些工作里，点云必须变成可测量、可审查的几何，而不是又一份可视化模型。
 
 ### 项目背景
 

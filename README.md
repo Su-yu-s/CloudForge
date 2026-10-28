@@ -5,10 +5,10 @@ English | [简体中文](README.zh-CN.md)
 **Repository:** [github.com/Su-yu-s/CloudForge](https://github.com/Su-yu-s/CloudForge)
 
 <p align="center">
-  <img src="docs/assets/cloudforge-trailer.webp" alt="Animated CloudForge overview: point-cloud detection, CAD delivery, verification, and the AGH execution trace" width="100%" />
+  <img src="docs/assets/cloudforge-trailer.webp" alt="Animated CloudForge overview: point-cloud acquisition, CAD reconstruction, the evidence panel, and the agent handoff" width="100%" />
 </p>
 
-<p align="center"><sub>Animated overview · 12 s loop · real AGH panel captures · <a href="docs/assets/cloudforge-poster.png">static poster</a></sub></p>
+<p align="center"><sub>Animated overview · 18 s loop · real scan data + AGH panel captures · <a href="docs/assets/cloudforge-poster.png">static poster</a></sub></p>
 
 <div align="center">
 
@@ -16,20 +16,18 @@ English | [简体中文](README.zh-CN.md)
 
 **An Agnes Harness-powered agentic workbench for point-cloud reverse engineering, geometric verification, and CAD delivery.**
 
-<img src="https://img.shields.io/badge/status-hackathon%20submission-f59e0b" alt="Status: hackathon submission" />
+<img src="https://img.shields.io/badge/status-active%20development-2ea44f" alt="Status: active development" />
 <img src="https://img.shields.io/badge/license-Apache--2.0-2F4F4F" alt="License: Apache-2.0" />
 <img src="https://img.shields.io/badge/agent-Agnes%20Harness-3b8fff" alt="Agent runtime: Agnes Harness" />
 <img src="https://img.shields.io/badge/platform-Windows%20x64-0078D6" alt="Platform: Windows x64" />
 
 [Project overview](#project-overview) · [Demo video](#demo-video) · [Architecture](#architecture) · [Integration standards](#integration-standards) · [Quick start](#quick-start) · [Repository layout](#repository-layout) · [Licensing](#licensing-and-third-party-notices)
 
-<sub>2026 Jiangsu Province University AI + Science & Engineering Innovation Practice Hackathon · Undergraduate Group · Track D (Engineering Design and the Digital World) · Direction D3 (3D Design and Spatial Intelligence)</sub>
-
 </div>
 
 ## Project Overview
 
-CloudForge (云铸, "cloud casting") turns a 3D scan into a set of geometric parameters, an editable CAD model, and a verification report. It was built for the **2026 Jiangsu Province University AI + Science & Engineering Innovation Practice Hackathon** (Undergraduate Group, Track D, Direction D3).
+CloudForge (云铸, "cloud casting") turns a 3D scan into structured geometric parameters, an editable CAD model, and a verification report that can be checked and re-run. It is built for **as-built acceptance and BIM delivery**, **mechanical and shipbuilding segment inspection**, and **heritage-component documentation** — workflows where a point cloud has to become measurable, reviewable geometry rather than another visualization.
 
 ### Why this project
 
