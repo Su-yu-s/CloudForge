@@ -8,11 +8,7 @@
   <img src="docs/assets/cloudforge-trailer.webp" alt="云铸 CloudForge 动画概览：点云检测、CAD 交付、验证与 AGH 执行轨迹" width="100%" />
 </p>
 
-<p align="center"><sub>动画概览 · 12 秒循环 · 真实 AGH 面板画面</sub></p>
-
-<p align="center">
-  <img src="docs/assets/cloudforge-poster.png" alt="云铸 CloudForge：从百万点云到实体参数" width="100%" />
-</p>
+<p align="center"><sub>动画概览 · 12 秒循环 · 真实 AGH 面板画面 · <a href="docs/assets/cloudforge-poster.png">静态海报</a></sub></p>
 
 <div align="center">
 

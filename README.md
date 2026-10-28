@@ -8,11 +8,7 @@ English | [简体中文](README.zh-CN.md)
   <img src="docs/assets/cloudforge-trailer.webp" alt="Animated CloudForge overview: point-cloud detection, CAD delivery, verification, and the AGH execution trace" width="100%" />
 </p>
 
-<p align="center"><sub>Animated overview · 12 s loop · real AGH panel captures</sub></p>
-
-<p align="center">
-  <img src="docs/assets/cloudforge-poster.png" alt="CloudForge: from point clouds to physical parameters" width="100%" />
-</p>
+<p align="center"><sub>Animated overview · 12 s loop · real AGH panel captures · <a href="docs/assets/cloudforge-poster.png">static poster</a></sub></p>
 
 <div align="center">
 
