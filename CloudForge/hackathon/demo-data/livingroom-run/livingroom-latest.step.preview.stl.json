@@ -1,7 +1,7 @@
 {
  "ok": true,
- "step": "E:\\yuntao\\CloudForge\\hackathon\\demo-data\\livingroom-run\\livingroom-latest.step",
- "stl": "E:\\yuntao\\CloudForge\\hackathon\\demo-data\\livingroom-run\\livingroom-latest.step.preview.stl",
+ "step": "E:\\Code\\cloudforge\\CloudForge\\hackathon\\demo-data\\livingroom-run\\livingroom-latest.step",
+ "stl": "E:\\Code\\cloudforge\\CloudForge\\hackathon\\demo-data\\livingroom-run\\livingroom-latest.step.preview.stl",
  "facets": 756,
  "points": 1218,
  "stl_bytes": 37884,
@@ -20,7 +20,7 @@
  "coverage_error": 1.0271048321307596e-13,
  "deflection": 0.005,
  "route": "step-preview",
- "source": "E:\\yuntao\\CloudForge\\hackathon\\demo-data\\livingroom-run\\livingroom-latest.step",
+ "source": "E:\\Code\\cloudforge\\CloudForge\\hackathon\\demo-data\\livingroom-run\\livingroom-latest.step",
  "source_cloud": null,
  "coordinate_unit": "m",
  "step_coordinate_unit": "mm",
@@ -31,14 +31,14 @@
  "previewUnits": "m",
  "stepCoordinateUnit": "mm",
  "sourceIdentity": {
-  "path": "E:\\yuntao\\CloudForge\\hackathon\\demo-data\\livingroom-run\\livingroom-latest.step",
-  "size": 837027,
-  "mtimeMs": 1791816319101.1663
+  "path": "E:\\Code\\cloudforge\\CloudForge\\hackathon\\demo-data\\livingroom-run\\livingroom-latest.step",
+  "size": 856109,
+  "mtimeMs": 1793182163612.5598
  },
  "stlIdentity": {
-  "path": "E:\\yuntao\\CloudForge\\hackathon\\demo-data\\livingroom-run\\livingroom-latest.step.preview.stl",
+  "path": "E:\\Code\\cloudforge\\CloudForge\\hackathon\\demo-data\\livingroom-run\\livingroom-latest.step.preview.stl",
   "size": 37884,
-  "mtimeMs": 1791852638324.9548
+  "mtimeMs": 1793190250349.2046
  },
  "cached": false
 }
