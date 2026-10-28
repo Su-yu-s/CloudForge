@@ -17,6 +17,15 @@ const keyPath = (path) => {
 }
 const samePath = (a, b) => !!a && !!b && keyPath(a) === keyPath(b)
 const fileName = (path) => String(path || '').split(/[\\/]/).pop()
+const timeOf = (wf) => {
+  const value = wf?.updatedMs ?? (wf?.updated ? Date.parse(wf.updated) : NaN)
+  if (!Number.isFinite(value)) return ''
+  try {
+    return new Date(value).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+  } catch {
+    return ''
+  }
+}
 
 const MODES = [
   { id: 'detect', label: '检测' },
@@ -90,14 +99,14 @@ export function createCloudTab({ ctx, data, state }) {
   })
   toolbar.appendChild(overlayBtn)
 
+  const viewGroup = el('div', { class: 'cf-view-group' })
   for (const [name, title] of [
     ['fit', '恢复默认视图'],
     ['iso', '等轴视角'],
     ['top', '顶视图'],
     ['front', '前视图'],
   ]) {
-    const b = el('button', { class: name === 'fit' ? 'cf-btn-xs' : 'cf-icon-btn sm', title, 'aria-label': title }, [icon(name, 13)])
-    if (name === 'fit') b.appendChild(el('span', { text: title }))
+    const b = el('button', { class: 'cf-icon-btn sm', title, 'aria-label': title, type: 'button' }, [icon(name, 14)])
     b.addEventListener('click', () => {
       if (!viewer) return
       if (name === 'fit') viewer.fit()
@@ -105,8 +114,9 @@ export function createCloudTab({ ctx, data, state }) {
       else if (name === 'top') viewer.stage.faceNormal([0, 0, 1], centerOf(), spanOf())
       else if (name === 'front') viewer.stage.faceNormal([0, -1, 0], centerOf(), spanOf())
     })
-    toolbar.appendChild(b)
+    viewGroup.appendChild(b)
   }
+  toolbar.appendChild(viewGroup)
   root.appendChild(toolbar)
 
   const listWrap = el('div', { class: 'cf-scroll' })
@@ -740,9 +750,18 @@ export function createCloudTab({ ctx, data, state }) {
       const pendingSource = !!source && (!wf || !samePath(source, wf.sourceCloud))
       const points = pendingSource ? (st.progress?.total ?? (basePoints && samePath(source, framedCloud) ? basePoints.length / 3 : null)) : wf?.points
       const shapes = pendingSource ? (samePath(source, scene?.sourceCloud || scene?.source_cloud) ? scene?.shape_count ?? 0 : 0) : wf?.shapes ?? 0
-      row.appendChild(el('span', { class: 'mono', text: pendingSource ? '当前点云 · 待检测' : wf ? wf.name : '无工作流' }))
-      row.appendChild(el('span', { class: 'sep', text: '·' }))
-      row.appendChild(el('span', { class: 'mono', text: `${num(points)} 点 / ${shapes} 基元` }))
+      row.title = wf?.name || ''
+      row.appendChild(el('span', {
+        class: 'cf-foot-status',
+        text: pendingSource
+          ? `待检测${points != null ? ` · ${num(points)} 点` : ''}`
+          : `${num(points)} 点 · ${shapes} 基元`,
+      }))
+      const time = !pendingSource && wf ? timeOf(wf) : ''
+      if (time) {
+        row.appendChild(el('span', { class: 'sep', text: '·' }))
+        row.appendChild(el('span', { class: 'cf-foot-status', text: time }))
+      }
       const spacer = el('span', { class: 'spacer' })
       row.appendChild(spacer)
       // 选择过程的状态位：默认隐藏，选择开始后显示进度/结果/错误，30s 无新事件自动收起
@@ -753,19 +772,17 @@ export function createCloudTab({ ctx, data, state }) {
       row.appendChild(reloadBtn)
       foot.appendChild(row)
 
-      if (st.progress && st.progress.total) {
-        if (st.progress.loaded < st.progress.total) {
-          // 用 <progress> 的 value/max **属性**而不是 inline width：CSP 的 style-src 不含
-          // 'unsafe-inline'，style 属性会被浏览器拦掉
-          const p = document.createElement('progress')
-          p.className = 'cf-progress'
-          p.max = st.progress.total
-          p.value = Math.min(st.progress.loaded, st.progress.total)
-          foot.appendChild(p)
-        }
+      if (st.progress && st.progress.total && st.progress.loaded < st.progress.total) {
+        // 用 <progress> 的 value/max **属性**而不是 inline width：CSP 的 style-src 不含
+        // 'unsafe-inline'，style 属性会被浏览器拦掉
+        const p = document.createElement('progress')
+        p.className = 'cf-progress'
+        p.max = st.progress.total
+        p.value = Math.min(st.progress.loaded, st.progress.total)
+        foot.appendChild(p)
         foot.appendChild(
           el('div', { class: 'cf-foot-row' }, [
-            el('span', { class: 'mono', text: `已载入 ${num(st.progress.loaded)} / ${num(st.progress.total)}` }),
+            el('span', { class: 'cf-foot-status', text: `已载入 ${num(st.progress.loaded)} / ${num(st.progress.total)}` }),
           ]),
         )
       }

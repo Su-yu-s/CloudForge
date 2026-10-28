@@ -85,9 +85,9 @@ export function createCadTab({ ctx, data, state }) {
     }
   })
   toolbar.appendChild(overlayBtn)
+  const viewGroup = el('div', { class: 'cf-view-group' })
   for (const [name, title] of [['fit', '恢复默认视图'], ['iso', '等轴视角']]) {
-    const button = el('button', { class: name === 'fit' ? 'cf-btn-xs' : 'cf-icon-btn sm', title, 'aria-label': title }, [icon(name, 13)])
-    if (name === 'fit') button.appendChild(el('span', { text: title }))
+    const button = el('button', { class: 'cf-icon-btn sm', title, 'aria-label': title, type: 'button' }, [icon(name, 14)])
     button.addEventListener('click', () => {
       if (name === 'fit') viewer?.fit()
       else if (state.meshCache?.bbox) {
@@ -95,8 +95,9 @@ export function createCadTab({ ctx, data, state }) {
         viewer?.stage.faceNormal([-0.55, -0.8, 0.45], min.map((value, i) => (value + max[i]) / 2), meshSpan)
       }
     })
-    toolbar.appendChild(button)
+    viewGroup.appendChild(button)
   }
+  toolbar.appendChild(viewGroup)
   root.appendChild(toolbar)
 
   const scroll = el('div', { class: 'cf-scroll' })
@@ -231,13 +232,14 @@ export function createCadTab({ ctx, data, state }) {
       return
     }
     const box = mesh.clientBbox
+    const volume = Number(mesh.solid?.volume_m3)
     const rows = [
       ['文件', fileName(mesh.originFile || currentPath)],
       ['源点云', meshSource ? fileName(meshSource) : '未记录'],
       ['三角面', num(mesh.triCount)],
       ['包围盒', box ? `${box.map((value) => value.toFixed(3)).join(' × ')} m` : '—'],
       ['实体数', mesh.solid?.solids != null ? String(mesh.solid.solids) : '—'],
-      ['体积', mesh.solid?.volume_m3 != null ? `${mesh.solid.volume_m3} m³` : '—'],
+      ['体积', Number.isFinite(volume) ? `${volume.toFixed(3)} m³` : '—'],
     ]
     for (const [name, value] of rows) infoBox.appendChild(el('div', { class: 'cf-kv' }, [el('span', { text: name }), el('span', { class: 'mono', text: value })]))
     const scope = mesh.route || mesh.converted?.route
@@ -560,7 +562,7 @@ export function createCadTab({ ctx, data, state }) {
     cancelRefresh() { meshController?.abort(); overlayController?.abort() },
     renderFooter(foot, { state: currentState }) {
       const row = el('div', { class: 'cf-foot-row' })
-      row.append(el('span', { class: 'mono', text: currentState.meshCache ? `${num(currentState.meshCache.triCount)} 三角面` : '未载入模型' }),
+      row.append(el('span', { class: 'cf-foot-status', text: currentState.meshCache ? `${num(currentState.meshCache.triCount)} 三角面` : '未载入模型' }),
         el('span', { class: 'spacer' }), pickNote, pickBtn, reloadBtn)
       reloadBtn.disabled = !!meshController
       foot.appendChild(row)

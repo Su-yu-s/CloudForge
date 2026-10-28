@@ -557,12 +557,7 @@ function renderHeat() {
     renderFooter(foot) {
       const row = el('div', { class: 'cf-foot-row' })
       const job = currentJob()
-      row.appendChild(el('span', { class: 'mono', text: statusLabel(job) }))
-      row.appendChild(el('span', { class: 'spacer' }))
-      const btn = el('button', { class: 'cf-btn-sm primary', text: runBtn.textContent })
-      btn.disabled = runBtn.disabled
-      btn.addEventListener('click', () => void startVerify())
-      row.appendChild(btn)
+      row.appendChild(el('span', { class: 'cf-foot-status', text: statusLabel(job) }))
       foot.appendChild(row)
       if (job?.pollError || job?.sendError || job?.prepareError) foot.appendChild(el('div', { class: 'cf-msg', text: job.pollError || job.sendError || job.prepareError }))
     },

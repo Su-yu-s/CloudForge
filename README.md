@@ -43,7 +43,7 @@ Jiangsu's smart-construction policy explicitly calls for **3D digital completion
 - **Verification with a real boundary.** When ground truth is available, `verify` compares parameters and angles and returns an explicit pass/fail. When it is not, the system reports only what it can actually check and keeps `precisionVerified=false`.
 - **CAD delivery.** Detection results become an executable CadQuery script, then STEP/STL. Building scans use a wall/floor/ceiling skeleton route; mechanical parts use parametric primitive solids. The exported model is checked for validity, units, bounds, and mesh coverage.
 - **A workbench, not a black box.** The AGH right-side panel has four tabs: point cloud, CAD, verification, and report. It shows the current input, primitive list, fit evidence, CAD preview, verification request, and the actual AGH execution chain.
-- **A guided workbench layout.** A four-step flow strip, a current-result summary, one primary action per tab, and progressive disclosure keep the 38-row detection list readable in a 512 px AGH panel.
+- **A viewer-first workbench layout.** The point-cloud and CAD canvases take the main height; a compact header carries the active file, primitive/coverage stats, and the next action, while lists and model details scroll underneath.
 - **Audit trail by default.** Tool calls, approvals, and results stay in the AGH session. The panel exports the real execution record instead of fabricating a trace.
 
 ### What is new here
@@ -76,7 +76,7 @@ The Bilibili upload is the canonical streaming copy. A 720p preview is included 
 
 ## Screenshots from the Live Run
 
-These screenshots were captured from the **real AGH Web workbench** at `http://127.0.0.1:4177/` with the installed CloudForge client module and the locally configured `agnes-3.0-flash` model. The panel loaded the bundled `livingroom-run` result: **196,133 points, 38 primitives, 81.5% coverage**. The CAD tab rendered the **756-triangle** preview mesh.
+These screenshots were captured from the **real AGH Web workbench** at `http://127.0.0.1:4177/` with the installed CloudForge client module and the locally configured `agnes-3.0-flash` model. The panel loaded the current CloudForge result: **196,133 points, 38 primitives, 81.8% coverage**. The CAD tab rendered `model.step` with **740 triangles** and a **2.943 × 1.588 × 1.569 m** bounding box.
 
 ![CloudForge panel inside the live AGH workbench](docs/assets/screenshot-agh-workbench.png)
 
@@ -96,7 +96,7 @@ These screenshots were captured from the **real AGH Web workbench** at `http://1
 The live run demonstrates:
 
 - **Point cloud:** the actual 196,133-point cloud with per-primitive inlier coloring, RMSE, robust sigma, and a 38-row primitive list.
-- **CAD:** the panel reads `livingroom-model.stl` directly and reports 756 triangles and a 2.914 × 1.595 × 1.527 m bounding box.
+- **CAD:** the panel reads `model.step` directly and reports 740 triangles, 13 solids, and a 2.943 × 1.588 × 1.569 m bounding box.
 - **Verification:** the regression suite reports **11/11 PASS** and the noise × sampling robustness grid; the form still states that no ground truth means no precision certificate.
 - **Report:** the panel shows the real AGH execution chain: 12 tool calls, 25 tool/step/turn verifier judgments, and the `agnes-3.0-flash` model.
 
@@ -453,8 +453,8 @@ This section records a fresh run on the development machine, separate from the h
 ### AGH and panel
 
 - AGH started at `http://127.0.0.1:4177/`; the workbench reported **本地后台已连接** (local backend connected).
-- The installed `cloudforge-panel` client module loaded `livingroom-run`: **196,133 points, 38 primitives, 81.5% coverage**.
-- The CAD tab read `livingroom-model.stl`: **756 triangles**, bounding box **2.914 × 1.595 × 1.527 m**.
+- The installed `cloudforge-panel` client module loaded the current result: **196,133 points, 38 primitives, 81.8% coverage**.
+- The CAD tab read `model.step`: **740 triangles**, 13 solids, bounding box **2.943 × 1.588 × 1.569 m**.
 - The verification tab reported **11/11 PASS** for the regression suite plus the robustness grid.
 - The report tab showed **12 tool calls**, **25 verifier judgments**, and model `agnes-3.0-flash`.
 

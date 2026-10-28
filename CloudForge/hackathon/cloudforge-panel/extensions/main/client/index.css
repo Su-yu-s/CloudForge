@@ -642,8 +642,8 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  margin: 16px 0 7px;
-  font-size: 11px;
+  margin: 14px 0 6px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.01em;
   color: var(--cf-text-dim);
@@ -659,7 +659,7 @@
 }
 .cf-sub-title {
   margin: 8px 0 3px;
-  font-size: 11px;
+  font-size: 11.5px;
   color: var(--cf-text-dim);
 }
 
@@ -978,12 +978,12 @@
  * 改成 grid 后四列纵向对齐，眼睛可以沿一列扫下去，右侧备注也不会溢出。 */
 .cf-chain-row {
   display: grid;
-  grid-template-columns: 64px 40px minmax(0, 1fr) minmax(0, 34%);
+  grid-template-columns: 68px 42px minmax(0, 1fr) minmax(0, 34%);
   align-items: center;
-  gap: 8px;
-  padding: 4px 2px;
+  gap: 7px;
+  padding: 5px 2px;
   border-radius: 5px;
-  font-size: 11px;
+  font-size: 11.5px;
   color: var(--cf-text-dim);
 }
 .cf-chain-row + .cf-chain-row {
@@ -991,15 +991,15 @@
 }
 .cf-chain-time {
   flex: none;
-  font-size: 9.5px;
+  font-size: 10.5px;
   color: var(--cf-text-mute);
 }
 .cf-chain-kind {
   flex: none;
   padding: 0 4px;
-  font-family: ui-monospace, Menlo, Consolas, monospace;
-  font-size: 9px;
-  letter-spacing: 0.04em;
+  font-size: 9.5px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
   border-radius: 3px;
 }
 .cf-chain-kind.call {
@@ -1020,15 +1020,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 11.5px;
 }
 .cf-chain-detail {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-align: right;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--cf-text-mute);
   text-align: right;
 }
@@ -1173,7 +1172,7 @@ progress.cf-progress::-moz-progress-bar {
 }
 .cf-msg {
   min-height: 16px;
-  font-size: 10.5px;
+  font-size: 11.5px;
   color: var(--cf-warn);
   word-break: break-word;
 }
@@ -1302,7 +1301,7 @@ progress.cf-progress::-moz-progress-bar {
   display: none;
   max-width: 38%;
   overflow: hidden;
-  font-size: 10.5px;
+  font-size: 11px;
   color: var(--cf-text-dim);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1447,37 +1446,37 @@ progress.cf-progress::-moz-progress-bar {
 
 /* ---- header ---- */
 .cf-panel .cf-head {
-  padding: 14px 16px 0;
+  padding: 10px 16px 0;
   align-items: flex-start;
   gap: 8px;
   border-bottom: 0;
 }
 .cf-panel .cf-head-text { min-width: 0; flex: 1; }
 .cf-panel .cf-head-title {
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -.02em;
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -.025em;
   color: var(--cf-text);
 }
 .cf-panel .cf-head-sub {
   display: flex;
   align-items: center;
   gap: 5px;
-  margin-top: 3px;
-  font-size: 11px;
+  margin-top: 2px;
+  font-size: 11.5px;
   color: var(--cf-text-mute);
 }
 .cf-panel .cf-status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  height: 21px;
-  padding: 0 8px;
+  gap: 4px;
+  height: 20px;
+  padding: 0 7px;
   border-radius: 999px;
   border: 1px solid #bbf7d0;
   background: var(--cf-green-bg);
   color: var(--cf-green);
-  font-size: 10.5px;
+  font-size: 11px;
   line-height: 1;
   white-space: nowrap;
 }
@@ -1495,24 +1494,24 @@ progress.cf-progress::-moz-progress-bar {
 .cf-panel .cf-status-pill .cf-dot { width: 6px; height: 6px; }
 .cf-panel .cf-head-actions { display: flex; align-items: center; gap: 1px; flex: none; }
 .cf-panel .cf-head .cf-icon-btn { width: 26px; height: 26px; border-radius: 7px; }
-.cf-panel .cf-head-tagline { margin-left: 2px; font-size: 10.5px; color: var(--cf-text-mute); }
+.cf-panel .cf-head-tagline { margin-left: 2px; font-size: 11.5px; color: var(--cf-text-mute); }
 .cf-panel .cf-help-btn { font-size: 12px; font-weight: 650; color: var(--cf-text-mute); }
 
 /* ---- scene row ---- */
 .cf-panel .cf-toolbar {
-  padding: 11px 16px 0;
+  padding: 8px 16px 0;
   border-bottom: 0;
   gap: 8px;
 }
 .cf-panel .cf-scene-label {
-  font-size: 11px;
+  font-size: 11.5px;
   color: var(--cf-text-mute);
   white-space: nowrap;
 }
 .cf-panel .cf-toolbar .cf-select {
   height: 32px;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: 12.5px;
   color: #3f3f46;
   background: #fff;
 }
@@ -1522,26 +1521,26 @@ progress.cf-progress::-moz-progress-bar {
   flex: none;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 4px;
-  margin: 12px 16px 0;
-  padding: 9px 10px;
-  border: 1px solid var(--cf-border-soft);
-  border-radius: 10px;
-  background: var(--cf-bg-elev);
+  gap: 2px;
+  margin: 8px 16px 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 .cf-panel .cf-flow-step { display: flex; align-items: center; gap: 5px; min-width: 0; }
 .cf-panel .cf-flow-dot {
   flex: none;
-  width: 19px;
-  height: 19px;
+  width: 18px;
+  height: 18px;
   border: 1px solid var(--cf-border);
   border-radius: 50%;
   background: #fff;
   color: var(--cf-text-mute);
   display: grid;
   place-items: center;
-  font-size: 9.5px;
-  font-weight: 700;
+  font-size: 10px;
+  font-weight: 650;
 }
 .cf-panel .cf-flow-step[data-state='done'] .cf-flow-dot {
   border-color: #bbf7d0;
@@ -1554,20 +1553,20 @@ progress.cf-progress::-moz-progress-bar {
   color: #fff;
 }
 .cf-panel .cf-flow-step[data-state='next'] .cf-flow-dot {
-  border-color: #fde68a;
-  background: var(--cf-warn-bg);
-  color: var(--cf-warn);
+  border-color: var(--cf-border);
+  background: #fff;
+  color: var(--cf-text-mute);
 }
 .cf-panel .cf-flow-label {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 10.5px;
+  font-size: 11px;
   color: var(--cf-text-mute);
 }
 .cf-panel .cf-flow-step[data-state='active'] .cf-flow-label { color: var(--cf-text); font-weight: 600; }
-.cf-panel .cf-flow-step[data-state='next'] .cf-flow-label { color: var(--cf-warn); }
+.cf-panel .cf-flow-step[data-state='next'] .cf-flow-label { color: var(--cf-text-mute); }
 
 /* ---- summary ---- */
 .cf-panel .cf-summary-card {
@@ -1575,11 +1574,11 @@ progress.cf-progress::-moz-progress-bar {
   display: flex;
   align-items: flex-start;
   gap: 9px;
-  margin: 10px 16px 0;
-  padding: 10px 11px;
-  border: 1px solid var(--cf-border);
-  border-radius: 10px;
-  background: #fff;
+  margin: 8px 16px 0;
+  padding: 7px 9px;
+  border: 1px solid var(--cf-border-soft);
+  border-radius: 9px;
+  background: var(--cf-bg-elev);
 }
 .cf-panel .cf-summary-main { min-width: 0; flex: 1; }
 .cf-panel .cf-summary-title {
@@ -1587,7 +1586,7 @@ progress.cf-progress::-moz-progress-bar {
   align-items: center;
   gap: 7px;
   min-width: 0;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 650;
   color: var(--cf-text);
 }
@@ -1599,7 +1598,7 @@ progress.cf-progress::-moz-progress-bar {
 }
 .cf-panel .cf-summary-badge {
   flex: none;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 500;
   color: var(--cf-green);
   background: var(--cf-green-bg);
@@ -1607,9 +1606,9 @@ progress.cf-progress::-moz-progress-bar {
   padding: 2px 6px;
 }
 .cf-panel .cf-summary-meta {
-  margin-top: 4px;
-  font-size: 10.5px;
-  line-height: 1.5;
+  margin-top: 3px;
+  font-size: 12px;
+  line-height: 1.45;
   color: var(--cf-text-dim);
   font-variant-numeric: tabular-nums;
 }
@@ -1621,30 +1620,30 @@ progress.cf-progress::-moz-progress-bar {
   display: flex;
   align-items: center;
   gap: 7px;
-  margin: 10px 16px 0;
-  padding: 8px 9px;
-  border: 1px solid #dbeafe;
-  border-radius: 9px;
-  background: var(--cf-accent-soft);
+  margin: 6px 16px 0;
+  padding: 5px 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: #f5f8ff;
 }
 .cf-panel .cf-next-icon {
   flex: none;
-  width: 17px;
-  height: 17px;
+  width: 16px;
+  height: 16px;
   border: 1px solid #bfdbfe;
   border-radius: 50%;
   background: #fff;
   color: var(--cf-accent);
   display: grid;
   place-items: center;
-  font-size: 10px;
+  font-size: 9px;
 }
 .cf-panel .cf-next-text {
   flex: 1;
   min-width: 0;
   margin: 0;
-  font-size: 10.5px;
-  line-height: 1.45;
+  font-size: 11.5px;
+  line-height: 1.4;
   color: #1e40af;
 }
 .cf-panel .cf-next-text b { font-weight: 650; }
@@ -1656,7 +1655,7 @@ progress.cf-progress::-moz-progress-bar {
   border-radius: 6px;
   background: var(--cf-accent);
   color: #fff;
-  font-size: 10.5px;
+  font-size: 11.5px;
   font-weight: 600;
 }
 .cf-panel .cf-next-btn:hover { background: #1d4ed8; }
@@ -1664,18 +1663,21 @@ progress.cf-progress::-moz-progress-bar {
 /* ---- tabs ---- */
 .cf-panel .cf-tabs {
   flex: none;
-  margin: 10px 16px 0;
+  margin: 6px 16px 0;
   border-bottom: 1px solid var(--cf-border);
   gap: 2px;
 }
 .cf-panel .cf-tab {
-  height: 38px;
+  height: 34px;
   padding: 0;
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: var(--cf-text-dim);
   border-radius: 0;
 }
 .cf-panel .cf-tab:hover { color: var(--cf-text); }
+.cf-panel .cf-tab,
+.cf-panel .cf-tab:hover,
+.cf-panel .cf-tab.active { background: transparent; }
 .cf-panel .cf-tab.active {
   color: var(--cf-accent);
   border-bottom-color: var(--cf-accent);
@@ -1685,7 +1687,7 @@ progress.cf-progress::-moz-progress-bar {
 
 /* ---- content ---- */
 .cf-panel .cf-content { min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
-.cf-panel .cf-pane { min-height: 0; padding: 12px 16px 0; gap: 0; }
+.cf-panel .cf-pane { min-height: 0; padding: 10px 16px 0; gap: 0; }
 .cf-panel .cf-pane[data-pane='cloud'] { overflow: hidden; }
 .cf-panel .cf-pane[data-pane='cad'],
 .cf-panel .cf-pane[data-pane='verify'],
@@ -1700,7 +1702,7 @@ progress.cf-progress::-moz-progress-bar {
   border-radius: 7px;
   background: var(--cf-accent);
   color: #fff;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 600;
   box-shadow: 0 2px 5px rgb(37 99 235 / 18%);
 }
@@ -1714,10 +1716,10 @@ progress.cf-progress::-moz-progress-bar {
 }
 .cf-panel .cf-primary-btn.is-secondary:hover { background: var(--cf-accent-soft); border-color: #c7dbfe; }
 .cf-panel .cf-btn-sm {
-  height: 27px;
+  height: 28px;
   padding: 0 9px;
   border-radius: 6px;
-  font-size: 10.5px;
+  font-size: 11.5px;
   color: #3f3f46;
   background: #fff;
   border-color: var(--cf-border);
@@ -1729,9 +1731,9 @@ progress.cf-progress::-moz-progress-bar {
   border-color: #dbeafe;
 }
 .cf-panel .cf-btn-xs {
-  min-height: 24px;
+  min-height: 26px;
   padding: 0 7px;
-  font-size: 10px;
+  font-size: 11px;
   border-radius: 5px;
   border: 1px solid var(--cf-border);
   background: #fff;
@@ -1754,7 +1756,7 @@ progress.cf-progress::-moz-progress-bar {
 .cf-panel .cf-cad-source {
   flex: 1;
   min-width: 0;
-  font-size: 10.5px;
+  font-size: 11.5px;
   color: var(--cf-text-mute);
   white-space: nowrap;
   overflow: hidden;
@@ -1763,15 +1765,16 @@ progress.cf-progress::-moz-progress-bar {
 .cf-panel .cf-cloud-scope,
 .cf-panel .cf-cad-scope { display: none; }
 .cf-panel .cf-cloud-job,
-.cf-panel .cf-cad-job { flex-basis: 100%; margin: 0; font-size: 10.5px; }
+.cf-panel .cf-cad-job { flex-basis: 100%; margin: 0; font-size: 11.5px; }
 .cf-panel .cf-cloud-detect .cf-primary-btn,
 .cf-panel .cf-cad-build .cf-primary-btn { flex: none; }
 
 /* ---- viewer ---- */
 .cf-panel .cf-viewer {
-  flex: 0 0 240px;
-  height: 240px;
-  min-height: 180px;
+  flex: 0 0 180px;
+  height: 180px;
+  min-height: 160px;
+  max-height: 200px;
   border-radius: 12px;
   border-color: var(--cf-border);
   background:
@@ -1779,8 +1782,9 @@ progress.cf-progress::-moz-progress-bar {
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 80%);
 }
 .cf-panel .cf-viewer-tag {
-  top: 9px;
-  left: 9px;
+  top: 8px;
+  left: 8px;
+  max-width: calc(100% - 16px);
   height: 24px;
   padding: 0 8px;
   display: inline-flex;
@@ -1788,8 +1792,11 @@ progress.cf-progress::-moz-progress-bar {
   border-radius: 7px;
   background: rgb(255 255 255 / 88%);
   border-color: var(--cf-border);
-  font-size: 10px;
+  font-size: 11px;
   color: #3f3f46;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   backdrop-filter: blur(8px);
 }
 .cf-panel .cf-legend { display: none; }
@@ -1797,8 +1804,8 @@ progress.cf-progress::-moz-progress-bar {
   flex: none;
   display: flex;
   align-items: center;
-  gap: 5px;
-  margin: 8px 0 0;
+  gap: 4px;
+  margin: 7px 0 0;
   flex-wrap: wrap;
 }
 .cf-panel .cf-seg {
@@ -1809,13 +1816,13 @@ progress.cf-progress::-moz-progress-bar {
   background: var(--cf-bg-elev);
 }
 .cf-panel .cf-seg-btn {
-  height: 25px;
-  padding: 0 8px;
+  height: 26px;
+  padding: 0 9px;
   border: 0;
   border-radius: 5px;
   background: transparent;
   color: var(--cf-text-dim);
-  font-size: 10.5px;
+  font-size: 11.5px;
 }
 .cf-panel .cf-seg-btn:hover { color: var(--cf-text); }
 .cf-panel .cf-seg-btn.on {
@@ -1824,6 +1831,13 @@ progress.cf-progress::-moz-progress-bar {
   font-weight: 600;
   box-shadow: 0 1px 2px rgb(0 0 0 / 6%);
 }
+.cf-panel .cf-view-group {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  margin-left: auto;
+}
+.cf-panel .cf-view-group .cf-icon-btn { width: 26px; height: 26px; border-radius: 6px; }
 
 /* ---- list and shape rows ---- */
 .cf-panel .cf-scroll {
@@ -1840,8 +1854,8 @@ progress.cf-progress::-moz-progress-bar {
   grid-template-columns: 8px minmax(0, 1fr) 24px;
   align-items: center;
   gap: 7px;
-  padding: 8px 6px;
-  margin: 0 -6px;
+  padding: 9px 6px;
+  margin: 0;
   border: 0;
   border-bottom: 1px solid var(--cf-border-soft);
   border-radius: 7px;
@@ -1851,10 +1865,10 @@ progress.cf-progress::-moz-progress-bar {
 .cf-panel .cf-row.active { background: var(--cf-accent-soft); border-bottom-color: #dbeafe; }
 .cf-panel .cf-row.dim { opacity: .42; }
 .cf-panel .cf-row-main { min-width: 0; }
-.cf-panel .cf-row-title { display: flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; }
+.cf-panel .cf-row-title { display: flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; }
 .cf-panel .cf-row-meta {
   margin-top: 3px;
-  font-size: 10px;
+  font-size: 11.5px;
   color: var(--cf-text-dim);
   white-space: nowrap;
   overflow: hidden;
@@ -1870,7 +1884,7 @@ progress.cf-progress::-moz-progress-bar {
   background: var(--cf-green-bg);
   border: 1px solid #dcfce7;
   color: var(--cf-green);
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 500;
 }
 .cf-panel .cf-bar { height: 3px; margin-top: 5px; background: var(--cf-border-soft); }
@@ -1881,27 +1895,27 @@ progress.cf-progress::-moz-progress-bar {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin: 10px -6px 4px;
-  padding: 0 6px;
+  margin: 8px 0 2px;
+  padding: 0;
 }
-.cf-panel .cf-shape-head h3 { margin: 0; font-size: 11.5px; letter-spacing: -.01em; }
+.cf-panel .cf-shape-head h3 { margin: 0; font-size: 12.5px; letter-spacing: -.01em; }
 .cf-panel .cf-shape-count {
   padding: 2px 7px;
   border: 1px solid var(--cf-border);
   border-radius: 999px;
   background: var(--cf-bg-elev);
   color: var(--cf-text-dim);
-  font-size: 9.5px;
+  font-size: 10.5px;
 }
 .cf-panel .cf-chips { display: flex; align-items: center; gap: 3px; margin-left: auto; }
 .cf-panel .cf-chip {
-  height: 23px;
+  height: 24px;
   padding: 0 7px;
   border: 1px solid transparent;
   border-radius: 5px;
   background: transparent;
   color: var(--cf-text-mute);
-  font-size: 9.5px;
+  font-size: 11px;
 }
 .cf-panel .cf-chip:hover { color: var(--cf-text-dim); background: var(--cf-bg-hover); }
 .cf-panel .cf-chip.active { color: var(--cf-accent); background: var(--cf-accent-soft); border-color: #dbeafe; font-weight: 600; }
@@ -1914,7 +1928,7 @@ progress.cf-progress::-moz-progress-bar {
   border: 0;
   background: transparent;
   color: var(--cf-accent);
-  font-size: 10px;
+  font-size: 11px;
   padding: 3px 6px;
   border-radius: 5px;
 }
@@ -1925,25 +1939,25 @@ progress.cf-progress::-moz-progress-bar {
   border-radius: 8px;
   background: #fcfcfd;
   color: var(--cf-text-dim);
-  font-size: 10.5px;
+  font-size: 11.5px;
   line-height: 1.55;
   text-align: center;
 }
 
 /* ---- info / verify / report ---- */
 .cf-panel .cf-kv {
-  padding: 7px 0;
+  padding: 8px 0;
   border-bottom: 1px solid var(--cf-border-soft);
-  font-size: 10.5px;
+  font-size: 12px;
   gap: 10px;
   grid-template-columns: minmax(82px, 30%) minmax(0, 1fr);
 }
 .cf-panel .cf-kv > span:first-child { color: var(--cf-text-mute); }
 .cf-panel .cf-kv > span:last-child { max-width: none; color: #3f3f46; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cf-panel .cf-check {
-  padding: 7px 0;
+  padding: 8px 0;
   border-bottom: 1px solid var(--cf-border-soft);
-  font-size: 10.5px;
+  font-size: 11.5px;
 }
 .cf-panel .cf-check-name { color: #3f3f46; }
 .cf-panel .cf-check-val { color: var(--cf-text-dim); }
@@ -1956,33 +1970,34 @@ progress.cf-progress::-moz-progress-bar {
 }
 .cf-panel .cf-heat-cell.is-pass { background: var(--cf-green-bg); border-color: #dcfce7; }
 .cf-panel .cf-heat-cell.is-fail { background: #fef2f2; border-color: #fecaca; }
-.cf-panel .cf-heat-num { font-size: 12px; }
-.cf-panel .cf-heat-unit, .cf-panel .cf-heat-meta { font-size: 9px; }
+.cf-panel .cf-heat-num { font-size: 12.5px; }
+.cf-panel .cf-heat-unit, .cf-panel .cf-heat-meta { font-size: 10px; }
 .cf-panel .cf-note {
-  padding: 7px 9px;
+  padding: 8px 10px;
   border: 1px solid var(--cf-border-soft);
   border-radius: 7px;
   background: var(--cf-bg-elev);
   color: var(--cf-text-dim);
-  font-size: 10px;
+  font-size: 11.5px;
   line-height: 1.55;
 }
-.cf-panel .cf-report { font-size: 11.5px; line-height: 1.6; }
-.cf-panel .cf-report h3 { font-size: 12px; }
-.cf-panel .cf-report h4 { font-size: 11.5px; }
+.cf-panel .cf-report { font-size: 12.5px; line-height: 1.65; }
+.cf-panel .cf-report h3 { font-size: 13px; }
+.cf-panel .cf-report h4 { font-size: 12.5px; }
 .cf-panel .cf-verify-thresholds { gap: 7px; margin: 8px 0; }
-.cf-panel .cf-verify-thresholds label { font-size: 10px; gap: 4px; }
-.cf-panel .cf-verify-thresholds input { padding: 6px 7px; font-size: 11px; border-radius: 6px; }
+.cf-panel .cf-verify-thresholds label { font-size: 11px; gap: 4px; }
+.cf-panel .cf-verify-thresholds input { padding: 7px 8px; font-size: 12px; border-radius: 6px; }
 
 /* ---- footer ---- */
 .cf-panel .cf-foot {
   flex: none;
-  padding: 9px 16px;
+  padding: 8px 16px;
   border-top: 1px solid var(--cf-border);
   background: #fff;
 }
-.cf-panel .cf-foot-row { font-size: 10px; gap: 6px; }
+.cf-panel .cf-foot-row { font-size: 11.5px; gap: 5px; }
 .cf-panel .cf-foot .mono { color: var(--cf-text-dim); }
+.cf-panel .cf-foot-status { color: var(--cf-text-dim); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .cf-panel .cf-foot .sep { color: var(--cf-text-mute); }
 .cf-panel .cf-progress { height: 2px; margin: 4px 0; }
 
@@ -2013,54 +2028,131 @@ progress.cf-progress::-moz-progress-bar {
 .cf-panel .cf-summary-meta,
 .cf-panel .cf-foot .mono,
 .cf-panel .cf-kv .mono,
-.cf-panel .cf-check .mono {
+.cf-panel .cf-check .mono,
+.cf-panel .cf-chain-time,
+.cf-panel .cf-chain-kind,
+.cf-panel .cf-chain-label,
+.cf-panel .cf-chain-detail {
   font-family: var(--cf-ui-font);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
 }
-.cf-panel .cf-row-meta { font-size: 11px; }
-.cf-panel .cf-viewer-tag { font-size: 10.5px; }
-.cf-panel .cf-summary-meta { font-size: 11.5px; }
-.cf-panel .cf-foot { font-size: 10.5px; }
-.cf-panel .cf-foot-row { font-size: 11px; }
-.cf-panel .cf-tab { font-size: 12px; }
-.cf-panel .cf-chip { font-size: 10px; }
+.cf-panel .cf-row-meta { font-size: 11.5px; }
+.cf-panel .cf-viewer-tag { font-size: 11px; }
+.cf-panel .cf-summary-meta { font-size: 12px; }
+.cf-panel .cf-foot { font-size: 11.5px; }
+.cf-panel .cf-foot-row { font-size: 11.5px; }
+.cf-panel .cf-tab { font-size: 12.5px; }
+.cf-panel .cf-chip { font-size: 11px; }
 .cf-panel .cf-head-title { font-weight: 650; letter-spacing: -.25px; }
 
 /* ---- list overflow + breathing room ---- */
 .cf-panel .cf-scroll { overflow-x: hidden; min-height: 140px; }
 .cf-panel .cf-shape-head {
-  margin: 10px 0 4px;
+  margin: 8px 0 2px;
   padding: 0;
   flex-wrap: wrap;
   row-gap: 4px;
 }
 .cf-panel .cf-chips { flex-wrap: wrap; }
-.cf-panel .cf-row { margin: 0; padding: 8px 0; }
+.cf-panel .cf-row { margin: 0; padding: 9px 0; }
 
 /* ---- density: let the viewer shrink before the list disappears ---- */
-.cf-panel .cf-flow { margin-top: 10px; padding: 7px 9px; }
-.cf-panel .cf-summary-card { margin-top: 8px; padding: 9px 10px; }
-.cf-panel .cf-next-card { margin-top: 8px; padding: 7px 9px; }
-.cf-panel .cf-tabs { margin-top: 8px; }
+.cf-panel .cf-flow { margin-top: 8px; padding: 0; }
+.cf-panel .cf-summary-card { margin-top: 8px; padding: 8px 10px; }
+.cf-panel .cf-next-card { margin-top: 6px; padding: 6px 8px; }
+.cf-panel .cf-tabs { margin-top: 6px; }
 .cf-panel .cf-viewer {
-  flex: 0 1 220px;
-  height: auto;
-  max-height: 240px;
-  min-height: 150px;
+  flex: 0 0 180px;
+  height: 180px;
+  max-height: 200px;
+  min-height: 160px;
 }
 .cf-panel .cf-scroll { flex: 1 1 auto; }
 
 @media (max-height: 720px) {
   .cf-panel .cf-flow,
-  .cf-panel .cf-next-card { display: none; }
+  .cf-panel .cf-next-card,
+  .cf-panel .cf-summary-card { display: none; }
   .cf-panel .cf-head { padding-top: 8px; }
   .cf-panel .cf-toolbar { padding-top: 6px; }
   .cf-panel .cf-toolbar .cf-select { height: 28px; }
-  .cf-panel .cf-summary-card { margin-top: 6px; padding: 8px 10px; }
-  .cf-panel .cf-tabs { margin-top: 6px; }
-  .cf-panel .cf-viewer { flex-basis: 130px; min-height: 110px; }
-  .cf-panel .cf-scroll { min-height: 120px; }
-  .cf-panel .cf-foot { padding: 7px 14px; }
+  .cf-panel .cf-tabs { margin-top: 4px; }
+  .cf-panel .cf-tab { height: 32px; }
+  .cf-panel .cf-viewer { flex: 0 0 140px; height: 140px; min-height: 120px; max-height: 160px; }
+  .cf-panel .cf-scroll { min-height: 110px; }
+  .cf-panel .cf-foot { padding: 6px 14px; }
 }
+
+/* ---- viewer-first layout: the canvas is the primary surface ---- */
+.cf-panel .cf-pane[data-pane='cloud'],
+.cf-panel .cf-pane[data-pane='cad'] {
+  overflow: hidden;
+  padding-bottom: 0;
+}
+.cf-panel .cf-pane[data-pane='cloud'] .cf-viewer,
+.cf-panel .cf-pane[data-pane='cad'] .cf-viewer {
+  flex: 1.7 1 0;
+  height: auto;
+  min-height: 240px;
+  max-height: none;
+}
+.cf-panel .cf-pane[data-pane='cloud'] .cf-scroll,
+.cf-panel .cf-pane[data-pane='cad'] .cf-scroll {
+  flex: 1 1 0;
+  min-height: 150px;
+  max-height: 46%;
+  margin-top: 2px;
+}
+
+@media (max-height: 720px) {
+  .cf-panel .cf-pane[data-pane='cloud'] .cf-viewer,
+  .cf-panel .cf-pane[data-pane='cad'] .cf-viewer {
+    flex: 1.5 1 0;
+    min-height: 180px;
+  }
+  .cf-panel .cf-pane[data-pane='cloud'] .cf-scroll,
+  .cf-panel .cf-pane[data-pane='cad'] .cf-scroll {
+    min-height: 120px;
+    max-height: 48%;
+  }
+}
+
+/* ---- compact workflow line in the header ---- */
+.cf-panel .cf-head-sub {
+  min-width: 0;
+  overflow: hidden;
+  gap: 6px;
+}
+.cf-panel .cf-head-file {
+  max-width: 42%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cf-text);
+}
+.cf-panel .cf-head-stats {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  color: var(--cf-text-mute);
+  font-variant-numeric: tabular-nums;
+}
+.cf-panel .cf-head-next {
+  flex: none;
+  margin-left: auto;
+  height: 22px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--cf-accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+.cf-panel .cf-head-next:hover { background: #1d4ed8; }
 

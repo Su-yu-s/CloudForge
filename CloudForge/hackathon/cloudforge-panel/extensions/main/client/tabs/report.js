@@ -181,7 +181,7 @@ export function createReportTab({ ctx, data, state }) {
     renderFooter(foot, { state: st }) {
       const row = el('div', { class: 'cf-foot-row' })
       const t = st.trace
-      row.appendChild(el('span', { class: 'mono', text: t?.ok === false ? '无轨迹证据' : `${num(t?.eventCount)} 事件 · ${t?.model ?? '—'}` }))
+      row.appendChild(el('span', { class: 'cf-foot-status', text: t?.ok === false ? '无轨迹证据' : `${num(t?.eventCount)} 事件 · ${t?.model ?? '—'}` }))
       row.appendChild(el('span', { class: 'spacer' }))
       const analyzeBtn = el('button', { class: 'cf-btn-sm', title: '从当前点云重新执行检测、CAD 与验证' }, [icon('play', 12), el('span', { text: '一键分析' })])
       analyzeBtn.addEventListener('click', () => void analyze(analyzeBtn))
