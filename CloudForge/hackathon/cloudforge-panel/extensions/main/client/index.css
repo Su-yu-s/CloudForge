@@ -1996,3 +1996,71 @@ progress.cf-progress::-moz-progress-bar {
 .cf-panel[data-rail='1'] .cf-head { padding-top: 10px; }
 .cf-panel[data-rail='1'] .cf-head-title { font-size: 13px; }
 
+/* ---- typography pass ----
+ * 不再依赖宿主 --font-sans；数据也用无衬线 + tabular numerals，
+ * 只有真正的代码/路径保留等宽。 */
+.cf-panel {
+  --cf-ui-font: "Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei UI",
+    "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
+  font-family: var(--cf-ui-font);
+}
+.cf-panel button,
+.cf-panel select,
+.cf-panel input,
+.cf-panel summary { font-family: var(--cf-ui-font); }
+.cf-panel .cf-row-meta,
+.cf-panel .cf-viewer-tag,
+.cf-panel .cf-summary-meta,
+.cf-panel .cf-foot .mono,
+.cf-panel .cf-kv .mono,
+.cf-panel .cf-check .mono {
+  font-family: var(--cf-ui-font);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+.cf-panel .cf-row-meta { font-size: 11px; }
+.cf-panel .cf-viewer-tag { font-size: 10.5px; }
+.cf-panel .cf-summary-meta { font-size: 11.5px; }
+.cf-panel .cf-foot { font-size: 10.5px; }
+.cf-panel .cf-foot-row { font-size: 11px; }
+.cf-panel .cf-tab { font-size: 12px; }
+.cf-panel .cf-chip { font-size: 10px; }
+.cf-panel .cf-head-title { font-weight: 650; letter-spacing: -.25px; }
+
+/* ---- list overflow + breathing room ---- */
+.cf-panel .cf-scroll { overflow-x: hidden; min-height: 140px; }
+.cf-panel .cf-shape-head {
+  margin: 10px 0 4px;
+  padding: 0;
+  flex-wrap: wrap;
+  row-gap: 4px;
+}
+.cf-panel .cf-chips { flex-wrap: wrap; }
+.cf-panel .cf-row { margin: 0; padding: 8px 0; }
+
+/* ---- density: let the viewer shrink before the list disappears ---- */
+.cf-panel .cf-flow { margin-top: 10px; padding: 7px 9px; }
+.cf-panel .cf-summary-card { margin-top: 8px; padding: 9px 10px; }
+.cf-panel .cf-next-card { margin-top: 8px; padding: 7px 9px; }
+.cf-panel .cf-tabs { margin-top: 8px; }
+.cf-panel .cf-viewer {
+  flex: 0 1 220px;
+  height: auto;
+  max-height: 240px;
+  min-height: 150px;
+}
+.cf-panel .cf-scroll { flex: 1 1 auto; }
+
+@media (max-height: 720px) {
+  .cf-panel .cf-flow,
+  .cf-panel .cf-next-card { display: none; }
+  .cf-panel .cf-head { padding-top: 8px; }
+  .cf-panel .cf-toolbar { padding-top: 6px; }
+  .cf-panel .cf-toolbar .cf-select { height: 28px; }
+  .cf-panel .cf-summary-card { margin-top: 6px; padding: 8px 10px; }
+  .cf-panel .cf-tabs { margin-top: 6px; }
+  .cf-panel .cf-viewer { flex-basis: 130px; min-height: 110px; }
+  .cf-panel .cf-scroll { min-height: 120px; }
+  .cf-panel .cf-foot { padding: 7px 14px; }
+}
+
