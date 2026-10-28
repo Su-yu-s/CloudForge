@@ -5,6 +5,12 @@
 **仓库地址：** [github.com/Su-yu-s/CloudForge](https://github.com/Su-yu-s/CloudForge)
 
 <p align="center">
+  <img src="docs/assets/cloudforge-trailer.webp" alt="云铸 CloudForge 动画概览：点云检测、CAD 交付、验证与 AGH 执行轨迹" width="100%" />
+</p>
+
+<p align="center"><sub>动画概览 · 12 秒循环 · 真实 AGH 面板画面</sub></p>
+
+<p align="center">
   <img src="docs/assets/cloudforge-poster.png" alt="云铸 CloudForge：从百万点云到实体参数" width="100%" />
 </p>
 
@@ -62,7 +68,7 @@
 
 **仓库内 720p 预览：** [docs/assets/cloudforge-demo-720p.mp4](docs/assets/cloudforge-demo-720p.mp4)（13 MB，H.264/AAC）
 
-[![云铸 CloudForge 演示视频](docs/assets/cloudforge-poster.png)](https://b23.tv/wLaIodS)
+[![云铸 CloudForge 演示视频封面](docs/assets/cloudforge-video-cover.png)](https://b23.tv/wLaIodS)
 
 视频按以下顺序展开：
 

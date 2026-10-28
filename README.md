@@ -5,6 +5,12 @@ English | [简体中文](README.zh-CN.md)
 **Repository:** [github.com/Su-yu-s/CloudForge](https://github.com/Su-yu-s/CloudForge)
 
 <p align="center">
+  <img src="docs/assets/cloudforge-trailer.webp" alt="Animated CloudForge overview: point-cloud detection, CAD delivery, verification, and the AGH execution trace" width="100%" />
+</p>
+
+<p align="center"><sub>Animated overview · 12 s loop · real AGH panel captures</sub></p>
+
+<p align="center">
   <img src="docs/assets/cloudforge-poster.png" alt="CloudForge: from point clouds to physical parameters" width="100%" />
 </p>
 
@@ -62,7 +68,7 @@ Direct video ID: [BV19spk6vEL9](https://www.bilibili.com/video/BV19spk6vEL9/)
 
 **In-repo 720p preview:** [docs/assets/cloudforge-demo-720p.mp4](docs/assets/cloudforge-demo-720p.mp4) (13 MB, H.264/AAC)
 
-[![CloudForge demo video](docs/assets/cloudforge-poster.png)](https://b23.tv/wLaIodS)
+[![CloudForge demo video cover](docs/assets/cloudforge-video-cover.png)](https://b23.tv/wLaIodS)
 
 The demo walks through the complete story:
 
