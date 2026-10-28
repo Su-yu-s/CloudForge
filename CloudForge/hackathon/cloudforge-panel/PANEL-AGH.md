@@ -216,15 +216,15 @@ esbuild client\vendor\three.module.js --minify --format=esm --target=es2022 --ou
 # 0) 若报 credential store is unavailable / SEMANTIC_REJECTED(-32011)：先修 ACL 再继续
 icacls "$env:USERPROFILE\.agh" /remove:g SU\CodexSandboxUsers
 
-# 0.5) 告诉脚本 AGH 在哪（若它不在本仓库同级目录才需要）
-$env:AGH_ROOT = "E:/C++/Point/agnes-harness"
+# 0.5) 告诉脚本 AGH 在哪（默认使用仓库内的 ../agnes-harness）
+$env:AGH_ROOT = (Resolve-Path ..\agnes-harness).Path
 
-# 1) 装面板（CWD 必须是 CloudForge 仓库根：`file:` 源只接受 file:./ 相对路径）
-cd E:\C++\Point\CloudForge
-& E:\C++\Point\agnes-harness\node_modules\.bin\tsx.cmd hackathon\agh-scripts\install-package.mts "file:./hackathon/cloudforge-panel" "cloudforge-panel"
+# 1) 装面板（CWD 必须是 CloudForge 目录：`file:` 源只接受 file:./ 相对路径）
+cd <仓库根>\CloudForge
+& ..\agnes-harness\node_modules\.bin\tsx.cmd hackathon\agh-scripts\install-package.mts "file:./hackathon/cloudforge-panel" "cloudforge-panel"
 
 # 2) 名册自检：确认 entryUrl / slots / slotCatalogVersion 都在
-& E:\C++\Point\agnes-harness\node_modules\.bin\tsx.cmd hackathon\agh-scripts\probe-roster.mts
+& ..\agnes-harness\node_modules\.bin\tsx.cmd hackathon\agh-scripts\probe-roster.mts
 
 # 3) 浏览器：硬刷新（Ctrl+Shift+R）后打开一个会话，右侧停靠列即出现控制台
 #    再用另两个探针自检：

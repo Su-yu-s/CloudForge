@@ -82,10 +82,10 @@ TypeBox 参数（手写 kind 标记免依赖）、返回 `{ content:[{type:'text
 |---|---|---|---|
 | **M0** | AGH Windows 构建跑通 | 10.03–10.04 | ✅ 完成：serve 启动（127.0.0.1:4177）、插件安装/信任/启用全流程走通 |
 | **M1** | hackathon/cli：cloudforge-cli.exe | 10.05–10.06 | ✅ 完成：合成基准全链路 PASS（平面误差 0.016mm、圆柱泛化 0.68mm、<50 点拒绝） |
-| **M2** | cloudforge-tools 插件 | 10.07–10.08 | ✅ 完成：trusted+running，工具级自测 6/6 PASS |
-| **M3** | 工作流 Skill + 端到端 | 10.09–10.10 | 🔶 Skill 已写入 .agh/skills/cloud-casting；端到端等 Agnes 模型 Key |
-| **M4** | 测试三件套 + AGH 轨迹导出 | 10.11–10.12 | 待做（正常/边界样例已在 CLI/自测中验证，需在 AGH 会话留证） |
-| **M5** | 视频 + 文档 + 提交 | 10.13–10.15 | 待做 |
+| **M2** | cloudforge-tools 插件 | 10.07–10.08 | ✅ 完成：trusted+running，工具级自测 7/7 PASS |
+| **M3** | 工作流 Skill + 端到端 | 10.09–10.10 | ✅ 完成：Skill 已写入；端到端会话、工具调用与轨迹导出见根 README「Live Verification」 |
+| **M4** | 测试三件套 + AGH 轨迹导出 | 10.11–10.12 | ✅ 完成：11/11 PASS；轨迹已导出（12 次工具调用 / 25 条验证判定） |
+| **M5** | 视频 + 文档 + 提交 | 10.13–10.15 | ✅ 完成：视频已发布，双语文档与仓库齐备 |
 
 **已解决的关键障碍**（AGH pre-alpha Windows 未验收，以下均为踩坑记录）：
 - 包管理 CLI 要求 TTY 交互确认 → 走官方管理 SDK（hackathon/agh-scripts/install-package.mts）经 named pipe 直调

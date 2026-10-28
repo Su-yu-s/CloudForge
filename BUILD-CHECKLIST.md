@@ -1,4 +1,6 @@
-# pointhks 工作区安装与运行 — 错误清单（Checklist）
+# CloudForge 工作区安装与运行 — 历史错误清单（Checklist）
+
+> **历史记录（2026-10-12）。** 当前安装、构建与运行步骤以根目录 [README.md](README.md) 和 [复现指南.md](复现指南.md) 为准；本文保留当时的排错过程与补丁说明。
 
 > 生成时间：2026-10-12 18:40 ｜ 环境：Windows + Git Bash + MSVC 14.44.35207 + Windows SDK 10.0.26100 + CMake 4.3.0 + Node 24.21.0 + pnpm 10.34.5 + Rust 1.99.0
 > 规则遵循：**未修改任何仓库源码**；问题仅以清单 + 独立补丁文件形式交付（补丁：`CloudForge/fix-m-randomseed.patch`，已通过 `git apply --check` 验证可干净应用）。

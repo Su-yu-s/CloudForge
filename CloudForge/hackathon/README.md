@@ -6,6 +6,7 @@
 
 - **主赛道**：D. 工程设计与数字世界
 - **具体方向**：D3. 3D 设计与空间智能
+- **代码仓库**：[Su-yu-s/CloudForge](https://github.com/Su-yu-s/CloudForge)
 - **演示视频**：[B 站](https://b23.tv/wLaIodS)（5 分 38 秒）
 - **完整参赛规划**：见 [PLAN.md](PLAN.md)
 
@@ -13,7 +14,7 @@
 
 ```
 Agnes Harness（AGH 智能体底座：会话 / 审批 / 轨迹留证）
-  ├─ cloudforge-tools 插件（cloudforge-tools/，本目录）— 6 个智能体工具
+  ├─ cloudforge-tools 插件（cloudforge-tools/，本目录）— 7 个智能体工具
   │    └─ 子进程调用 ↓
   ├─ cloudforge-cli（cli/）— C++17 命令行壳
   │    └─ 静态链接 CloudForge/src-tauri/cpp 核心库（qRANSAC_SD 检测 + LO-RANSAC 精拟合，零改动）
@@ -87,7 +88,7 @@ node hackathon/cloudforge-panel/tools/preview.mjs   # http://127.0.0.1:5199/
 
 集成约束、服务白名单、传输预算与已知实现陷阱：[`cloudforge-panel/PANEL-AGH.md`](cloudforge-panel/PANEL-AGH.md)。
 
-## 六个智能体工具
+## 七个智能体工具
 
 | 工具 | 功能 | 审批 |
 |---|---|---|
@@ -96,6 +97,7 @@ node hackathon/cloudforge-panel/tools/preview.mjs   # http://127.0.0.1:5199/
 | `cloudforge_refine` | 点子集鲁棒精拟合（<50 点由核心拒绝） | 需审批 |
 | `cloudforge_synth` | 生成已知真值合成点云（验证基准） | 需审批 |
 | `cloudforge_verify` | 结果 vs 真值误差判定（支持圆柱↔圆锥泛化匹配） | 免审批（只读） |
+| `cloudforge_verify_current` | 在工作台会话中执行当前验证请求并写出 verify 报告 | 需审批 |
 | `cloudforge_cad_export` | 检测结果 → 可执行 CadQuery 脚本 → 可编辑参数化 CAD 模型（STEP） | 需审批 |
 
 ## 已验证结果（合成基准）
@@ -105,7 +107,7 @@ node hackathon/cloudforge-panel/tools/preview.mjs   # http://127.0.0.1:5199/
 - 平面：参数误差 **1.6e-05 m**，法向角误差 **0.006°**（exact 匹配）
 - 圆柱：经圆锥泛化匹配，等效半径误差 **0.68 mm**，轴向角误差 **0.05°**
 - 边界：40168 内点精拟合 → 1 个平面；10 个点 → 核心拒绝（rc=-1，正确失败路径）
-- 真实数据：Redwood livingroom1 片段 196133 点，1.0 秒检出 43 个平面，内点覆盖 82.3%
+- 真实数据：Redwood livingroom1 片段 196133 点，约 1.0 秒检出 38 个平面基元，内点覆盖 81.5%
 - **CAD 交付**：检测产物 → CadQuery 脚本 → 执行生成 STEP，模型 bbox 0.600×0.600×0.206
   与真值零件（0.6×0.6×0.2）吻合；测试三件套 **11/11 PASS**（`tests/results/suite-result.json`）
 

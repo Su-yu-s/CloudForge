@@ -4,11 +4,11 @@
 
 ## 入口 ①：AGH 智能体会话（比赛主战场）
 
-**前置**：AGH 框架已构建（`E:\C++\Point\agnes-harness`）、cloudforge-tools 插件已安装、Agnes 模型已在工作台配置。
+**前置**：AGH 框架已构建（仓库内 `../agnes-harness`）、cloudforge-tools 插件已安装、Agnes 模型已在工作台配置。
 
 ```sh
-cd E:\C++\Point\CloudForge
-node E:\C++\Point\agnes-harness\packages\cli\dist\local\agnes.mjs serve
+cd <仓库根>\CloudForge
+node ..\agnes-harness\packages\cli\dist\local\agnes.mjs serve
 ```
 
 > 必须在 `CloudForge` 目录下启动：会话工作区即本仓库，`cloud-casting` Skill 与演示数据才能被智能体发现。
@@ -17,7 +17,7 @@ node E:\C++\Point\agnes-harness\packages\cli\dist\local\agnes.mjs serve
 2. 创建会话（工作区选 `CloudForge`）；
 3. 发一句话，例如：
 
-   > 使用 cloud-casting 流程分析 E:/C++/Point/data/livingroom1-fragments-ply/cloud_bin_0.ply
+   > 使用 cloud-casting 流程分析 hackathon/demo-data/cloud_bin_0.ply
 
    智能体自主走：`cloudforge_cloud_info` 侦察 → `cloudforge_detect` 检测 → 按 RMSE/软评分决定
    `cloudforge_refine` 重试 → 输出参数报告。每步调用与审批留在轨迹视图（比赛执行证据，可导出）。
@@ -25,13 +25,13 @@ node E:\C++\Point\agnes-harness\packages\cli\dist\local\agnes.mjs serve
 终端单命令模式（与 Web 同一后台，会话互通）：
 
 ```sh
-node E:\C++\Point\agnes-harness\packages\cli\dist\local\agnes.mjs -p "使用 cloud-casting 流程分析 <点云路径>"
+node ..\agnes-harness\packages\cli\dist\local\agnes.mjs -p "使用 cloud-casting 流程分析 <点云路径>"
 ```
 
 ## 入口 ②：工具层直调（不经过智能体）
 
 ```sh
-set CLI=E:\C++\Point\CloudForge\hackathon\cli\build\Release\cloudforge-cli.exe
+set CLI=hackathon\cli\build\Release\cloudforge-cli.exe
 
 %CLI% info   <点云文件>                                    # 点数/包围盒/格式诊断
 %CLI% synth  out.pcd                                       # 生成已知真值合成点云 + truth.json
@@ -54,7 +54,7 @@ node hackathon/tests/run-suite.mjs           # 三件套（正常/边界/失败�
 ## 入口 ④：CloudForge GUI 桌面版（演示镜头）
 
 ```sh
-cd E:\C++\Point\CloudForge
+cd <仓库根>\CloudForge
 npm install        # 首次
 npm run tauri dev  # 需 MSVC + CMake，首次编译 C++ 核心 + Rust 较久
 ```

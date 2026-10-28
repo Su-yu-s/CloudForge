@@ -3,12 +3,14 @@
 **云铸——从百万点云到实体参数的智造引擎**
 2026 年江苏省高校 AI+科学与工程创新实践黑客松 · 本科生组 · 主赛道 D. 工程设计与数字世界 · 方向 D3. 3D 设计与空间智能
 
+**仓库地址：** https://github.com/Su-yu-s/CloudForge
+
 用 Agnes + AGH 打造"云铸"智能体：自主规划点云分析、拟合几何基元、验证误差并重试，
 把三维扫描逆向建模从数小时压缩到一次对话，输出可复核的参数报告。
 
 ---
 
-## 一、目录结构（本包即 `CloudForge` 仓库）
+## 一、目录结构（仓库根目录；`CloudForge/` 为桌面端与主工程）
 
 ```
 CloudForge/
@@ -34,7 +36,7 @@ CloudForge/
 │   │
 │   ├── cloudforge-tools/           M2：AGH 后端插件
 │   │   ├── package.json        agnes.plugins 清单（inspect/install/trust/enable 可装）
-│   │   ├── index.mjs           零依赖注册 6 个智能体工具（含 TypeBox 参数 Schema）
+│   │   ├── index.mjs           零依赖注册 7 个智能体工具（含 TypeBox 参数 Schema）
 │   │   └── tools.test.mjs      工具级自测（mock extension API，7 项断言）
 │   │
 │   ├── tests/
@@ -42,7 +44,7 @@ CloudForge/
 │   │
 │   └── demo-data/
 │       └── livingroom-run/     真实数据演示产物：Redwood 客厅扫描 19.6 万点
-│                               检出 41 个平面（result.json + info.json + 内点下标）
+│                               检出 38 个平面基元（result.json + info.json + 内点下标）
 │
 ├── src/                        Vue 3 前端（Glass UI 工作台，viewer.ts Three.js 渲染）
 ├── spec/                       核心契约规格（core-contracts / ai-runner / viewer 等 5 篇）
@@ -55,10 +57,7 @@ CloudForge/
     └── src/                    Tauri 命令层 + WSL 分割运行器（ai.rs，未接入执行链路）
 ```
 
-> 已从包中剔除的生成物：`node_modules/`（129M，`npm install` 复原）、
-> `src-tauri/target/`（3.4G Rust 构建产物）、`hackathon/cli/build/`（CMake 产物，CMake 一键重建）、
-> `.claude/` 本地配置、废弃的 `hackathon/.agh-home/`。
-> 前端产物 `dist/` **已包含**（2026-10-04 用 `npm run build` 重建，可直接被 `tauri build` 使用）；打包脚本见 `hackathon/pack-submission.py`。
+> 构建产物不入库：`node_modules/`、`src-tauri/target/`、`hackathon/cli/build/` 与前端 `dist/` 均由本机生成（`dist/` 在 `.gitignore` 中）。Tauri 构建前先 `npm run build`，或直接执行 `npm run tauri build`；打包脚本见 `hackathon/pack-submission.py`。
 
 ## 二、架构（三层，自上而下）
 
@@ -68,7 +67,7 @@ CloudForge/
 │  会话管理 · 任务规划 · 工具审批 · 轨迹留证（比赛执行证据）      │
 │                                                              │
 │  ├─ cloudforge-tools 插件（hackathon/cloudforge-tools/）             │
-│  │    6 个工具：cloud_info / detect / refine / synth / verify / cad_export │
+│  │    7 个工具：cloud_info / detect / refine / synth / verify / verify_current / cad_export │
 │  └─ cloud-casting Skill（.agh/skills/）                       │
 │       四阶段工作流：侦察 → 检测 → 反馈重试 → 验证报告          │
 └──────────────────────┬──────────────────────────────────────┘
@@ -107,13 +106,13 @@ cmake --build hackathon/cli/build --config Release
 cd CloudForge
 node ../agnes-harness/packages/cli/dist/local/agnes.mjs serve   # 启动 AGH
 #   → 浏览器 http://127.0.0.1:4177 → 配置 Agnes 模型 → 发指令：
-#   "使用 cloud-casting 流程分析 E:/C++/Point/data/xxx.ply"
+#   "使用 cloud-casting 流程分析 hackathon/demo-data/cloud_bin_0.ply"
 
 # 2) 工具层直调（不经过智能体）
 hackathon\cli\build\Release\cloudforge-cli.exe info <点云文件>
 
 # 3) 自测
-node hackathon/cloudforge-tools/tools.test.mjs    # 插件工具链 6 项断言
+node hackathon/cloudforge-tools/tools.test.mjs    # 插件工具链 7 项断言
 node hackathon/tests/run-suite.mjs            # 三件套：正常/边界/失败样例
 
 # 4) CloudForge GUI（Tauri 桌面版，演示镜头）
@@ -130,7 +129,7 @@ npm run tauri dev
 | 工作流 Skill | [.agh/skills/cloud-casting/SKILL.md](.agh/skills/cloud-casting/SKILL.md) | ✅ |
 | 插件与工具源码 | hackathon/cloudforge-tools/ · hackathon/cli/ | ✅ 已验证 |
 | 真实数据演示产物 | hackathon/demo-data/ | ✅ |
-| AGH 轨迹留证 | AGH 会话导出 | ⏳ 等 Agnes 模型 Key |
+| AGH 轨迹留证 | AGH 会话导出 | ✅ 已导出（12 次工具调用 / 25 条验证判定） |
 | 3–5 分钟演示视频 | [B 站](https://b23.tv/wLaIodS) | ✅ 已发布 |
 | 真实运行截图与实测 | 根 README · Screenshots / Live Verification | ✅ |
 

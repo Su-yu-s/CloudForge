@@ -1,5 +1,7 @@
 # CloudForge
 
+> 本文件位于仓库的 `CloudForge/` 子目录；仓库地址：https://github.com/Su-yu-s/CloudForge
+
 > **参赛交付说明（黑客松评审请先读这里）**
 > 本仓库是 2026 年江苏省高校 AI+科学与工程创新实践黑客松参赛作品**「云铸——从百万点云到实体参数的智造引擎」**（本科生组 · 主赛道 D · 方向 D3）。
 >
@@ -9,13 +11,13 @@
 > | **完整参赛方案**（问题价值 / 技术方案 / 验证 / 已知边界 / 交接指南） | [`hackathon/SOLUTION.md`](hackathon/SOLUTION.md) |
 > | 参赛作品说明与复现路径 | [`hackathon/README.md`](hackathon/README.md) |
 > | 独立完成声明与第三方素材披露 | [`hackathon/declaration.md`](hackathon/declaration.md) |
-> | AGH 智能体插件（6 个工具） | [`hackathon/cloudforge-tools/`](hackathon/cloudforge-tools/) |
+> | AGH 智能体插件（7 个工具） | [`hackathon/cloudforge-tools/`](hackathon/cloudforge-tools/) |
 > | 智能体工作流 Skill | [`.agh/skills/cloud-casting/SKILL.md`](.agh/skills/cloud-casting/SKILL.md) |
 >
 > 作品主线是 **AGH 智能体 + C++ 几何核心**：智能体规划、工具执行、误差验证与重试，
 > 推理仅使用 Agnes 模型。下方 README 描述的是承载它的桌面端程序（参赛前既有工程的复刻版）。
 
-RANSAC 点云几何检测工作台的 Tauri 2 + Vue 3 复刻版（原版为 Qt Widgets，见 `E:/C++/Point/RANSAC_GUI`）。
+RANSAC 点云几何检测工作台的 Tauri 2 + Vue 3 复刻版（原版为前作 RANSAC_GUI 的 Qt Widgets 实现）。
 
 ## 架构
 

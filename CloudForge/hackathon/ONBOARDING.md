@@ -13,8 +13,8 @@
 
 | 方式 | 说明 |
 |---|---|
-| **参赛包 zip（推荐）** `云铸-参赛包-CloudForge.zip`（约 6.3 MB） | 解压即用。含全部源码、演示数据，以及**构建必需的第三方库 `ransac_sd`** |
-| `git clone https://github.com/tyy-zsy/yunzhu_cloudforge.git` | ⚠️ 公开仓库**不含 `ransac_sd`**（波恩大学原版，只授权研究用途、未授予再分发权利）。需按 `src-tauri/cpp/third_party/README.md` 自行获取后放入，否则 CLI 构建会直接报错 |
+| **公开仓库（推荐）** `git clone https://github.com/Su-yu-s/CloudForge.git` | 完整源码与演示数据；⚠️ **不含 `ransac_sd`**（波恩大学原版，只授权研究用途、未授予再分发权利）。需按 `src-tauri/cpp/third_party/README.md` 自行获取后放入，否则 CLI 构建会直接报错 |
+| **参赛包 zip（由队伍另行分发）** `云铸-参赛包-CloudForge.zip`（约 6.3 MB） | 解压即用。含全部源码、演示数据，以及**构建必需的第三方库 `ransac_sd`** |
 
 **另外两件不在包里，需自己准备**
 
@@ -31,7 +31,7 @@
 | pnpm | 10.34.5 | `npm i -g pnpm@10.34.5` |
 | CMake | ≥ 3.15 | 构建 C++ 核心 |
 | Visual Studio | 含 C++ 工具集（MSVC） | 编译 CLI |
-| Python 3.13 + cadquery | 可选 | 只有执行 CAD 导出（STEP/STL）时才需要：`pip install cadquery` |
+| Python 3.12 + cadquery | 可选 | 只有执行 CAD 导出（STEP/STL）时才需要；建议使用项目 `.venv-cad`（`pip install cadquery`） |
 
 > AGH 官方只在 macOS 上做过验收，Windows 需要一些额外处理；本指南以 Windows 为准，坑见 §8。
 

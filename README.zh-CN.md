@@ -2,6 +2,8 @@
 
 [English](README.md) | 简体中文
 
+**仓库地址：** [github.com/Su-yu-s/CloudForge](https://github.com/Su-yu-s/CloudForge)
+
 <p align="center">
   <img src="docs/assets/cloudforge-poster.png" alt="云铸 CloudForge：从百万点云到实体参数" width="100%" />
 </p>
@@ -306,8 +308,8 @@ CloudForge/src-tauri/cpp/third_party/ransac_sd/
 ### 1. 克隆并构建 CLI
 
 ```powershell
-git clone https://github.com/tyy-zsy/yunzhu_cloudforge.git
-Set-Location yunzhu_cloudforge
+git clone https://github.com/Su-yu-s/CloudForge.git
+Set-Location CloudForge
 cmake -S CloudForge/hackathon/cli -B CloudForge/hackathon/cli/build -G "Visual Studio 17 2022" -A x64
 cmake --build CloudForge/hackathon/cli/build --config Release
 ```

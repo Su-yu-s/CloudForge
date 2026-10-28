@@ -55,7 +55,7 @@
 
 如获奖，本队将在规定时限（5 个工作日）内开源赛事期间开发的代码库
 （`hackathon/` 目录及智能体接入层），并保留上述第三方组件的原始许可声明。
-本作品代码库**现已公开**：https://github.com/tyy-zsy/yunzhu_cloudforge
+本作品代码库**现已公开**：https://github.com/Su-yu-s/CloudForge
 
 **开源范围（如实界定）**：
 

@@ -61,7 +61,7 @@
 ```
 ┌──────────────────────────────────────────────────────────┐
 │ Agnes Harness（智能体底座：会话/规划/审批/轨迹留证）        │
-│  ├─ cloudforge-tools 插件 v0.2.0（6 个工具，见 §3.2）          │
+│  ├─ cloudforge-tools 插件 v0.2.0（7 个工具，见 §3.2）          │
 │  └─ cloud-casting Skill（.agh/skills/，工作流手册）         │
 └─────────────────────┬────────────────────────────────────┘
                       │ 子进程 JSON 协议
@@ -76,7 +76,7 @@
 旁路：CloudForge GUI（Tauri 桌面版）＝人机复核界面（纯几何算法，无模型调用）
 ```
 
-### 3.2 六个智能体工具
+### 3.2 七个智能体工具
 
 | 工具 | 功能 | 审批 |
 |---|---|---|
@@ -85,6 +85,7 @@
 | `cloudforge_refine` | 点子集精拟合（<50 点核心拒绝） | 需审批 |
 | `cloudforge_synth` | 生成已知真值合成点云（验证基准） | 需审批 |
 | `cloudforge_verify` | 结果 vs 真值判定（圆柱↔圆锥泛化匹配） | 免审批（只读） |
+| `cloudforge_verify_current` | 在工作台会话中执行当前验证请求并写出 verify 报告 | 需审批 |
 | `cloudforge_cad_export` | 检测结果 → 可执行 CadQuery 脚本 → STEP 模型 | 需审批 |
 
 ### 3.3 工作流闭环（对应比赛"≥3 连续步骤"要求）
@@ -106,15 +107,15 @@
 |---|---|---|
 | AGH 底座 | Windows 源码构建 + Web 工作台 + 插件治理流程（inspect/install/trust/enable） | 服务运行正常；官方仅验收过 macOS，Windows 坑全部趟平 |
 | cloudforge-cli | 六子命令 CLI（info/detect/refine/synth/verify/cad），静态链接现有核心 | 编译通过，JSON 契约稳定 |
-| cloudforge-tools 插件 | 零依赖 JS 插件，6 工具注册，v0.2.0 已安装运行 | `trusted=true, running`；工具级自测 **7/7 PASS** |
+| cloudforge-tools 插件 | 零依赖 JS 插件，7 工具注册，v0.2.0 已安装运行 | `trusted=true, running`；工具级自测 **7/7 PASS** |
 | 合成基准验证 | 65000 点（平面 z=0 + 圆柱 r=0.05m） | 平面误差 **1.6e-05 m**、法向角 0.006°；圆柱泛化匹配误差 **0.68 mm** |
-| 真实数据验证 | Redwood 客厅 196133 点 | **1.0 s 检出 43 平面，内点覆盖 82.3%** |
+| 真实数据验证 | Redwood 客厅 196133 点 | **约 1.0 s 检出 38 个平面基元，内点覆盖 81.5%** |
 | CAD 导出链路 | 检测 → CadQuery 代码 → 执行 → STEP | 模型 bbox **0.600×0.600×0.206** vs 真值（0.6×0.6×0.2）吻合 |
 | 测试三件套 | 正常 3 + 边界 3 + 失败 5 | **11/11 PASS**（`tests/results/suite-result.json`） |
 | 鲁棒性边界扫描 | 噪声 σ×降采样 12 工况网格（CLI 新增 --noise/--downsample） | **可信域明确：σ≤2mm 且 ≥50% 点数稳定 PASS；σ≥10mm 无检出如实 FAIL**（`results/robustness.json`） |
 | Skill 场景化 | 竣工核验/船舶分段/文物构件三 profile + 三份行业报告模板（含净高/开间换算规则） | 已写入 cloud-casting Skill |
 | 文档体系 | PROJECT/PLAN/SOLUTION/README/RUN/IDEAS/VALUE/declaration 八份 | 齐备 |
-| 参赛包 | 桌面 `云铸-参赛包-CloudForge.zip` | ⏳ 本轮改动后需重打 |
+| 参赛包 | `hackathon/pack-submission.py` | ✅ 脚本可复现；公开发布以仓库为准 |
 
 **踩坑记录（AGH pre-alpha Windows 适配，作品差异化壁垒）**：
 包管理 CLI 强制 TTY → 改走官方管理 SDK 经 named pipe 直调；native 模块仅打包在 CLI 快照内 →
@@ -161,9 +162,9 @@ Windows 实例无法激活，官方最小示例同样失败，判定为 AGH pre-
 ### 6.1 演示主线（AGH 会话，3 分钟内完成）
 
 1. 打开 AGH 工作台（云铸面板按钮或直接对话）；
-2. 一句话："使用 cloud-casting 流程分析 E:/C++/Point/data/livingroom1-fragments-ply/cloud_bin_0.ply"；
+2. 一句话："使用 cloud-casting 流程分析 hackathon/demo-data/cloud_bin_0.ply"；
 3. 智能体走四阶段闭环，轨迹视图全程可见（审批弹窗出现时点"允许"——展示治理能力）；
-4. 报告输出：43 个平面的参数清单 + 净高/墙体推断 + 误差证据；
+4. 报告输出：38 个平面基元的参数清单 + 净高/墙体推断 + 误差证据；
 5. CAD 炸点：切换合成零件数据 → detect → cad_export → 终端 `python model.py` →
    CAD 软件打开 STEP 旋转展示。
 
@@ -233,10 +234,10 @@ Windows 实例无法激活，官方最小示例同样失败，判定为 AGH pre-
 
 | 项 | 路径 | 说明 |
 |---|---|---|
-| 参赛作品仓库 | `E:\C++\Point\CloudForge`（2026-10-04 由 LitePT-new 更名） | 所有赛事代码：`hackathon/`（作品层）+ `.agh/skills/`（工作流）+ `src-tauri/cpp/`（算法核心，**勿改动**）；仓库内全部绝对路径引用已同步 |
-| AGH 框架源码 | `E:\C++\Point\agnes-harness` | 官方仓库克隆（commit a6b8319），已完成 `pnpm install` + `build:local`；`hackathon/agh-scripts/install-package.mts`（安装/覆盖）与 `hackathon/agh-scripts/remove-package.mts`（卸载）是我们的插件管理脚本 |
-| 测试数据 | `E:\C++\Point\data` | Redwood livingroom1 / office1 片段（PLY 带颜色）、DemoColoredICP |
-| 演示产物 | `CloudForge\hackathon\demo-data\` | `cad-test/`（合成件 + model.py + part.step）、`livingroom-run/`（43 平面检测结果） |
+| 参赛作品仓库 | https://github.com/Su-yu-s/CloudForge | 仓库根包含 `CloudForge/`（作品层与桌面端）、`agnes-harness/`（随仓 AGH）、`data/`、`docs/`；赛事代码主要在 `CloudForge/hackathon/` + `CloudForge/.agh/skills/` + `CloudForge/src-tauri/cpp/`（算法核心，**勿改动**） |
+| AGH 框架源码 | `agnes-harness/`（随仓） | 已包含本项目的 Windows 配套修复；构建方式见根 README。`CloudForge/hackathon/agh-scripts/install-package.mts` 与 `remove-package.mts` 是插件管理脚本 |
+| 测试数据 | `data/` 与 `CloudForge/hackathon/demo-data/` | Redwood livingroom1 / office1 片段（PLY 带颜色）、DemoColoredICP、合成件与检测产物 |
+| 演示产物 | `CloudForge/hackathon/demo-data/` | `cad-test/`（合成件 + model.py + part.step）、`livingroom-run/`（38 个平面基元的检测结果） |
 | 参赛包 | `%USERPROFILE%\Desktop\云铸-参赛包-CloudForge.zip` | ✅ **2026-10-04 已重打**（2253 文件，21.7 MB → 6.2 MB，包内自检无旧命名）。用 `python hackathon/pack-submission.py` 可复现，脚本自动排除 node_modules/target/build/dist 之外的构建产物与 `.test-run`/`.agh-home` |
 | 测试结果 | `hackathon\tests\results\` | 三件套 suite-result.json（11/11）+ 鲁棒性 robustness.json，均含时间戳 |
 | 旧目录 | ~~`E:\C++\Point\LitePT-new`~~ | ✅ **2026-10-04 内容已全部删除**（3.6 GB / 14414 文件）。更名前先完整复制迁移到 `CloudForge`，逐文件比对确认新仓库为超集（旧目录独有的只有 `.claude/`、已被取代的 `litept-panel`/`litept-tools`/`litept_shim`）。**遗留一个空目录**：它当时是本会话的工作目录，Windows 不允许删除进程的当前目录（`Device or resource busy`）→ 在**从 CloudForge 打开的新会话**里执行 `rmdir E:\C++\Point\LitePT-new` 即可收尾 |
@@ -244,26 +245,28 @@ Windows 实例无法激活，官方最小示例同样失败，判定为 AGH pre-
 | 同日修复 | `hackathon/cli/main.cpp`、`dist/` | ① CAD 生成器两处缺陷：非 `--union` 分支少一个右括号（生成的 Python 直接语法错误）、收尾 `bb = model.val()...` 对 `cq.Compound` 不存在 `.val()`；已修并两个分支实跑验证（bbox 0.600×0.600×0.206 与真值一致）。② `dist/` 是 9-17 的旧前端产物（`<title>LitePT</title>`），已 `npm run build` 重建 |
 | AGH 侧清理 | `%USERPROFILE%\.agh` | ✅ 卸载调试对照包 `panel-min`（其 rowId 为 `ext:litept/panel-min`）；删除更名前旧工作区（`LitePT-new`）的技能注册与 LKG 缓存（旧 LKG 正文让智能体调用已不存在的 `litept_*` 工具）；`profile.yaml` 注释旧服务名改为 `cloudforge_panel.report`；清空 jiti 转译缓存。审计日志（`data/audit/*.jsonl`）按证据保留 |
 
-### 10.2 当前已部署状态
+> 表中 2026-10-04 的“旧目录 / 旧构建产物 / AGH 侧清理”保留当时的本机路径，仅作历史记录；新环境不需要这些目录。
 
-- **AGH daemon**：运行中（PID 5196，http://127.0.0.1:4177 返回 200；2026-10-04 为清理技能缓存而重启过）；停止/启动用 `agh daemon stop|start`，或在 CloudForge 目录跑 SOP 里的 `serve`；
-- **插件**：`cloudforge-tools@0.2.0` 与三个官方 helper 均 `trusted=true / enabled / actual=running`（六工具可用）；调试用 `panel-min` 已卸载；
+### 10.2 当前已部署状态（2026-10-28 核验）
+
+- **AGH daemon**：运行中（`http://127.0.0.1:4177/` 返回 200，profile `local-dev`）；停止/启动用 `agh daemon stop|start`，或在 CloudForge 目录跑 SOP 里的 `serve`；
+- **插件**：`cloudforge-tools@0.2.0` 与三个官方 helper 均 `trusted=true / enabled / actual=running`（七工具可用）；
 - **profile fragment**：`~/.agh/profiles/local-dev/profile.yaml`（纯 policy fragment，capabilityCeiling 已含 services）；
-- **Python**：本机 Python 3.13 + **cadquery 已安装**（执行 CAD 脚本用）；
-- **CLI**：`hackathon\cli\build\Release\cloudforge-cli.exe`（六子命令 + --noise/--downsample 扰动参数）；
-- **模型**：**尚未配置**——Agnes Key 未到位，端到端（智能体真实调用工具）还没跑过；
-- **面板**：已安装并跑通（`rightbar.session` 槽 + 12 个服务），见 §4「已解除的已知边界」与 PANEL-AGH.md。
+- **Python**：项目 `.venv-cad`（Python 3.12）+ **cadquery 已安装**（执行 CAD 脚本用）；
+- **CLI**：`CloudForge/hackathon/cli/build/Release/cloudforge-cli.exe`（六子命令 + --noise/--downsample 扰动参数）；
+- **模型**：已配置 `agnes-3.0-flash`，完成真实会话、工具调用、验证与轨迹导出（见根 README「Live Verification」）；
+- **面板**：已安装并跑通（`rightbar.session` 槽 + 20 个声明服务），真实 AGH 截图见根 README。已安装快照可能落后于源码，改动后需按 §10.3 ④ 重装并硬刷新。
 
 ### 10.3 标准操作流程（SOP）
 
 ```sh
 # ① 启动 AGH（必须 cd 到 CloudForge：工作区 = Skill 发现根）
-cd E:\C++\Point\CloudForge
-node E:\C++\Point\agnes-harness\packages\cli\dist\local\agnes.mjs serve
-# → 浏览器 http://127.0.0.1:4177 → 设置里配置 Agnes 模型（Key 到位后一次性）
+cd <仓库根>\CloudForge
+node ..\agnes-harness\packages\cli\dist\local\agnes.mjs serve
+# → 浏览器 http://127.0.0.1:4177 → 设置里配置 Agnes 模型
 
-# ② 端到端（Key 配置后）：新会话发指令
-#    "使用 cloud-casting 流程分析 E:/C++/Point/data/livingroom1-fragments-ply/cloud_bin_0.ply"
+# ② 端到端：新会话发指令
+#    "使用 cloud-casting 流程分析 hackathon/demo-data/cloud_bin_0.ply"
 #    审批弹窗点允许；完成后导出轨迹视图 = 提交证据
 
 # ③ 回归测试（任何改动后必跑）
@@ -272,7 +275,7 @@ node hackathon/tests/run-suite.mjs             # 预期 11/11 PASS
 
 # ④ 插件更新（改了 cloudforge-tools/ 后）：幂等脚本，自动 disable→remove→install→trust→enable
 #    脚本按 AGH_ROOT 自定位框架仓库，不用复制进 agnes-harness；须在 CloudForge 目录执行
-$env:AGH_ROOT = "E:/C++/Point/agnes-harness"
+$env:AGH_ROOT = (Resolve-Path ..\agnes-harness).Path
 pnpm exec tsx hackathon/agh-scripts/install-package.mts             # 安装/覆盖（默认包路径 hackathon/cloudforge-tools，包 id cloudforge-tools）
 pnpm exec tsx hackathon/agh-scripts/remove-package.mts cloudforge-tools   # 卸载（先 disable 再 remove）
 
@@ -297,14 +300,14 @@ cmake --build hackathon/cli/build --config Release
 12. TXT/STL 点云加载后质心居中（库行为），报告需注明坐标系；`detect` 激活失败后包会卡 `actual=failed`，此时任何 enable 都被状态机拒绝——必须先 remove 再 install（脚本已内置）。
 13. ⚠️ **桌面端必须用 `npm run tauri build` 构建**（2026-10-04 实测踩坑）：tauri 的 build.rs 用 `dev = !custom_protocol` 判定运行模式，只有 CLI 会启用 `custom-protocol` 特性。用裸 `cargo build --release` 编出的 `cloudforge.exe` 会去连 `devUrl`（http://localhost:5183），双击打开显示"localhost 拒绝连接"（WebView2 错误页）。判别方法：二进制里含内嵌资源路径（如 `assets/index-*.js`）才是生产版；`Cargo.toml` 的 `[features] custom-protocol` 勿删。
 
-### 10.6 阻塞项与下一步（按序执行）
+### 10.6 收尾记录（2026-10-28）
 
-1. **【用户】报名**（10.10 12:00 截止）：组别本科组、赛道 D、方向 D3、项目名"云铸——从百万点云到实体参数的智造引擎"；**进官方群领 Agnes 模型 Key**；
-2. **【接手人】Key 到位后**（对应 §5 排期）：配置模型 → 端到端跑通 → 轨迹导出留证 → Skill 场景化（10.06）→ 云铸面板（10.07–08）→ 价值表实测（10.09）→ 纵深二选一（10.10）→ 视频（10.11–13）→ 终稿与提交（10.14–15）。
+1. 报名与 Agnes 模型 Key：已完成，`agnes-3.0-flash` 已配置并用于真实会话；
+2. 端到端链路、轨迹导出、Skill 场景化、云铸面板、价值表实测、视频与提交材料均已完成；本次真实运行数据见根 README「Live Verification」。
 
 ### 10.7 关键约定
 
-- 项目名统一用「**云铸**」（英文名 Cloud Casting；代码前缀 `cloudforge_` 保留不动）；
+- 项目名统一用「**云铸**」（英文名 CloudForge；代码前缀 `cloudforge_` 保留不动）；
 - 比赛三条红线：AGH 执行底座、仅 Agnes 模型调用、轨迹留证；获奖 5 个工作日内开源；
-- 文档全中文，代码注释中文，CLI/代码输出 ASCII；
+- README 提供中英双语；其余项目文档以中文为主，代码注释中文，CLI/代码输出 ASCII；
 - `src-tauri/cpp/` 零改动是既定原则（声明与复现依赖此边界）。
