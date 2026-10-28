@@ -449,7 +449,7 @@ npm.cmd run tauri build -- --no-bundle
 | 测试三件套 | 11 / 11 PASS（正常、边界、失败样例） | `CloudForge/hackathon/tests/results/suite-result.json` |
 | 工具级自测 | 7 / 7 PASS | `CloudForge/hackathon/cloudforge-tools/tools.test.mjs` |
 
-测试套件还记录了一次可比的 19.6 万点运行，检测耗时 986 ms。耗时会随机型、输入和预设变化。
+测试套件对一个可比的 19.6 万点输入记录的检测耗时约 1 秒；实际耗时会随机型、输入和预设变化。
 
 ## 实际运行验证（2026-10-28）
 

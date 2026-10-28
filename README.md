@@ -449,7 +449,7 @@ These are recorded results from the repository's test artifacts, not a fresh run
 | Test suite | 11 / 11 PASS (normal, boundary, failure cases) | `CloudForge/hackathon/tests/results/suite-result.json` |
 | Tool self-test | 7 / 7 PASS | `CloudForge/hackathon/cloudforge-tools/tools.test.mjs` |
 
-The test suite also records a 986 ms detection for a comparable 196k-point run. Timing varies by machine, input, and preset.
+The test suite records a detection around 1 s for a comparable 196k-point run. Timing varies by machine, input, and preset.
 
 ## Live Verification (2026-10-28)
 
